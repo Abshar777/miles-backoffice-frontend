@@ -5,13 +5,13 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
-import { TrendingUp, Mail, Lock, Chrome } from 'lucide-react';
+import { TrendingUp, Mail, Lock } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, loginWithGoogle } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -126,26 +126,6 @@ export default function Login() {
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-4 text-slate-500">Or continue with</span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={loginWithGoogle}
-              className="w-full bg-transparent border-blue-600 text-blue-600 hover:bg-blue-50 font-medium uppercase tracking-wider rounded-lg"
-              data-testid="google-login-btn"
-            >
-              <Chrome className="w-4 h-4 mr-2" />
-              Sign in with Google
-            </Button>
 
             <p className="mt-6 text-center text-xs text-slate-500">
               Demo credentials: admin@fxbroker.com / password

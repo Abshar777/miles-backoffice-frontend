@@ -34,6 +34,7 @@ import {
   Sun,
   Moon,
   ScrollText,
+  Shield,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -84,6 +85,7 @@ export default function Layout() {
     ...(isAdmin ? [{ to: '/logs', icon: ScrollText, label: 'Logs' }] : []),
     { to: '/reports', icon: BarChart3, label: 'Reports' },
     ...(isAccountantOrAdmin ? [{ to: '/accountant', icon: ClipboardCheck, label: 'Approvals' }] : []),
+    ...(isAdmin ? [{ to: '/roles', icon: Shield, label: 'Roles & Permissions' }] : []),
     { to: '/settings', icon: Settings, label: 'Settings' },
   ];
 

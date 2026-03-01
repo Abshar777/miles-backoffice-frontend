@@ -12,6 +12,7 @@ import Vendors from "./pages/Vendors";
 import VendorDashboard from "./pages/VendorDashboard";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import RolesPermissions from "./pages/RolesPermissions";
 import AccountantDashboard from "./pages/AccountantDashboard";
 import IncomeExpenses from "./pages/IncomeExpenses";
 import Loans from "./pages/Loans";
@@ -110,6 +111,14 @@ function AppRouter() {
         <Route path="reports" element={<Reports />} />
         <Route path="reconciliation" element={<Reconciliation />} />
         <Route path="settings" element={<Settings />} />
+        <Route 
+          path="roles" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <RolesPermissions />
+            </ProtectedRoute>
+          } 
+        />
         <Route 
           path="accountant" 
           element={

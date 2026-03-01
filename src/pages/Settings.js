@@ -66,16 +66,10 @@ import {
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-const roleOptions = [
-  { value: 'admin', label: 'Admin' },
-  { value: 'sub_admin', label: 'Sub-Admin' },
-  { value: 'accountant', label: 'Accountant' },
-  { value: 'vendor', label: 'Exchanger' },
-];
-
 export default function Settings() {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -84,6 +78,7 @@ export default function Settings() {
     password: '',
     name: '',
     role: 'sub_admin',
+    role_id: '',
     deposit_commission: 0,
     withdrawal_commission: 0,
   });
@@ -137,6 +132,18 @@ export default function Settings() {
       console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/roles`, { headers: getAuthHeaders(), credentials: 'include' });
+      if (response.ok) {
+        const rolesData = await response.json();
+        setRoles(rolesData.filter(r => r.is_active !== false));
+      }
+    } catch (error) {
+      console.error('Error fetching roles:', error);
     }
   };
   
@@ -240,6 +247,7 @@ export default function Settings() {
 
   useEffect(() => {
     fetchUsers();
+    fetchRoles();
     fetchEmailSettings();
     fetchEmailLogs();
     fetchCommissionSettings();
@@ -254,8 +262,9 @@ export default function Settings() {
         : `${API_URL}/api/users`;
       const method = selectedUser ? 'PUT' : 'POST';
 
+      // Include role_id when saving
       const body = selectedUser
-        ? { name: formData.name, role: formData.role, is_active: formData.is_active }
+        ? { name: formData.name, role: formData.role, role_id: formData.role_id || formData.role, is_active: formData.is_active }
         : formData;
 
       const response = await fetch(url, {
@@ -306,6 +315,7 @@ export default function Settings() {
       password: '',
       name: userItem.name,
       role: userItem.role,
+      role_id: userItem.role_id || userItem.role,
       is_active: userItem.is_active,
     });
     setIsDialogOpen(true);
@@ -318,6 +328,7 @@ export default function Settings() {
       password: '',
       name: '',
       role: 'sub_admin',
+      role_id: '',
       deposit_commission: 0,
       withdrawal_commission: 0,
     });
@@ -434,22 +445,26 @@ export default function Settings() {
     }));
   };
 
-  const getRoleBadge = (role) => {
+  const getRoleBadge = (role, roleId) => {
+    // Try to find from roles list first
+    const foundRole = roles.find(r => r.role_id === roleId || r.name === role);
+    
     const roleStyles = {
       admin: 'bg-blue-100 text-blue-700 border border-blue-200',
+      super_admin: 'bg-red-100 text-red-700 border border-red-200',
       sub_admin: 'bg-slate-100 text-slate-600 border border-slate-200',
       accountant: 'bg-purple-100 text-purple-700 border border-purple-200',
       vendor: 'bg-amber-100 text-amber-700 border border-amber-200',
+      exchanger: 'bg-amber-100 text-amber-700 border border-amber-200',
+      viewer: 'bg-green-100 text-green-700 border border-green-200',
     };
-    const roleLabels = {
-      admin: 'Admin',
-      sub_admin: 'Sub-Admin',
-      accountant: 'Accountant',
-      vendor: 'Exchanger',
-    };
+    
+    const displayName = foundRole?.display_name || role;
+    const styleKey = roleId || role;
+    
     return (
-      <Badge className={`${roleStyles[role] || roleStyles.sub_admin} text-xs uppercase`}>
-        {roleLabels[role] || role}
+      <Badge className={`${roleStyles[styleKey] || 'bg-slate-100 text-slate-600 border border-slate-200'} text-xs uppercase`}>
+        {displayName}
       </Badge>
     );
   };
@@ -487,7 +502,7 @@ export default function Settings() {
               <p className="text-xl text-white font-medium">{user?.name}</p>
               <p className="text-[#C5C6C7] font-mono">{user?.email}</p>
               <div className="mt-2">
-                {getRoleBadge(user?.role)}
+                {getRoleBadge(user?.role, user?.role_id)}
               </div>
             </div>
           </div>
@@ -577,23 +592,31 @@ export default function Settings() {
                         <div className="space-y-2">
                           <Label className="text-slate-500 text-xs uppercase tracking-wider">Role</Label>
                           <Select
-                            value={formData.role}
-                            onValueChange={(value) => setFormData({ ...formData, role: value })}
+                            value={formData.role_id || formData.role}
+                            onValueChange={(value) => {
+                              const selectedRole = roles.find(r => r.role_id === value || r.name === value);
+                              setFormData({ 
+                                ...formData, 
+                                role: selectedRole?.name || value,
+                                role_id: selectedRole?.role_id || value 
+                              });
+                            }}
                           >
                             <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800" data-testid="user-role-select">
                               <SelectValue placeholder="Select role" />
                             </SelectTrigger>
                             <SelectContent className="bg-white border-slate-200">
-                              {roleOptions.map((role) => (
-                                <SelectItem key={role.value} value={role.value} className="text-slate-800 hover:bg-slate-100">
-                                  {role.label}
+                              {roles.map((role) => (
+                                <SelectItem key={role.role_id} value={role.role_id} className="text-slate-800 hover:bg-slate-100">
+                                  {role.display_name}
+                                  {role.is_system_role && <span className="ml-2 text-xs text-slate-400">(System)</span>}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         {/* Exchanger Commission Fields */}
-                        {formData.role === 'vendor' && !selectedUser && (
+                        {(formData.role === 'vendor' || formData.role_id === 'exchanger') && !selectedUser && (
                           <div className="space-y-3 p-3 bg-amber-50 border border-amber-200 rounded-sm">
                             <p className="text-xs text-amber-700 font-semibold uppercase tracking-wider">Exchanger Commission Rates</p>
                             <div className="grid grid-cols-2 gap-3">
@@ -700,7 +723,7 @@ export default function Settings() {
                               </div>
                             </TableCell>
                             <TableCell className="text-white font-mono">{userItem.email}</TableCell>
-                            <TableCell>{getRoleBadge(userItem.role)}</TableCell>
+                            <TableCell>{getRoleBadge(userItem.role, userItem.role_id)}</TableCell>
                             <TableCell>
                               <Badge className={`${userItem.is_active !== false ? 'status-approved' : 'status-rejected'} text-xs uppercase`}>
                                 {userItem.is_active !== false ? 'Active' : 'Inactive'}
