@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { usePermissions } from '../context/usePermissions';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import {
@@ -35,11 +36,14 @@ import {
   Moon,
   ScrollText,
   Shield,
+  ArrowLeft,
+  AlertTriangle,
 } from 'lucide-react';
 
 export default function Layout() {
-  const { user, logout } = useAuth();
+  const { user, logout, impersonating, adminName, stopImpersonation } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { canView, loading: permissionsLoading } = usePermissions();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -50,10 +54,12 @@ export default function Layout() {
     navigate('/login');
   };
 
-  const isAccountantOrAdmin = user?.role === 'admin' || user?.role === 'accountant';
+  const handleStopImpersonation = async () => {
+    await stopImpersonation();
+    navigate('/settings');
+  };
+
   const isExchanger = user?.role === 'vendor';
-  const isAdmin = user?.role === 'admin';
-  const isSubAdmin = user?.role === 'sub_admin';
 
   // Exchanger-specific navigation
   const vendorNavItems = [
@@ -61,36 +67,34 @@ export default function Layout() {
     { to: '/settings', icon: Settings, label: 'Settings' },
   ];
 
-  // Sub-admin navigation (Clients & Transactions only)
-  const subAdminNavItems = [
-    { to: '/clients', icon: Users, label: 'Clients' },
-    { to: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
-    { to: '/settings', icon: Settings, label: 'Settings' },
+  // Permission-based navigation for all non-vendor users
+  const allNavItems = [
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', module: 'dashboard' },
+    { to: '/clients', icon: Users, label: 'Clients', module: 'clients' },
+    { to: '/transactions', icon: ArrowLeftRight, label: 'Transactions', module: 'transactions' },
+    { to: '/treasury', icon: Landmark, label: 'Treasury', module: 'treasury' },
+    { to: '/lp-accounts', icon: TrendingUp, label: 'LP Management', module: 'lp_management' },
+    { to: '/income-expenses', icon: Wallet, label: 'Income & Expenses', module: 'income_expenses' },
+    { to: '/loans', icon: Banknote, label: 'Loans', module: 'loans' },
+    { to: '/debts', icon: Receipt, label: 'O/S Accounts', module: 'debts' },
+    { to: '/psp', icon: CreditCard, label: 'PSP', module: 'psp' },
+    { to: '/vendors', icon: Store, label: 'Exchangers', module: 'exchangers' },
+    { to: '/reconciliation', icon: ArrowUpDown, label: 'Reconciliation', module: 'reconciliation' },
+    { to: '/audit', icon: ShieldCheck, label: 'Audit', module: 'audit' },
+    { to: '/logs', icon: ScrollText, label: 'Logs', module: 'logs' },
+    { to: '/reports', icon: BarChart3, label: 'Reports', module: 'reports' },
+    { to: '/accountant', icon: ClipboardCheck, label: 'Approvals', module: 'transactions' },
+    { to: '/roles', icon: Shield, label: 'Roles & Permissions', module: 'roles' },
+    { to: '/settings', icon: Settings, label: 'Settings', module: null },
   ];
 
-  // Admin/Accountant navigation (full access)
-  const adminNavItems = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/clients', icon: Users, label: 'Clients' },
-    { to: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
-    { to: '/treasury', icon: Landmark, label: 'Treasury' },
-    ...(isAccountantOrAdmin ? [{ to: '/lp-accounts', icon: TrendingUp, label: 'LP Management' }] : []),
-    ...(isAccountantOrAdmin ? [{ to: '/income-expenses', icon: Wallet, label: 'Income & Expenses' }] : []),
-    ...(isAccountantOrAdmin ? [{ to: '/loans', icon: Banknote, label: 'Loans' }] : []),
-    ...(isAccountantOrAdmin ? [{ to: '/debts', icon: Receipt, label: 'O/S Accounts' }] : []),
-    { to: '/psp', icon: CreditCard, label: 'PSP' },
-    ...(isAccountantOrAdmin ? [{ to: '/vendors', icon: Store, label: 'Exchangers' }] : []),
-    { to: '/reconciliation', icon: ArrowUpDown, label: 'Reconciliation' },
-    ...(isAdmin ? [{ to: '/audit', icon: ShieldCheck, label: 'Audit' }] : []),
-    ...(isAdmin ? [{ to: '/logs', icon: ScrollText, label: 'Logs' }] : []),
-    { to: '/reports', icon: BarChart3, label: 'Reports' },
-    ...(isAccountantOrAdmin ? [{ to: '/accountant', icon: ClipboardCheck, label: 'Approvals' }] : []),
-    ...(isAdmin ? [{ to: '/roles', icon: Shield, label: 'Roles & Permissions' }] : []),
-    { to: '/settings', icon: Settings, label: 'Settings' },
-  ];
+  // Filter navigation items based on permissions (show all while loading)
+  const filteredNavItems = allNavItems.filter(item => 
+    !item.module || permissionsLoading || canView(item.module)
+  );
 
   // Select nav items based on role
-  const navItems = isExchanger ? vendorNavItems : isSubAdmin ? subAdminNavItems : adminNavItems;
+  const navItems = isExchanger ? vendorNavItems : filteredNavItems;
 
   const NavItem = ({ to, icon: Icon, label }) => (
     <NavLink
@@ -191,7 +195,29 @@ export default function Layout() {
       </aside>
 
       <div className="flex-1 flex flex-col min-h-screen">
-        <header className={`sticky top-0 z-30 h-16 backdrop-blur-md border-b theme-transition ${
+        {/* Impersonation Banner */}
+        {impersonating && (
+          <div
+            className="sticky top-0 z-50 flex items-center justify-between px-4 py-2.5 bg-red-600 text-white shadow-lg"
+            data-testid="impersonation-banner"
+          >
+            <div className="flex items-center gap-2 text-sm font-semibold tracking-wide">
+              <AlertTriangle className="w-4 h-4" />
+              <span>You are impersonating <strong>{user?.name}</strong> ({user?.role})</span>
+              <span className="hidden sm:inline text-red-200 ml-1">— Logged in by {adminName}</span>
+            </div>
+            <button
+              onClick={handleStopImpersonation}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-red-600 rounded font-bold text-xs uppercase tracking-wider hover:bg-red-50 transition-colors"
+              data-testid="stop-impersonation-btn"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Return to Admin
+            </button>
+          </div>
+        )}
+
+        <header className={`sticky ${impersonating ? 'top-[42px]' : 'top-0'} z-30 h-16 backdrop-blur-md border-b theme-transition ${
           isDark ? 'bg-[#1F2833]/80 border-[#2D3748]' : 'bg-white/80 border-slate-200'
         }`}>
           <div className="flex items-center justify-between h-full px-4 md:px-6">
