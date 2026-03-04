@@ -60,6 +60,7 @@ import {
   FileX,
   Filter,
   RotateCcw,
+  FileText,
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -136,6 +137,8 @@ export default function Loans() {
     installment_frequency: 'monthly',
     num_installments: '',
     treasury_account_id: '',
+    disburse_from_vendor_id: '',
+    bank_details: '',
     collateral: '',
     notes: '',
   });
@@ -145,6 +148,7 @@ export default function Loans() {
     amount: '',
     currency: 'USD',
     treasury_account_id: '',
+    credit_to_vendor_id: '',
     payment_date: new Date().toISOString().split('T')[0],
     reference: '',
     notes: '',
@@ -283,8 +287,8 @@ export default function Loans() {
       toast.error('Please enter a valid amount');
       return;
     }
-    if (!loanForm.treasury_account_id) {
-      toast.error('Please select source treasury account');
+    if (!loanForm.treasury_account_id && !loanForm.disburse_from_vendor_id) {
+      toast.error('Please select source (Treasury or Exchanger)');
       return;
     }
     if (!loanForm.due_date) {
@@ -300,6 +304,7 @@ export default function Loans() {
         installment_amount: loanForm.installment_amount ? parseFloat(loanForm.installment_amount) : null,
         num_installments: loanForm.num_installments ? parseInt(loanForm.num_installments) : null,
         vendor_id: loanForm.vendor_id || null,
+        disburse_from_vendor_id: loanForm.disburse_from_vendor_id || null,
       };
       
       const response = await fetch(`${API_URL}/api/loans`, {
@@ -442,8 +447,8 @@ export default function Loans() {
       toast.error('Please enter a valid amount');
       return;
     }
-    if (!repaymentForm.treasury_account_id) {
-      toast.error('Please select treasury account');
+    if (!repaymentForm.treasury_account_id && !repaymentForm.credit_to_vendor_id) {
+      toast.error('Please select destination (Treasury or Exchanger)');
       return;
     }
     
@@ -453,6 +458,7 @@ export default function Loans() {
         amount: parseFloat(repaymentForm.amount),
         exchange_rate: repaymentForm.exchange_rate ? parseFloat(repaymentForm.exchange_rate) : null,
         amount_in_loan_currency: repaymentForm.amount_in_loan_currency ? parseFloat(repaymentForm.amount_in_loan_currency) : null,
+        credit_to_vendor_id: repaymentForm.credit_to_vendor_id || null,
       };
       
       const response = await fetch(`${API_URL}/api/loans/${selectedLoan.loan_id}/repayment`, {
@@ -519,6 +525,8 @@ export default function Loans() {
       installment_frequency: 'monthly',
       num_installments: '',
       treasury_account_id: '',
+      disburse_from_vendor_id: '',
+      bank_details: '',
       collateral: '',
       notes: '',
     });
@@ -530,6 +538,7 @@ export default function Loans() {
       amount: '',
       currency: 'USD',
       treasury_account_id: '',
+      credit_to_vendor_id: '',
       payment_date: new Date().toISOString().split('T')[0],
       reference: '',
       notes: '',
@@ -624,10 +633,10 @@ export default function Loans() {
 
   const hasActiveFilters = borrowerFilter || principalMinFilter || principalMaxFilter || outstandingMinFilter || outstandingMaxFilter || activeTab !== 'all';
 
-  const handleExportCSV = async () => {
+  const handleExportExcel = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${API_URL}/api/loans/export/csv`, {
+      const response = await fetch(`${API_URL}/api/loans/export/excel`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
@@ -635,16 +644,39 @@ export default function Loans() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `loans_export_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `loans_export_${new Date().toISOString().split('T')[0]}.xlsx`;
         document.body.appendChild(a);
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
-        toast.success('Loans exported successfully');
+        toast.success('Loans exported to Excel');
       } else {
-        toast.error('Export failed');
+        toast.error('Excel export failed');
       }
-    } catch { toast.error('Export failed'); }
+    } catch { toast.error('Excel export failed'); }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${API_URL}/api/loans/export/pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `loans_export_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success('Loans exported to PDF');
+      } else {
+        toast.error('PDF export failed');
+      }
+    } catch { toast.error('PDF export failed'); }
   };
 
   return (
@@ -658,15 +690,6 @@ export default function Loans() {
           <p className="text-slate-500">Track loans given to other companies</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleExportCSV}
-            className="border-slate-200 text-slate-500 hover:bg-slate-100 font-bold uppercase tracking-wider rounded-sm"
-            data-testid="export-loans-btn"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
           <Button
             onClick={() => setIsLoanDialogOpen(true)}
             className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase tracking-wider rounded-sm glow-cyan"
@@ -1034,12 +1057,34 @@ export default function Loans() {
                       variant="ghost"
                       size="sm"
                       onClick={clearAllFilters}
-                      className="ml-auto text-slate-500 hover:text-slate-700 h-7 px-2"
+                      className="text-slate-500 hover:text-slate-700 h-7 px-2"
                     >
                       <RotateCcw className="w-3 h-3 mr-1" />
                       Clear All
                     </Button>
                   )}
+                  <div className="ml-auto flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExportExcel}
+                      className="border-green-200 text-green-600 hover:bg-green-50 h-7 px-3"
+                      data-testid="export-loans-excel"
+                    >
+                      <Download className="w-3.5 h-3.5 mr-1" />
+                      Excel
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExportPDF}
+                      className="border-red-200 text-red-600 hover:bg-red-50 h-7 px-3"
+                      data-testid="export-loans-pdf"
+                    >
+                      <FileText className="w-3.5 h-3.5 mr-1" />
+                      PDF
+                    </Button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Borrower Filter */}
@@ -1270,7 +1315,9 @@ export default function Loans() {
                       <TableHead className="text-slate-500 text-xs">Date</TableHead>
                       <TableHead className="text-slate-500 text-xs">Type</TableHead>
                       <TableHead className="text-slate-500 text-xs">Description</TableHead>
+                      <TableHead className="text-slate-500 text-xs">Source / Destination</TableHead>
                       <TableHead className="text-slate-500 text-xs text-right">Amount</TableHead>
+                      <TableHead className="text-slate-500 text-xs">Status</TableHead>
                       <TableHead className="text-slate-500 text-xs">By</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1289,16 +1336,41 @@ export default function Loans() {
                             {tx.transaction_type?.replace(/_/g, ' ')}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-slate-500 text-sm max-w-[300px] truncate">{tx.description}</TableCell>
+                        <TableCell className="text-slate-500 text-sm max-w-[200px] truncate">{tx.description}</TableCell>
+                        <TableCell className="text-sm">
+                          {tx.transaction_type === 'disbursement' && (
+                            <div className="flex flex-col">
+                              <span className="text-red-500 text-xs font-medium">Disburse From:</span>
+                              <span className="text-slate-700">{tx.treasury_account_name || tx.source_vendor_name || '-'}</span>
+                            </div>
+                          )}
+                          {tx.transaction_type === 'repayment' && (
+                            <div className="flex flex-col">
+                              <span className="text-green-500 text-xs font-medium">Credit To:</span>
+                              <span className="text-slate-700">{tx.treasury_account_name || tx.credit_vendor_name || '-'}</span>
+                            </div>
+                          )}
+                          {tx.transaction_type !== 'disbursement' && tx.transaction_type !== 'repayment' && '-'}
+                        </TableCell>
                         <TableCell className="text-slate-800 font-mono text-sm text-right">
                           {tx.currency === 'USD' ? '$' : ''}{tx.amount?.toLocaleString()}{tx.currency !== 'USD' ? ` ${tx.currency}` : ''}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={
+                            tx.status === 'completed' ? 'bg-green-100 text-green-700' :
+                            tx.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                            tx.status === 'failed' ? 'bg-red-100 text-red-700' :
+                            'bg-blue-100 text-blue-700'
+                          }>
+                            {tx.status || 'Completed'}
+                          </Badge>
                         </TableCell>
                         <TableCell className="text-slate-400 text-sm">{tx.created_by_name}</TableCell>
                       </TableRow>
                     ))}
                     {loanTransactions.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center text-slate-400 py-8">
+                        <TableCell colSpan={7} className="text-center text-slate-400 py-8">
                           No transactions yet
                         </TableCell>
                       </TableRow>
@@ -1519,24 +1591,48 @@ export default function Loans() {
               </div>
             )}
 
-            {/* Treasury Account */}
+            {/* Disburse From - Treasury or Exchanger */}
             <div className="space-y-2">
-              <Label className="text-slate-500 text-xs uppercase tracking-wider">Disburse From Treasury *</Label>
-              <Select
-                value={loanForm.treasury_account_id}
-                onValueChange={(value) => setLoanForm({ ...loanForm, treasury_account_id: value })}
-              >
-                <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800" data-testid="loan-treasury">
-                  <SelectValue placeholder="Select treasury account" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-slate-200">
-                  {treasuryAccounts.map((acc) => (
-                    <SelectItem key={acc.account_id} value={acc.account_id} className="text-slate-800 hover:bg-slate-100">
-                      {acc.account_name} ({acc.balance?.toLocaleString()} {acc.currency})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="text-slate-500 text-xs uppercase tracking-wider">Disburse From *</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <Select
+                  value={loanForm.treasury_account_id}
+                  onValueChange={(value) => setLoanForm({ ...loanForm, treasury_account_id: value, disburse_from_vendor_id: '' })}
+                >
+                  <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800" data-testid="loan-treasury">
+                    <SelectValue placeholder="Treasury Account" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200">
+                    {treasuryAccounts.map((acc) => (
+                      <SelectItem key={acc.account_id} value={acc.account_id} className="text-slate-800 hover:bg-slate-100">
+                        {acc.account_name} ({acc.balance?.toLocaleString()} {acc.currency})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={loanForm.disburse_from_vendor_id}
+                  onValueChange={(value) => setLoanForm({ ...loanForm, disburse_from_vendor_id: value, treasury_account_id: '' })}
+                >
+                  <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800" data-testid="loan-vendor">
+                    <SelectValue placeholder="Or Exchanger" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200">
+                    {vendors.map((v) => (
+                      <SelectItem key={v.vendor_id} value={v.vendor_id} className="text-slate-800 hover:bg-slate-100">
+                        {v.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {(loanForm.treasury_account_id || loanForm.disburse_from_vendor_id) && (
+                <p className="text-xs text-blue-600">
+                  Selected: {loanForm.treasury_account_id 
+                    ? treasuryAccounts.find(a => a.account_id === loanForm.treasury_account_id)?.account_name 
+                    : vendors.find(v => v.vendor_id === loanForm.disburse_from_vendor_id)?.name}
+                </p>
+              )}
             </div>
 
             {/* Collateral */}
@@ -1549,6 +1645,22 @@ export default function Loans() {
                 placeholder="e.g., Property deed, Bank guarantee..."
               />
             </div>
+
+            {/* Bank Account Details - shown when disbursing from Exchanger */}
+            {loanForm.disburse_from_vendor_id && (
+              <div className="space-y-2">
+                <Label className="text-slate-500 text-xs uppercase tracking-wider">Bank Account Details *</Label>
+                <Textarea
+                  value={loanForm.bank_details}
+                  onChange={(e) => setLoanForm({ ...loanForm, bank_details: e.target.value })}
+                  className="bg-slate-50 border-slate-200 text-slate-800 focus:border-[#66FCF1]"
+                  rows={3}
+                  placeholder="Enter bank account details for the exchanger (Account Name, Account Number, Bank Name, IFSC/SWIFT, etc.)"
+                  data-testid="loan-bank-details"
+                />
+                <p className="text-xs text-amber-600">These details will be visible to the Exchanger for approval</p>
+              </div>
+            )}
 
             {/* Notes */}
             <div className="space-y-2">
@@ -1693,24 +1805,48 @@ export default function Loans() {
               </div>
             )}
 
-            {/* Treasury Account */}
+            {/* Credit To - Treasury or Exchanger */}
             <div className="space-y-2">
-              <Label className="text-slate-500 text-xs uppercase tracking-wider">Credit to Treasury *</Label>
-              <Select
-                value={repaymentForm.treasury_account_id}
-                onValueChange={(value) => setRepaymentForm({ ...repaymentForm, treasury_account_id: value })}
-              >
-                <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800" data-testid="repayment-treasury">
-                  <SelectValue placeholder="Select treasury account" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-slate-200">
-                  {treasuryAccounts.map((acc) => (
-                    <SelectItem key={acc.account_id} value={acc.account_id} className="text-slate-800 hover:bg-slate-100">
-                      {acc.account_name} ({acc.currency})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="text-slate-500 text-xs uppercase tracking-wider">Credit To *</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <Select
+                  value={repaymentForm.treasury_account_id}
+                  onValueChange={(value) => setRepaymentForm({ ...repaymentForm, treasury_account_id: value, credit_to_vendor_id: '' })}
+                >
+                  <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800" data-testid="repayment-treasury">
+                    <SelectValue placeholder="Treasury Account" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200">
+                    {treasuryAccounts.map((acc) => (
+                      <SelectItem key={acc.account_id} value={acc.account_id} className="text-slate-800 hover:bg-slate-100">
+                        {acc.account_name} ({acc.currency})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={repaymentForm.credit_to_vendor_id}
+                  onValueChange={(value) => setRepaymentForm({ ...repaymentForm, credit_to_vendor_id: value, treasury_account_id: '' })}
+                >
+                  <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800" data-testid="repayment-vendor">
+                    <SelectValue placeholder="Or Exchanger" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200">
+                    {vendors.map((v) => (
+                      <SelectItem key={v.vendor_id} value={v.vendor_id} className="text-slate-800 hover:bg-slate-100">
+                        {v.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {(repaymentForm.treasury_account_id || repaymentForm.credit_to_vendor_id) && (
+                <p className="text-xs text-green-600">
+                  Credit to: {repaymentForm.treasury_account_id 
+                    ? treasuryAccounts.find(a => a.account_id === repaymentForm.treasury_account_id)?.account_name 
+                    : vendors.find(v => v.vendor_id === repaymentForm.credit_to_vendor_id)?.name}
+                </p>
+              )}
             </div>
 
             {/* Payment Date */}
