@@ -4,531 +4,594 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
-import { Checkbox } from '../components/ui/checkbox';
 import { Textarea } from '../components/ui/textarea';
+import { Checkbox } from '../components/ui/checkbox';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '../components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '../components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '../components/ui/select';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
+  Tabs, TabsContent, TabsList, TabsTrigger,
 } from '../components/ui/tabs';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 import {
-  FileSpreadsheet,
-  Upload,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  Eye,
-  Link2,
-  Building2,
-  CreditCard,
-  Users,
-  Store,
-  RefreshCw,
-  Download,
-  ArrowUpDown,
-  Calendar,
-  Flag,
-  Check,
-  X,
-  Clock,
-  History,
-  FileText,
-  DollarSign,
-  AlertCircle,
-  Trash2,
-  Edit,
-  Plus,
+  CalendarDays, Building2, CreditCard, Store, Upload, FileSpreadsheet,
+  CheckCircle2, AlertTriangle, Clock, History, Link2, Flag, Check, X,
+  ChevronLeft, ChevronRight, Loader2, FileText, Download, Eye,
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
+// Big Calendar Component
+function BigCalendarView({ selectedDate, onSelectDate, datesWithTx, reconStatus, dailySummary, formatDate }) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+    
+    const days = [];
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDay; i++) {
+      days.push(null);
+    }
+    
+    // Add days of the month
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    
+    return days;
+  };
+  
+  const getDateStatus = (date) => {
+    if (!date) return null;
+    const dateStr = date.toISOString().split('T')[0];
+    return reconStatus[dateStr];
+  };
+  
+  const hasTransactions = (date) => {
+    if (!date) return false;
+    const dateStr = date.toISOString().split('T')[0];
+    return datesWithTx.includes(dateStr);
+  };
+  
+  const isToday = (date) => {
+    if (!date) return false;
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+  
+  const isSelected = (date) => {
+    if (!date || !selectedDate) return false;
+    return date.toDateString() === selectedDate.toDateString();
+  };
+  
+  const prevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+  };
+  
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+  };
+  
+  const days = getDaysInMonth(currentMonth);
+  
+  return (
+    <div className="space-y-6">
+      {/* Summary Cards at Top */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-700">Reconciled</p>
+                <p className="text-3xl font-bold text-green-600">{dailySummary?.reconciled || 0}</p>
+              </div>
+              <CheckCircle2 className="w-10 h-10 text-green-500 opacity-80" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-yellow-700">Pending</p>
+                <p className="text-3xl font-bold text-yellow-600">{dailySummary?.pending || 0}</p>
+              </div>
+              <Clock className="w-10 h-10 text-yellow-500 opacity-80" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-red-700">Flagged</p>
+                <p className="text-3xl font-bold text-red-600">{dailySummary?.flagged || 0}</p>
+              </div>
+              <AlertTriangle className="w-10 h-10 text-red-500 opacity-80" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-700">Total</p>
+                <p className="text-3xl font-bold text-blue-600">{dailySummary?.total || 0}</p>
+              </div>
+              <CalendarDays className="w-10 h-10 text-blue-500 opacity-80" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Big Calendar */}
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-slate-800 to-slate-700 text-white py-4">
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={prevMonth}
+              className="text-white hover:bg-white/20"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </Button>
+            <h2 className="text-2xl font-bold">
+              {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+            </h2>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={nextMonth}
+              className="text-white hover:bg-white/20"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </Button>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="p-0">
+          {/* Day Headers */}
+          <div className="grid grid-cols-7 bg-slate-100 border-b">
+            {dayNames.map(day => (
+              <div key={day} className="py-3 text-center font-semibold text-slate-600 text-sm">
+                {day}
+              </div>
+            ))}
+          </div>
+          
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7">
+            {days.map((date, index) => {
+              const status = getDateStatus(date);
+              const hasTx = hasTransactions(date);
+              const today = isToday(date);
+              const selected = isSelected(date);
+              
+              return (
+                <div
+                  key={index}
+                  onClick={() => date && onSelectDate(date)}
+                  className={`
+                    min-h-[100px] p-2 border-b border-r relative
+                    ${!date ? 'bg-slate-50' : 'bg-white hover:bg-slate-50 cursor-pointer'}
+                    ${selected ? 'ring-2 ring-blue-500 ring-inset bg-blue-50' : ''}
+                    transition-all duration-150
+                  `}
+                >
+                  {date && (
+                    <>
+                      {/* Date Number */}
+                      <div className={`
+                        w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium
+                        ${today ? 'bg-blue-600 text-white' : ''}
+                        ${hasTx && !today ? 'bg-blue-100 text-blue-700 font-bold' : ''}
+                      `}>
+                        {date.getDate()}
+                      </div>
+                      
+                      {/* Status Indicators */}
+                      <div className="mt-1 space-y-1">
+                        {status === 'completed' && (
+                          <div className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>Done</span>
+                          </div>
+                        )}
+                        {status === 'pending' && (
+                          <div className="flex items-center gap-1 text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
+                            <Clock className="w-3 h-3" />
+                            <span>Pending</span>
+                          </div>
+                        )}
+                        {status === 'flagged' && (
+                          <div className="flex items-center gap-1 text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                            <AlertTriangle className="w-3 h-3" />
+                            <span>Flagged</span>
+                          </div>
+                        )}
+                        {hasTx && !status && (
+                          <div className="flex items-center gap-1 text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">
+                            <CalendarDays className="w-3 h-3" />
+                            <span>Transactions</span>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Legend */}
+      <div className="flex flex-wrap gap-6 justify-center text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs">15</div>
+          <span className="text-slate-600">Today</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold">15</div>
+          <span className="text-slate-600">Has Transactions</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3" /> Done
+          </div>
+          <span className="text-slate-600">Reconciled</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs flex items-center gap-1">
+            <Clock className="w-3 h-3" /> Pending
+          </div>
+          <span className="text-slate-600">In Progress</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> Flagged
+          </div>
+          <span className="text-slate-600">Needs Attention</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Reconciliation() {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('daily');
-  const [summary, setSummary] = useState(null);
+  const { user, getAuthHeaders } = useAuth();
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [datesWithTx, setDatesWithTx] = useState([]);
+  const [reconStatus, setReconStatus] = useState({});
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('calendar');
+  const [selectedType, setSelectedType] = useState(null); // treasury, psp, exchanger
   
-  // Daily reconciliation state
-  const [dailyData, setDailyData] = useState(null);
-  const [selectedItems, setSelectedItems] = useState([]);
-  
-  // Bank reconciliation state
+  // Account selection
   const [treasuryAccounts, setTreasuryAccounts] = useState([]);
+  const [psps, setPsps] = useState([]);
+  const [exchangers, setExchangers] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState('');
+  
+  // Transaction history for selected account/date
+  const [accountHistory, setAccountHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  
+  // Statement upload
   const [uploading, setUploading] = useState(false);
-  const [bankBatches, setBankBatches] = useState([]);
-  const [selectedBatch, setSelectedBatch] = useState(null);
-  const [batchDetails, setBatchDetails] = useState(null);
+  const [statementFile, setStatementFile] = useState(null);
+  const [parsedEntries, setParsedEntries] = useState([]);
+  const [showParsed, setShowParsed] = useState(false);
   
-  // PSP reconciliation state
-  const [pspRecon, setPspRecon] = useState([]);
-  const [selectedPsp, setSelectedPsp] = useState(null);
-  const [pspDetails, setPspDetails] = useState([]);
+  // Matching
+  const [selectedSystemTx, setSelectedSystemTx] = useState(null);
+  const [selectedStatementEntry, setSelectedStatementEntry] = useState(null);
+  const [matchedPairs, setMatchedPairs] = useState([]);
+  const [flaggedEntries, setFlaggedEntries] = useState([]);
+  const [flagDialog, setFlagDialog] = useState({ open: false, entry: null, reason: '' });
   
-  // Client reconciliation state
-  const [clientRecon, setClientRecon] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [clientDetails, setClientDetails] = useState(null);
+  // Approval
+  const [remarks, setRemarks] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   
-  // Exchanger reconciliation state
-  const [vendorRecon, setExchangerRecon] = useState([]);
+  // History
+  const [reconHistory, setReconHistory] = useState([]);
+  const [historyDialog, setHistoryDialog] = useState({ open: false, item: null });
   
-  // History state
-  const [history, setHistory] = useState([]);
-  const [flaggedItems, setFlaggedItems] = useState([]);
-  
-  // Dialog states
-  const [flagDialogOpen, setFlagDialogOpen] = useState(false);
-  const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
-  const [selectedItemForAction, setSelectedItemForAction] = useState(null);
-  const [flagReason, setFlagReason] = useState('');
-  const [adjustmentData, setAdjustmentData] = useState({ amount: '', reason: '', treasury_account_id: '' });
-  const [reconcileNotes, setReconcileNotes] = useState('');
+  // Daily summary
+  const [dailySummary, setDailySummary] = useState(null);
 
-  const isAdmin = user?.role === 'admin';
-
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('auth_token');
-    return {
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-    };
-  };
-
-  const fetchSummary = useCallback(async () => {
+  // Fetch dates with transactions
+  const fetchDatesWithTransactions = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/reconciliation/summary`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
+      const response = await fetch(`${API_URL}/api/reconciliation/dates-with-transactions`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
-        setSummary(await response.json());
+        const data = await response.json();
+        setDatesWithTx(data.dates || []);
+        setReconStatus(data.status || {});
       }
     } catch (error) {
-      console.error('Error fetching summary:', error);
+      console.error('Error fetching dates:', error);
     }
-  }, []);
+  }, [getAuthHeaders]);
 
-  const fetchDailyData = useCallback(async () => {
+  // Fetch accounts
+  const fetchAccounts = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/reconciliation/daily`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setDailyData(await response.json());
+      const [treasuryRes, pspRes, exchangerRes] = await Promise.all([
+        fetch(`${API_URL}/api/treasury`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/api/psps`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/api/vendors?page_size=100`, { headers: getAuthHeaders() })
+      ]);
+      
+      if (treasuryRes.ok) setTreasuryAccounts(await treasuryRes.json());
+      if (pspRes.ok) setPsps(await pspRes.json());
+      if (exchangerRes.ok) {
+        const data = await exchangerRes.json();
+        setExchangers(data.items || data);
       }
     } catch (error) {
-      console.error('Error fetching daily data:', error);
+      console.error('Error fetching accounts:', error);
     }
-  }, []);
+  }, [getAuthHeaders]);
 
-  const fetchTreasuryAccounts = async () => {
+  // Fetch daily summary
+  const fetchDailySummary = useCallback(async (date) => {
+    if (!date) return;
     try {
-      const response = await fetch(`${API_URL}/api/treasury`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
+      const dateStr = date.toISOString().split('T')[0];
+      const response = await fetch(`${API_URL}/api/reconciliation/daily-summary?date=${dateStr}`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
-        setTreasuryAccounts(await response.json());
+        setDailySummary(await response.json());
       }
     } catch (error) {
-      console.error('Error fetching treasury accounts:', error);
+      console.error('Error fetching daily summary:', error);
     }
-  };
+  }, [getAuthHeaders]);
 
-  const fetchBankBatches = async () => {
+  // Fetch account history for selected date
+  const fetchAccountHistory = useCallback(async () => {
+    if (!selectedDate || !selectedType || !selectedAccount) return;
+    
+    setHistoryLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/reconciliation/batches`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const response = await fetch(
+        `${API_URL}/api/reconciliation/account-history?type=${selectedType}&account_id=${selectedAccount}&date=${dateStr}`,
+        { headers: getAuthHeaders() }
+      );
       if (response.ok) {
-        setBankBatches(await response.json());
-      }
-    } catch (error) {
-      console.error('Error fetching batches:', error);
-    }
-  };
-
-  const fetchBatchDetails = async (batchId) => {
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/batch/${batchId}`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setBatchDetails(await response.json());
-      }
-    } catch (error) {
-      console.error('Error fetching batch details:', error);
-    }
-  };
-
-  const fetchPspRecon = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/psp`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setPspRecon(await response.json());
-      }
-    } catch (error) {
-      console.error('Error fetching PSP reconciliation:', error);
-    }
-  };
-
-  const fetchPspDetails = async (pspId) => {
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/psp/${pspId}/details`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setPspDetails(await response.json());
-      }
-    } catch (error) {
-      console.error('Error fetching PSP details:', error);
-    }
-  };
-
-  const fetchClientRecon = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/clients`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setClientRecon(await response.json());
-      }
-    } catch (error) {
-      console.error('Error fetching client reconciliation:', error);
-    }
-  };
-
-  const fetchClientDetails = async (clientId) => {
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/client/${clientId}/details`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setClientDetails(await response.json());
-      }
-    } catch (error) {
-      console.error('Error fetching client details:', error);
-    }
-  };
-
-  const fetchExchangerRecon = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/vendors`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setExchangerRecon(await response.json());
-      }
-    } catch (error) {
-      console.error('Error fetching exchanger reconciliation:', error);
-    }
-  };
-
-  const fetchHistory = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/history?limit=50`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setHistory(await response.json());
+        setAccountHistory(await response.json());
       }
     } catch (error) {
       console.error('Error fetching history:', error);
+      toast.error('Failed to load account history');
+    } finally {
+      setHistoryLoading(false);
     }
-  };
+  }, [selectedDate, selectedType, selectedAccount, getAuthHeaders]);
 
-  const fetchFlaggedItems = async () => {
+  // Fetch reconciliation history
+  const fetchReconHistory = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/reconciliation/flagged`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
+      const response = await fetch(`${API_URL}/api/reconciliation/calendar-history?limit=50`, {
+        headers: getAuthHeaders()
       });
       if (response.ok) {
-        setFlaggedItems(await response.json());
+        setReconHistory(await response.json());
       }
     } catch (error) {
-      console.error('Error fetching flagged items:', error);
+      console.error('Error fetching recon history:', error);
     }
-  };
+  }, [getAuthHeaders]);
 
   useEffect(() => {
-    const loadData = async () => {
+    const init = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchSummary(),
-        fetchDailyData(),
-        fetchTreasuryAccounts(),
-        fetchBankBatches(),
-        fetchPspRecon(),
-        fetchClientRecon(),
-        fetchExchangerRecon(),
-        fetchHistory(),
-        fetchFlaggedItems(),
-      ]);
+      await Promise.all([fetchDatesWithTransactions(), fetchAccounts(), fetchReconHistory()]);
       setLoading(false);
     };
-    loadData();
-  }, [fetchSummary, fetchDailyData]);
+    init();
+  }, [fetchDatesWithTransactions, fetchAccounts, fetchReconHistory]);
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedAccount) return;
-    
-    setUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('account_id', selectedAccount);
-    
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/bank/upload`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        credentials: 'include',
-        body: formData,
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        toast.success(`Processed ${result.total_rows} rows: ${result.matched} matched, ${result.unmatched} unmatched`);
-        fetchBankBatches();
-        fetchSummary();
-      } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Upload failed');
-      }
-    } catch (error) {
-      toast.error('Upload failed');
-    } finally {
-      setUploading(false);
-      e.target.value = '';
+  useEffect(() => {
+    if (selectedAccount) {
+      fetchAccountHistory();
     }
-  };
+  }, [selectedAccount, fetchAccountHistory]);
 
-  // Quick reconcile single item
-  const handleQuickReconcile = async (item) => {
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/quick-reconcile?reference_id=${item.id}&item_type=${item.type}&notes=${encodeURIComponent(reconcileNotes)}`, {
-        method: 'POST',
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        toast.success('Item reconciled');
-        fetchDailyData();
-        fetchSummary();
-        fetchHistory();
-      } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to reconcile');
-      }
-    } catch (error) {
-      toast.error('Failed to reconcile');
+  useEffect(() => {
+    if (selectedDate) {
+      fetchDailySummary(selectedDate);
     }
-  };
+  }, [selectedDate, fetchDailySummary]);
 
-  // Bulk reconcile selected items
-  const handleBulkReconcile = async () => {
-    if (selectedItems.length === 0) {
-      toast.error('No items selected');
+  // Handle statement upload
+  const handleStatementUpload = async () => {
+    if (!statementFile || !selectedAccount || !selectedDate) {
+      toast.error('Please select a file, account, and date');
       return;
     }
-    
-    try {
-      const items = selectedItems.map(id => {
-        const item = dailyData?.items?.find(i => i.id === id);
-        return { reference_id: id, item_type: item?.type || 'unknown' };
-      });
-      
-      const response = await fetch(`${API_URL}/api/reconciliation/bulk-reconcile?notes=${encodeURIComponent(reconcileNotes)}`, {
-        method: 'POST',
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(items),
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        toast.success(result.message);
-        setSelectedItems([]);
-        setReconcileNotes('');
-        fetchDailyData();
-        fetchSummary();
-        fetchHistory();
-      } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to reconcile');
-      }
-    } catch (error) {
-      toast.error('Failed to reconcile');
-    }
-  };
 
-  // Flag for review
-  const handleFlag = async () => {
-    if (!selectedItemForAction || !flagReason) return;
-    
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/flag?reference_id=${selectedItemForAction.id}&item_type=${selectedItemForAction.type}&reason=${encodeURIComponent(flagReason)}`, {
-        method: 'POST',
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        toast.success('Item flagged for review');
-        setFlagDialogOpen(false);
-        setFlagReason('');
-        setSelectedItemForAction(null);
-        fetchDailyData();
-        fetchFlaggedItems();
-        fetchHistory();
-      } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to flag item');
-      }
-    } catch (error) {
-      toast.error('Failed to flag item');
-    }
-  };
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', statementFile);
+    formData.append('account_type', selectedType);
+    formData.append('account_id', selectedAccount);
+    formData.append('date', selectedDate.toISOString().split('T')[0]);
 
-  // Create adjustment
-  const handleCreateAdjustment = async () => {
-    if (!selectedItemForAction || !adjustmentData.amount || !adjustmentData.reason) return;
-    
     try {
-      const params = new URLSearchParams({
-        reference_id: selectedItemForAction.id,
-        item_type: selectedItemForAction.type,
-        adjustment_amount: adjustmentData.amount,
-        currency: selectedItemForAction.currency || 'USD',
-        reason: adjustmentData.reason,
-      });
-      if (adjustmentData.treasury_account_id) {
-        params.append('treasury_account_id', adjustmentData.treasury_account_id);
-      }
-      
-      const response = await fetch(`${API_URL}/api/reconciliation/adjustment?${params}`, {
+      const response = await fetch(`${API_URL}/api/reconciliation/upload-statement`, {
         method: 'POST',
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Authorization': getAuthHeaders()['Authorization'] },
+        body: formData
       });
-      
-      if (response.ok) {
-        toast.success('Adjustment created');
-        setAdjustmentDialogOpen(false);
-        setAdjustmentData({ amount: '', reason: '', treasury_account_id: '' });
-        setSelectedItemForAction(null);
-        fetchDailyData();
-        fetchSummary();
-        fetchHistory();
-      } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to create adjustment');
-      }
-    } catch (error) {
-      toast.error('Failed to create adjustment');
-    }
-  };
 
-  // Export unmatched
-  const handleExportUnmatched = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/reconciliation/export-unmatched`, {
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      
       if (response.ok) {
         const data = await response.json();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `unmatched_items_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        toast.success(`Exported ${data.total_count} items`);
+        setParsedEntries(data.entries || []);
+        setShowParsed(true);
+        toast.success(`Parsed ${data.entries?.length || 0} entries from statement`);
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || 'Failed to parse statement');
       }
     } catch (error) {
-      toast.error('Export failed');
+      toast.error('Failed to upload statement');
+    } finally {
+      setUploading(false);
+      setStatementFile(null);
     }
   };
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'reconciled':
-      case 'matched':
-        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><CheckCircle2 className="w-3 h-3 mr-1" />Reconciled</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
-      case 'flagged':
-        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30"><Flag className="w-3 h-3 mr-1" />Flagged</Badge>;
-      case 'unmatched':
-        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30"><XCircle className="w-3 h-3 mr-1" />Unmatched</Badge>;
-      case 'discrepancy':
-        return <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30"><AlertTriangle className="w-3 h-3 mr-1" />Discrepancy</Badge>;
-      default:
-        return <Badge className="bg-slate-200 text-slate-600">{status}</Badge>;
+  // Match entry
+  const handleMatch = () => {
+    if (!selectedSystemTx || !selectedStatementEntry) {
+      toast.error('Select both a system transaction and statement entry to match');
+      return;
+    }
+
+    const pair = {
+      system_tx: selectedSystemTx,
+      statement_entry: selectedStatementEntry,
+      matched_at: new Date().toISOString(),
+      matched_by: user?.name
+    };
+
+    setMatchedPairs([...matchedPairs, pair]);
+    
+    // Remove from available lists
+    setAccountHistory(accountHistory.filter(tx => tx.transaction_id !== selectedSystemTx.transaction_id));
+    setParsedEntries(parsedEntries.filter(e => e.id !== selectedStatementEntry.id));
+    
+    setSelectedSystemTx(null);
+    setSelectedStatementEntry(null);
+    toast.success('Entries matched successfully');
+  };
+
+  // Flag entry
+  const handleFlag = () => {
+    if (!flagDialog.entry || !flagDialog.reason) {
+      toast.error('Please provide a reason for flagging');
+      return;
+    }
+
+    const flagged = {
+      entry: flagDialog.entry,
+      reason: flagDialog.reason,
+      flagged_at: new Date().toISOString(),
+      flagged_by: user?.name
+    };
+
+    setFlaggedEntries([...flaggedEntries, flagged]);
+    
+    // Remove from parsed entries
+    setParsedEntries(parsedEntries.filter(e => e.id !== flagDialog.entry.id));
+    
+    setFlagDialog({ open: false, entry: null, reason: '' });
+    toast.success('Entry flagged');
+  };
+
+  // Submit reconciliation
+  const handleSubmitReconciliation = async () => {
+    if (matchedPairs.length === 0 && flaggedEntries.length === 0) {
+      toast.error('No matched or flagged entries to submit');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const response = await fetch(`${API_URL}/api/reconciliation/submit`, {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: selectedDate?.toISOString().split('T')[0],
+          account_type: selectedType,
+          account_id: selectedAccount,
+          matched_pairs: matchedPairs,
+          flagged_entries: flaggedEntries,
+          remarks: remarks,
+          unmatched_system: accountHistory.length,
+          unmatched_statement: parsedEntries.length
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Reconciliation submitted successfully');
+        // Reset state
+        setMatchedPairs([]);
+        setFlaggedEntries([]);
+        setParsedEntries([]);
+        setShowParsed(false);
+        setRemarks('');
+        fetchDatesWithTransactions();
+        fetchReconHistory();
+        fetchDailySummary(selectedDate);
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || 'Failed to submit reconciliation');
+      }
+    } catch (error) {
+      toast.error('Failed to submit reconciliation');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(dateStr).toLocaleDateString('en-US', { 
+      year: 'numeric', month: 'short', day: 'numeric' 
+    });
   };
 
-  const toggleItemSelection = (itemId) => {
-    setSelectedItems(prev => 
-      prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
-    );
+  const formatCurrency = (amount, currency = 'USD') => {
+    return `${currency} ${(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const selectAllPending = () => {
-    const pendingIds = dailyData?.items?.filter(i => i.status === 'pending').map(i => i.id) || [];
-    setSelectedItems(pendingIds);
+  // Get account name by ID
+  const getAccountName = (type, id) => {
+    if (type === 'treasury') {
+      return treasuryAccounts.find(a => a.account_id === id)?.account_name || id;
+    } else if (type === 'psp') {
+      return psps.find(p => p.psp_id === id)?.name || id;
+    } else if (type === 'exchanger') {
+      return exchangers.find(e => e.vendor_id === id)?.vendor_name || id;
+    }
+    return id;
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -538,618 +601,444 @@ export default function Reconciliation() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Reconciliation</h1>
-          <p className="text-slate-500 mt-1">Match and verify transactions across all accounts</p>
+          <h1 className="text-2xl font-bold text-slate-800">Reconciliation</h1>
+          <p className="text-slate-500 mt-1">Match and reconcile transactions</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExportUnmatched} className="border-slate-200 text-slate-600">
-            <Download className="w-4 h-4 mr-2" /> Export Unmatched
-          </Button>
-          <Button variant="outline" onClick={() => { fetchSummary(); fetchDailyData(); }} className="border-slate-200 text-slate-600">
-            <RefreshCw className="w-4 h-4 mr-2" /> Refresh
-          </Button>
-        </div>
+        <Button variant="outline" onClick={() => setActiveTab('history')} data-testid="history-btn">
+          <History className="w-4 h-4 mr-2" /> History
+        </Button>
       </div>
 
-      {/* Summary Cards */}
-      {summary && (
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card className={`bg-white border-l-4 ${summary.bank.status === 'attention' ? 'border-l-yellow-500' : 'border-l-green-500'}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider">Bank</p>
-                  <p className="text-2xl font-bold text-slate-800">{summary.bank.unmatched_entries}</p>
-                  <p className="text-xs text-slate-500">Unmatched</p>
-                </div>
-                <Building2 className="w-8 h-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className={`bg-white border-l-4 ${summary.psp.status === 'attention' ? 'border-l-yellow-500' : 'border-l-green-500'}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider">PSP</p>
-                  <p className="text-2xl font-bold text-slate-800">${Math.abs(summary.psp.total_variance).toLocaleString()}</p>
-                  <p className="text-xs text-slate-500">Variance</p>
-                </div>
-                <CreditCard className="w-8 h-8 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className={`bg-white border-l-4 ${summary.clients.status === 'attention' ? 'border-l-yellow-500' : 'border-l-green-500'}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider">Clients</p>
-                  <p className="text-2xl font-bold text-slate-800">{summary.clients.clients_with_discrepancy}</p>
-                  <p className="text-xs text-slate-500">Discrepancies</p>
-                </div>
-                <Users className="w-8 h-8 text-amber-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className={`bg-white border-l-4 ${summary.vendors.status === 'attention' ? 'border-l-yellow-500' : 'border-l-green-500'}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider">Exchangers</p>
-                  <p className="text-2xl font-bold text-slate-800">{summary.vendors.vendors_with_discrepancy}</p>
-                  <p className="text-xs text-slate-500">Discrepancies</p>
-                </div>
-                <Store className="w-8 h-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-slate-50 border border-slate-200 flex-wrap">
-          <TabsTrigger value="daily" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-            <Calendar className="w-4 h-4 mr-1" /> Daily
+        <TabsList className="mb-4">
+          <TabsTrigger value="calendar" className="gap-2">
+            <CalendarDays className="w-4 h-4" /> Calendar
           </TabsTrigger>
-          <TabsTrigger value="bank" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-            <Building2 className="w-4 h-4 mr-1" /> Bank
+          <TabsTrigger value="reconcile" className="gap-2" disabled={!selectedDate}>
+            <Link2 className="w-4 h-4" /> Reconcile
           </TabsTrigger>
-          <TabsTrigger value="psp" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-            <CreditCard className="w-4 h-4 mr-1" /> PSP
-          </TabsTrigger>
-          <TabsTrigger value="clients" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-            <Users className="w-4 h-4 mr-1" /> Clients
-          </TabsTrigger>
-          <TabsTrigger value="exchangers" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-            <Store className="w-4 h-4 mr-1" /> Exchangers
-          </TabsTrigger>
-          <TabsTrigger value="flagged" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-            <Flag className="w-4 h-4 mr-1" /> Flagged ({flaggedItems.length})
-          </TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-            <History className="w-4 h-4 mr-1" /> History
+          <TabsTrigger value="history" className="gap-2">
+            <History className="w-4 h-4" /> History
           </TabsTrigger>
         </TabsList>
 
-        {/* Daily Reconciliation Tab */}
-        <TabsContent value="daily" className="mt-4">
-          <Card className="bg-white border-slate-200">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-[#66FCF1]" />
-                  Today's Reconciliation
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={selectAllPending} className="text-slate-600">
-                    Select All Pending
-                  </Button>
-                  {selectedItems.length > 0 && (
-                    <Button onClick={handleBulkReconcile} size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                      <Check className="w-4 h-4 mr-1" /> Reconcile Selected ({selectedItems.length})
-                    </Button>
-                  )}
-                </div>
-              </div>
-              {dailyData?.stats && (
-                <div className="grid grid-cols-4 gap-4 mt-4">
-                  <div className="bg-slate-50 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold text-slate-800">{dailyData.stats.total}</p>
-                    <p className="text-xs text-slate-500">Total Items</p>
-                  </div>
-                  <div className="bg-green-50 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold text-green-600">{dailyData.stats.reconciled}</p>
-                    <p className="text-xs text-green-600">Reconciled</p>
-                  </div>
-                  <div className="bg-yellow-50 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold text-yellow-600">{dailyData.stats.pending}</p>
-                    <p className="text-xs text-yellow-600">Pending</p>
-                  </div>
-                  <div className="bg-red-50 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold text-red-600">{dailyData.stats.flagged}</p>
-                    <p className="text-xs text-red-600">Flagged</p>
-                  </div>
-                </div>
-              )}
-            </CardHeader>
-            <CardContent>
-              {selectedItems.length > 0 && (
-                <div className="mb-4 p-3 bg-slate-50 rounded-lg">
-                  <Label className="text-xs text-slate-500 uppercase">Notes for Reconciliation (Optional)</Label>
-                  <Textarea 
-                    value={reconcileNotes}
-                    onChange={(e) => setReconcileNotes(e.target.value)}
-                    placeholder="Add any notes about this reconciliation..."
-                    className="mt-1 bg-white border-slate-200"
-                  />
-                </div>
-              )}
-              <ScrollArea className="h-[500px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-slate-200">
-                      <TableHead className="w-10"></TableHead>
-                      <TableHead className="text-slate-500 text-xs uppercase">Date</TableHead>
-                      <TableHead className="text-slate-500 text-xs uppercase">Type</TableHead>
-                      <TableHead className="text-slate-500 text-xs uppercase">Description</TableHead>
-                      <TableHead className="text-slate-500 text-xs uppercase">Reference</TableHead>
-                      <TableHead className="text-slate-500 text-xs uppercase text-right">Amount</TableHead>
-                      <TableHead className="text-slate-500 text-xs uppercase">Status</TableHead>
-                      <TableHead className="text-slate-500 text-xs uppercase w-32">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {dailyData?.items?.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center text-slate-500 py-8">
-                          <CheckCircle2 className="w-12 h-12 mx-auto mb-2 text-green-500" />
-                          <p>No transactions today</p>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      dailyData?.items?.map((item) => (
-                        <TableRow key={item.id} className={`border-slate-200 hover:bg-slate-50 ${item.status === 'reconciled' ? 'opacity-60' : ''}`}>
-                          <TableCell>
-                            {item.status !== 'reconciled' && (
-                              <Checkbox
-                                checked={selectedItems.includes(item.id)}
-                                onCheckedChange={() => toggleItemSelection(item.id)}
-                              />
-                            )}
-                          </TableCell>
-                          <TableCell className="text-slate-800 text-sm">{formatDate(item.date)}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-xs">
-                              {item.type?.replace('_', ' ')}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-slate-800 text-sm max-w-[200px] truncate">{item.description}</TableCell>
-                          <TableCell className="text-slate-500 text-xs font-mono">{item.reference || '-'}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">
-                            <span className={item.category === 'income' || item.category === 'deposit' ? 'text-green-600' : 'text-red-600'}>
-                              {item.amount?.toLocaleString()} {item.currency}
-                            </span>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(item.status)}</TableCell>
-                          <TableCell>
-                            {item.status !== 'reconciled' && (
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleQuickReconcile(item)}
-                                  className="text-green-600 hover:bg-green-50 h-7 px-2"
-                                  title="Quick Reconcile"
-                                >
-                                  <Check className="w-3.5 h-3.5" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => { setSelectedItemForAction(item); setFlagDialogOpen(true); }}
-                                  className="text-red-500 hover:bg-red-50 h-7 px-2"
-                                  title="Flag for Review"
-                                >
-                                  <Flag className="w-3.5 h-3.5" />
-                                </Button>
-                                {isAdmin && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => { setSelectedItemForAction(item); setAdjustmentDialogOpen(true); }}
-                                    className="text-blue-600 hover:bg-blue-50 h-7 px-2"
-                                    title="Create Adjustment"
-                                  >
-                                    <Plus className="w-3.5 h-3.5" />
-                                  </Button>
-                                )}
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+        {/* Calendar Tab */}
+        <TabsContent value="calendar">
+          <BigCalendarView
+            selectedDate={selectedDate}
+            onSelectDate={(date) => {
+              setSelectedDate(date);
+              if (date) setActiveTab('reconcile');
+            }}
+            datesWithTx={datesWithTx}
+            reconStatus={reconStatus}
+            dailySummary={dailySummary}
+            formatDate={formatDate}
+          />
         </TabsContent>
 
-        {/* Bank Reconciliation Tab */}
-        <TabsContent value="bank" className="mt-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Upload Section */}
-            <Card className="bg-white border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                  <Upload className="w-5 h-5 text-[#66FCF1]" />
-                  Upload Bank Statement
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-slate-500 text-xs uppercase">Treasury Account</Label>
-                  <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                    <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800">
-                      <SelectValue placeholder="Select account..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-slate-200">
-                      {treasuryAccounts.map((acc) => (
-                        <SelectItem key={acc.account_id} value={acc.account_id} className="text-slate-800 hover:bg-slate-50">
-                          {acc.account_name} - {acc.bank_name} ({acc.currency})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-slate-500 text-xs uppercase">Statement File (CSV/Excel/PDF)</Label>
-                  <Input
-                    type="file"
-                    accept=".csv,.xlsx,.xls,.pdf"
-                    onChange={handleFileUpload}
-                    disabled={uploading || !selectedAccount}
-                    className="bg-slate-50 border-slate-200 text-slate-800 file:bg-[#66FCF1] file:text-[#0B0C10] file:border-0 file:rounded file:px-3 file:py-1 file:mr-3 file:font-bold"
-                    data-testid="bank-statement-upload"
-                  />
-                  <p className="text-xs text-slate-500">Supported: CSV, Excel (.xlsx, .xls), PDF</p>
-                </div>
-                {uploading && (
-                  <div className="flex items-center gap-2 text-[#66FCF1]">
-                    <div className="w-4 h-4 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin" />
-                    Processing...
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+        {/* Reconcile Tab */}
+        <TabsContent value="reconcile">
+          {selectedDate && (
+            <div className="space-y-6">
+              {/* Back button and date info */}
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="sm" onClick={() => setActiveTab('calendar')}>
+                  <ChevronLeft className="w-4 h-4 mr-1" /> Back to Calendar
+                </Button>
+                <Badge variant="outline" className="text-base px-3 py-1">
+                  <CalendarDays className="w-4 h-4 mr-2" />
+                  {formatDate(selectedDate)}
+                </Badge>
+              </div>
 
-            {/* Recent Batches */}
-            <Card className="bg-white border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                  <FileSpreadsheet className="w-5 h-5 text-[#66FCF1]" />
-                  Recent Uploads
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[200px]">
-                  {bankBatches.length === 0 ? (
-                    <p className="text-slate-500 text-center py-4">No uploads yet</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {bankBatches.map((batch) => (
-                        <div
-                          key={batch.batch_id}
-                          className="p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors"
-                          onClick={() => { setSelectedBatch(batch); fetchBatchDetails(batch.batch_id); }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium text-slate-800 text-sm">{batch.account_name}</p>
-                              <p className="text-xs text-slate-500">{batch.filename}</p>
+              {/* Account Type Selection */}
+              {!selectedType ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card 
+                    className="cursor-pointer hover:border-blue-500 transition-colors"
+                    onClick={() => setSelectedType('treasury')}
+                    data-testid="select-treasury"
+                  >
+                    <CardContent className="pt-6 text-center">
+                      <Building2 className="w-12 h-12 mx-auto mb-3 text-blue-600" />
+                      <h3 className="font-semibold text-lg">Treasury</h3>
+                      <p className="text-sm text-slate-500 mt-1">Bank accounts & cash</p>
+                    </CardContent>
+                  </Card>
+                  <Card 
+                    className="cursor-pointer hover:border-purple-500 transition-colors"
+                    onClick={() => setSelectedType('psp')}
+                    data-testid="select-psp"
+                  >
+                    <CardContent className="pt-6 text-center">
+                      <CreditCard className="w-12 h-12 mx-auto mb-3 text-purple-600" />
+                      <h3 className="font-semibold text-lg">PSP</h3>
+                      <p className="text-sm text-slate-500 mt-1">Payment processors</p>
+                    </CardContent>
+                  </Card>
+                  <Card 
+                    className="cursor-pointer hover:border-orange-500 transition-colors"
+                    onClick={() => setSelectedType('exchanger')}
+                    data-testid="select-exchanger"
+                  >
+                    <CardContent className="pt-6 text-center">
+                      <Store className="w-12 h-12 mx-auto mb-3 text-orange-600" />
+                      <h3 className="font-semibold text-lg">Exchanger</h3>
+                      <p className="text-sm text-slate-500 mt-1">Vendor accounts</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <>
+                  {/* Account Selection */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          {selectedType === 'treasury' && <Building2 className="w-5 h-5 text-blue-600" />}
+                          {selectedType === 'psp' && <CreditCard className="w-5 h-5 text-purple-600" />}
+                          {selectedType === 'exchanger' && <Store className="w-5 h-5 text-orange-600" />}
+                          Select {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} Account
+                        </CardTitle>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedType(null); setSelectedAccount(''); }}>
+                          Change Type
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <Select value={selectedAccount} onValueChange={setSelectedAccount}>
+                        <SelectTrigger className="w-full max-w-md" data-testid="account-select">
+                          <SelectValue placeholder={`Select ${selectedType} account...`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedType === 'treasury' && treasuryAccounts.map(acc => (
+                            <SelectItem key={acc.account_id} value={acc.account_id}>
+                              {acc.account_name} ({acc.currency})
+                            </SelectItem>
+                          ))}
+                          {selectedType === 'psp' && psps.map(psp => (
+                            <SelectItem key={psp.psp_id} value={psp.psp_id}>
+                              {psp.name}
+                            </SelectItem>
+                          ))}
+                          {selectedType === 'exchanger' && exchangers.map(ex => (
+                            <SelectItem key={ex.vendor_id} value={ex.vendor_id}>
+                              {ex.vendor_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </CardContent>
+                  </Card>
+
+                  {selectedAccount && (
+                    <>
+                      {/* Statement Upload */}
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <Upload className="w-5 h-5" /> Upload Statement
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-4 items-end">
+                            <div className="flex-1 min-w-[200px]">
+                              <Label>Statement File (XLSX, PDF, CSV)</Label>
+                              <Input
+                                type="file"
+                                accept=".xlsx,.xls,.pdf,.csv"
+                                onChange={(e) => setStatementFile(e.target.files?.[0])}
+                                className="mt-1"
+                                data-testid="statement-file-input"
+                              />
                             </div>
-                            <div className="text-right">
-                              <p className="text-xs text-slate-500">{formatDate(batch.created_at)}</p>
-                              <div className="flex gap-1 mt-1">
-                                <Badge className="bg-green-500/20 text-green-600 text-[10px]">{batch.matched} matched</Badge>
-                                <Badge className="bg-red-500/20 text-red-600 text-[10px]">{batch.unmatched} unmatched</Badge>
-                              </div>
-                            </div>
+                            <Button 
+                              onClick={handleStatementUpload} 
+                              disabled={!statementFile || uploading}
+                              data-testid="upload-statement-btn"
+                            >
+                              {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                              {uploading ? 'Parsing...' : 'Upload & Parse'}
+                            </Button>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </div>
+                        </CardContent>
+                      </Card>
 
-          {/* Batch Details */}
-          {batchDetails && (
-            <Card className="bg-white border-slate-200 mt-4">
-              <CardHeader>
-                <CardTitle className="text-lg text-slate-800">
-                  Batch Details: {selectedBatch?.filename}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[300px]">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-slate-200">
-                        <TableHead className="text-slate-500 text-xs">Date</TableHead>
-                        <TableHead className="text-slate-500 text-xs">Reference</TableHead>
-                        <TableHead className="text-slate-500 text-xs">Description</TableHead>
-                        <TableHead className="text-slate-500 text-xs text-right">Amount</TableHead>
-                        <TableHead className="text-slate-500 text-xs">Status</TableHead>
-                        <TableHead className="text-slate-500 text-xs">Matched To</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {batchDetails.entries?.map((entry) => (
-                        <TableRow key={entry.entry_id} className="border-slate-200">
-                          <TableCell className="text-slate-800 text-sm">{entry.date || '-'}</TableCell>
-                          <TableCell className="text-slate-500 text-xs font-mono">{entry.reference || '-'}</TableCell>
-                          <TableCell className="text-slate-800 text-sm max-w-[200px] truncate">{entry.description || '-'}</TableCell>
-                          <TableCell className="text-right font-mono text-sm text-slate-800">{entry.amount?.toLocaleString()}</TableCell>
-                          <TableCell>{getStatusBadge(entry.status)}</TableCell>
-                          <TableCell className="text-slate-500 text-xs">{entry.matched_transaction_id || '-'}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                      {/* Matching Interface */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {/* System Transactions */}
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-base flex items-center justify-between">
+                              <span>System Transactions ({accountHistory.length})</span>
+                              {historyLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <ScrollArea className="h-[300px]">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead className="w-8"></TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Reference</TableHead>
+                                    <TableHead className="text-right">Amount</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {accountHistory.length === 0 ? (
+                                    <TableRow>
+                                      <TableCell colSpan={4} className="text-center text-slate-400 py-8">
+                                        No transactions found
+                                      </TableCell>
+                                    </TableRow>
+                                  ) : accountHistory.map(tx => (
+                                    <TableRow 
+                                      key={tx.transaction_id}
+                                      className={`cursor-pointer ${selectedSystemTx?.transaction_id === tx.transaction_id ? 'bg-blue-50' : ''}`}
+                                      onClick={() => setSelectedSystemTx(tx)}
+                                    >
+                                      <TableCell>
+                                        <Checkbox 
+                                          checked={selectedSystemTx?.transaction_id === tx.transaction_id}
+                                          onCheckedChange={() => setSelectedSystemTx(tx)}
+                                        />
+                                      </TableCell>
+                                      <TableCell className="text-xs">{formatDate(tx.created_at)}</TableCell>
+                                      <TableCell className="font-mono text-xs">{tx.reference || tx.transaction_id}</TableCell>
+                                      <TableCell className={`text-right font-medium ${tx.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {formatCurrency(tx.amount, tx.currency)}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </ScrollArea>
+                          </CardContent>
+                        </Card>
+
+                        {/* Statement Entries */}
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-base">
+                              Statement Entries ({parsedEntries.length})
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <ScrollArea className="h-[300px]">
+                              {!showParsed ? (
+                                <div className="text-center py-12 text-slate-400">
+                                  <FileSpreadsheet className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                  <p>Upload a statement to see entries</p>
+                                </div>
+                              ) : (
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="w-8"></TableHead>
+                                      <TableHead>Date</TableHead>
+                                      <TableHead>Description</TableHead>
+                                      <TableHead className="text-right">Amount</TableHead>
+                                      <TableHead className="w-10"></TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {parsedEntries.length === 0 ? (
+                                      <TableRow>
+                                        <TableCell colSpan={5} className="text-center text-slate-400 py-8">
+                                          All entries processed
+                                        </TableCell>
+                                      </TableRow>
+                                    ) : parsedEntries.map(entry => (
+                                      <TableRow 
+                                        key={entry.id}
+                                        className={`cursor-pointer ${selectedStatementEntry?.id === entry.id ? 'bg-green-50' : ''}`}
+                                        onClick={() => setSelectedStatementEntry(entry)}
+                                      >
+                                        <TableCell>
+                                          <Checkbox 
+                                            checked={selectedStatementEntry?.id === entry.id}
+                                            onCheckedChange={() => setSelectedStatementEntry(entry)}
+                                          />
+                                        </TableCell>
+                                        <TableCell className="text-xs">{formatDate(entry.date)}</TableCell>
+                                        <TableCell className="text-xs max-w-[150px] truncate" title={entry.description}>
+                                          {entry.description}
+                                        </TableCell>
+                                        <TableCell className={`text-right font-medium ${entry.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                          {formatCurrency(entry.amount)}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon"
+                                            className="h-7 w-7 text-red-500"
+                                            onClick={(e) => { e.stopPropagation(); setFlagDialog({ open: true, entry, reason: '' }); }}
+                                          >
+                                            <Flag className="w-3 h-3" />
+                                          </Button>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              )}
+                            </ScrollArea>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      {/* Match Button */}
+                      <div className="flex justify-center">
+                        <Button 
+                          size="lg"
+                          onClick={handleMatch}
+                          disabled={!selectedSystemTx || !selectedStatementEntry}
+                          className="gap-2"
+                          data-testid="match-btn"
+                        >
+                          <Link2 className="w-5 h-5" />
+                          Match Selected Entries
+                        </Button>
+                      </div>
+
+                      {/* Matched & Flagged Summary */}
+                      {(matchedPairs.length > 0 || flaggedEntries.length > 0) && (
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-lg">Reconciliation Summary</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            {matchedPairs.length > 0 && (
+                              <div>
+                                <h4 className="font-medium text-green-700 flex items-center gap-2 mb-2">
+                                  <CheckCircle2 className="w-4 h-4" /> Matched ({matchedPairs.length})
+                                </h4>
+                                <div className="bg-green-50 rounded-lg p-3 space-y-2 max-h-40 overflow-auto">
+                                  {matchedPairs.map((pair, i) => (
+                                    <div key={i} className="flex justify-between text-sm">
+                                      <span>{pair.system_tx.reference} ↔ {pair.statement_entry.description?.substring(0, 30)}</span>
+                                      <span className="font-medium">{formatCurrency(pair.system_tx.amount)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {flaggedEntries.length > 0 && (
+                              <div>
+                                <h4 className="font-medium text-red-700 flex items-center gap-2 mb-2">
+                                  <AlertTriangle className="w-4 h-4" /> Flagged ({flaggedEntries.length})
+                                </h4>
+                                <div className="bg-red-50 rounded-lg p-3 space-y-2 max-h-40 overflow-auto">
+                                  {flaggedEntries.map((item, i) => (
+                                    <div key={i} className="text-sm">
+                                      <span className="font-medium">{item.entry.description?.substring(0, 40)}</span>
+                                      <span className="text-red-600 ml-2">- {item.reason}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Remarks */}
+                            <div>
+                              <Label>Remarks</Label>
+                              <Textarea
+                                value={remarks}
+                                onChange={(e) => setRemarks(e.target.value)}
+                                placeholder="Add any notes or remarks for this reconciliation..."
+                                className="mt-1"
+                                data-testid="remarks-input"
+                              />
+                            </div>
+
+                            {/* Submit Button */}
+                            <Button 
+                              className="w-full"
+                              onClick={handleSubmitReconciliation}
+                              disabled={submitting}
+                              data-testid="submit-recon-btn"
+                            >
+                              {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                              Submit Reconciliation
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
           )}
         </TabsContent>
 
-        {/* PSP Tab */}
-        <TabsContent value="psp" className="mt-4">
-          <Card className="bg-white border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-[#66FCF1]" />
-                PSP Reconciliation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-slate-200">
-                      <TableHead className="text-slate-500 text-xs">PSP Name</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Expected</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Actual</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Variance</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Status</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pspRecon.map((psp) => (
-                      <TableRow key={psp.psp_id} className="border-slate-200 hover:bg-slate-50">
-                        <TableCell className="text-slate-800 font-medium">{psp.psp_name}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-800">${psp.expected_amount?.toLocaleString()}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-800">${psp.actual_amount?.toLocaleString()}</TableCell>
-                        <TableCell className={`text-right font-mono ${psp.total_variance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${psp.total_variance?.toLocaleString()}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(Math.abs(psp.total_variance) < 1 ? 'matched' : 'discrepancy')}</TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="sm" onClick={() => { setSelectedPsp(psp); fetchPspDetails(psp.psp_id); }}>
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Clients Tab */}
-        <TabsContent value="clients" className="mt-4">
-          <Card className="bg-white border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                <Users className="w-5 h-5 text-[#66FCF1]" />
-                Client Reconciliation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-slate-200">
-                      <TableHead className="text-slate-500 text-xs">Client</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Calculated</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Recorded</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Variance</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Status</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {clientRecon.map((client) => (
-                      <TableRow key={client.client_id} className="border-slate-200 hover:bg-slate-50">
-                        <TableCell className="text-slate-800 font-medium">{client.client_name}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-800">${client.calculated_balance?.toLocaleString()}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-800">${client.recorded_balance?.toLocaleString()}</TableCell>
-                        <TableCell className={`text-right font-mono ${client.variance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${client.variance?.toLocaleString()}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(client.status)}</TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="sm" onClick={() => { setSelectedClient(client); fetchClientDetails(client.client_id); }}>
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Exchangers Tab */}
-        <TabsContent value="exchangers" className="mt-4">
-          <Card className="bg-white border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                <Store className="w-5 h-5 text-[#66FCF1]" />
-                Exchanger Reconciliation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-slate-200">
-                      <TableHead className="text-slate-500 text-xs">Exchanger</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Volume</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Expected Commission</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Paid</TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">Variance</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {vendorRecon.map((vendor) => (
-                      <TableRow key={vendor.vendor_id} className="border-slate-200 hover:bg-slate-50">
-                        <TableCell className="text-slate-800 font-medium">{vendor.vendor_name}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-800">${vendor.total_volume?.toLocaleString()}</TableCell>
-                        <TableCell className="text-right font-mono text-blue-600">${vendor.expected_commission?.toLocaleString()}</TableCell>
-                        <TableCell className="text-right font-mono text-green-600">${vendor.paid_commission?.toLocaleString()}</TableCell>
-                        <TableCell className={`text-right font-mono ${vendor.variance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${vendor.variance?.toLocaleString()}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(vendor.status)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Flagged Tab */}
-        <TabsContent value="flagged" className="mt-4">
-          <Card className="bg-white border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                <Flag className="w-5 h-5 text-red-500" />
-                Flagged Items for Review
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {flaggedItems.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <CheckCircle2 className="w-12 h-12 mx-auto mb-2 text-green-500" />
-                  <p>No flagged items</p>
-                </div>
-              ) : (
-                <ScrollArea className="h-[400px]">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-slate-200">
-                        <TableHead className="text-slate-500 text-xs">Reference</TableHead>
-                        <TableHead className="text-slate-500 text-xs">Type</TableHead>
-                        <TableHead className="text-slate-500 text-xs">Reason</TableHead>
-                        <TableHead className="text-slate-500 text-xs">Flagged By</TableHead>
-                        <TableHead className="text-slate-500 text-xs">Date</TableHead>
-                        <TableHead className="text-slate-500 text-xs">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {flaggedItems.map((item) => (
-                        <TableRow key={item.item_id} className="border-slate-200 hover:bg-slate-50">
-                          <TableCell className="text-slate-800 font-mono text-sm">{item.reference_id}</TableCell>
-                          <TableCell><Badge variant="outline">{item.item_type}</Badge></TableCell>
-                          <TableCell className="text-slate-800 max-w-[200px] truncate">{item.flag_reason}</TableCell>
-                          <TableCell className="text-slate-500 text-sm">{item.flagged_by_name}</TableCell>
-                          <TableCell className="text-slate-500 text-sm">{formatDate(item.flagged_at)}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleQuickReconcile(item)}
-                                className="text-green-600 hover:bg-green-50"
-                                title="Resolve & Reconcile"
-                              >
-                                <Check className="w-4 h-4" />
-                              </Button>
-                              {isAdmin && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => { setSelectedItemForAction(item); setAdjustmentDialogOpen(true); }}
-                                  className="text-blue-600 hover:bg-blue-50"
-                                  title="Create Adjustment"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         {/* History Tab */}
-        <TabsContent value="history" className="mt-4">
-          <Card className="bg-white border-slate-200">
+        <TabsContent value="history">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                <History className="w-5 h-5 text-[#66FCF1]" />
-                Reconciliation Audit Trail
+              <CardTitle className="text-lg flex items-center gap-2">
+                <History className="w-5 h-5" /> Reconciliation History
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px]">
+              <ScrollArea className="h-[500px]">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-slate-200">
-                      <TableHead className="text-slate-500 text-xs">Date/Time</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Action</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Reference</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Type</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Performed By</TableHead>
-                      <TableHead className="text-slate-500 text-xs">Notes</TableHead>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Account</TableHead>
+                      <TableHead className="text-center">Matched</TableHead>
+                      <TableHead className="text-center">Flagged</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>By</TableHead>
+                      <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {history.map((entry) => (
-                      <TableRow key={entry.history_id} className="border-slate-200 hover:bg-slate-50">
-                        <TableCell className="text-slate-800 text-sm">{formatDate(entry.created_at)}</TableCell>
-                        <TableCell>
-                          <Badge className={
-                            entry.action === 'reconciled' ? 'bg-green-500/20 text-green-600' :
-                            entry.action === 'flagged' ? 'bg-red-500/20 text-red-600' :
-                            entry.action === 'adjustment_created' ? 'bg-blue-500/20 text-blue-600' :
-                            'bg-slate-200 text-slate-600'
-                          }>
-                            {entry.action?.replace('_', ' ')}
+                    {reconHistory.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center text-slate-400 py-12">
+                          No reconciliation history yet
+                        </TableCell>
+                      </TableRow>
+                    ) : reconHistory.map(item => (
+                      <TableRow key={item.recon_id}>
+                        <TableCell>{formatDate(item.date)}</TableCell>
+                        <TableCell className="capitalize">{item.account_type}</TableCell>
+                        <TableCell>{getAccountName(item.account_type, item.account_id)}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="bg-green-50 text-green-700">
+                            {item.matched_count || 0}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-slate-500 font-mono text-xs">{entry.reference_id?.substring(0, 20)}</TableCell>
-                        <TableCell><Badge variant="outline" className="text-xs">{entry.item_type}</Badge></TableCell>
-                        <TableCell className="text-slate-800 text-sm">{entry.performed_by_name}</TableCell>
-                        <TableCell className="text-slate-500 text-sm max-w-[200px] truncate">{entry.notes || '-'}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="bg-red-50 text-red-700">
+                            {item.flagged_count || 0}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={
+                            item.status === 'completed' ? 'bg-green-100 text-green-700' :
+                            item.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }>
+                            {item.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-slate-500">{item.created_by_name}</TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setHistoryDialog({ open: true, item })}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -1161,89 +1050,67 @@ export default function Reconciliation() {
       </Tabs>
 
       {/* Flag Dialog */}
-      <Dialog open={flagDialogOpen} onOpenChange={setFlagDialogOpen}>
-        <DialogContent className="bg-white">
+      <Dialog open={flagDialog.open} onOpenChange={(open) => setFlagDialog({ ...flagDialog, open })}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-slate-800">Flag for Review</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Flag className="w-5 h-5" /> Flag Entry
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4">
+            {flagDialog.entry && (
+              <div className="bg-slate-50 rounded-lg p-3">
+                <p className="text-sm"><strong>Date:</strong> {formatDate(flagDialog.entry.date)}</p>
+                <p className="text-sm"><strong>Description:</strong> {flagDialog.entry.description}</p>
+                <p className="text-sm"><strong>Amount:</strong> {formatCurrency(flagDialog.entry.amount)}</p>
+              </div>
+            )}
             <div>
-              <Label className="text-slate-600">Item Reference</Label>
-              <p className="text-slate-800 font-mono text-sm mt-1">{selectedItemForAction?.id}</p>
-            </div>
-            <div>
-              <Label className="text-slate-600">Reason for Flagging *</Label>
+              <Label>Reason for Flagging *</Label>
               <Textarea
-                value={flagReason}
-                onChange={(e) => setFlagReason(e.target.value)}
-                placeholder="Describe why this item needs review..."
-                className="mt-1 border-slate-200"
+                value={flagDialog.reason}
+                onChange={(e) => setFlagDialog({ ...flagDialog, reason: e.target.value })}
+                placeholder="Describe why this entry is being flagged..."
+                className="mt-1"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setFlagDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleFlag} className="bg-red-600 hover:bg-red-700 text-white" disabled={!flagReason}>
-              <Flag className="w-4 h-4 mr-2" /> Flag Item
+            <Button variant="outline" onClick={() => setFlagDialog({ open: false, entry: null, reason: '' })}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleFlag} disabled={!flagDialog.reason}>
+              <Flag className="w-4 h-4 mr-2" /> Flag Entry
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Adjustment Dialog */}
-      <Dialog open={adjustmentDialogOpen} onOpenChange={setAdjustmentDialogOpen}>
-        <DialogContent className="bg-white">
+      {/* History Detail Dialog */}
+      <Dialog open={historyDialog.open} onOpenChange={(open) => setHistoryDialog({ ...historyDialog, open })}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-slate-800">Create Adjustment Entry</DialogTitle>
+            <DialogTitle>Reconciliation Details</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label className="text-slate-600">Item Reference</Label>
-              <p className="text-slate-800 font-mono text-sm mt-1">{selectedItemForAction?.id}</p>
+          {historyDialog.item && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div><strong>Date:</strong> {formatDate(historyDialog.item.date)}</div>
+                <div><strong>Type:</strong> {historyDialog.item.account_type}</div>
+                <div><strong>Account:</strong> {getAccountName(historyDialog.item.account_type, historyDialog.item.account_id)}</div>
+                <div><strong>Status:</strong> {historyDialog.item.status}</div>
+                <div><strong>Matched:</strong> {historyDialog.item.matched_count || 0}</div>
+                <div><strong>Flagged:</strong> {historyDialog.item.flagged_count || 0}</div>
+                <div className="col-span-2"><strong>By:</strong> {historyDialog.item.created_by_name} on {formatDate(historyDialog.item.created_at)}</div>
+              </div>
+              {historyDialog.item.remarks && (
+                <div>
+                  <strong>Remarks:</strong>
+                  <p className="mt-1 text-sm bg-slate-50 p-3 rounded">{historyDialog.item.remarks}</p>
+                </div>
+              )}
             </div>
-            <div>
-              <Label className="text-slate-600">Adjustment Amount *</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={adjustmentData.amount}
-                onChange={(e) => setAdjustmentData({ ...adjustmentData, amount: e.target.value })}
-                placeholder="Enter amount (positive or negative)"
-                className="mt-1 border-slate-200"
-              />
-              <p className="text-xs text-slate-500 mt-1">Use negative for debits, positive for credits</p>
-            </div>
-            <div>
-              <Label className="text-slate-600">Treasury Account (Optional)</Label>
-              <Select value={adjustmentData.treasury_account_id} onValueChange={(v) => setAdjustmentData({ ...adjustmentData, treasury_account_id: v })}>
-                <SelectTrigger className="mt-1 border-slate-200">
-                  <SelectValue placeholder="Select account to adjust..." />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  {treasuryAccounts.map((acc) => (
-                    <SelectItem key={acc.account_id} value={acc.account_id}>
-                      {acc.account_name} ({acc.currency})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-slate-600">Reason *</Label>
-              <Textarea
-                value={adjustmentData.reason}
-                onChange={(e) => setAdjustmentData({ ...adjustmentData, reason: e.target.value })}
-                placeholder="Explain the reason for this adjustment..."
-                className="mt-1 border-slate-200"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAdjustmentDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleCreateAdjustment} className="bg-blue-600 hover:bg-blue-700 text-white" disabled={!adjustmentData.amount || !adjustmentData.reason}>
-              <Plus className="w-4 h-4 mr-2" /> Create Adjustment
-            </Button>
-          </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
     </div>
