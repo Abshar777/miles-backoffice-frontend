@@ -72,6 +72,7 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -93,6 +94,7 @@ export default function Exchangers() {
   const [statementData, setStatementData] = useState(null);
   const [statementOpen, setStatementOpen] = useState(false);
   const [statementLoading, setStatementLoading] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [settlementType, setSettlementType] = useState('bank');
   const [settlementDestination, setSettlementDestination] = useState('');
   const [settlementCommission, setSettlementCommission] = useState('');
@@ -232,11 +234,28 @@ export default function Exchangers() {
     }
   };
 
-  const openExchangerView = (vendor) => {
+  const openExchangerView = async (vendor) => {
     setViewExchanger(vendor);
-    fetchExchangerDetails(vendor.vendor_id);
-    fetchVendorIeEntries(vendor.vendor_id);
-    fetchVendorLoanTransactions(vendor.vendor_id);
+    setDetailLoading(true);
+    setPendingTransactions([]);
+    setSettlements([]);
+    setVendorIeEntries([]);
+    setVendorLoanTxs([]);
+    
+    try {
+      await Promise.all([
+        fetchExchangerDetails(vendor.vendor_id),
+        fetchVendorIeEntries(vendor.vendor_id),
+        fetchVendorLoanTransactions(vendor.vendor_id),
+        fetchExchangerTransactions(vendor.vendor_id),
+        fetchExchangerSettlements(vendor.vendor_id)
+      ]);
+    } catch (error) {
+      console.error('Error loading exchanger data:', error);
+      toast.error('Error loading exchanger data');
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   const openStatement = async (settlementId) => {
@@ -876,10 +895,17 @@ export default function Exchangers() {
             <DialogTitle className="text-2xl font-bold uppercase tracking-tight flex items-center gap-3" style={{ fontFamily: 'Barlow Condensed' }}>
               <Store className="w-6 h-6 text-blue-600" />
               {viewExchanger?.vendor_name}
+              {detailLoading && <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />}
             </DialogTitle>
           </DialogHeader>
           {viewExchanger && (
             <div className="space-y-4">
+              {detailLoading && (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="w-6 h-6 animate-spin text-blue-500 mr-2" />
+                  <span className="text-slate-500">Loading exchanger data...</span>
+                </div>
+              )}
               {/* Exchanger Info */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-sm">
                 <div>
@@ -1047,12 +1073,16 @@ export default function Exchangers() {
                                 </Badge>
                               </TableCell>
                               <TableCell>
-                                {tx.vendor_commission_amount ? (
+                                {tx.vendor_commission_base_amount ? (
+                                  <div className="font-mono text-yellow-400">
+                                    <span>{tx.vendor_commission_base_amount?.toLocaleString()} {tx.vendor_commission_base_currency || tx.base_currency || tx.currency}</span>
+                                    {tx.vendor_commission_amount && (
+                                      <span className="text-slate-500 text-xs block">(${tx.vendor_commission_amount?.toLocaleString()} USD)</span>
+                                    )}
+                                  </div>
+                                ) : tx.vendor_commission_amount ? (
                                   <div className="font-mono text-yellow-400">
                                     <span>${tx.vendor_commission_amount?.toLocaleString()}</span>
-                                    {tx.vendor_commission_base_currency && tx.vendor_commission_base_currency !== 'USD' && tx.vendor_commission_base_amount && (
-                                      <span className="text-slate-500 text-xs block">({tx.vendor_commission_base_amount?.toLocaleString()} {tx.vendor_commission_base_currency})</span>
-                                    )}
                                   </div>
                                 ) : (
                                   <span className="text-slate-500 text-xs">-</span>
@@ -1195,13 +1225,15 @@ export default function Exchangers() {
                                   <Badge className="text-[10px] bg-slate-100 text-slate-600">{entry.currency || 'USD'}</Badge>
                                 </TableCell>
                                 <TableCell>
-                                  {entry.vendor_commission_amount ? (
+                                  {entry.vendor_commission_base_amount ? (
                                     <span className="font-mono text-xs text-yellow-600">
-                                      ${entry.vendor_commission_amount?.toLocaleString()}
-                                      {entry.vendor_commission_base_amount && entry.currency !== 'USD' && (
-                                        <span className="text-slate-400 block text-[10px]">({entry.vendor_commission_base_amount?.toLocaleString()} {entry.currency})</span>
+                                      {entry.vendor_commission_base_amount?.toLocaleString()} {entry.vendor_commission_base_currency || entry.base_currency || entry.currency}
+                                      {entry.vendor_commission_amount && (
+                                        <span className="text-slate-400 block text-[10px]">(${entry.vendor_commission_amount?.toLocaleString()} USD)</span>
                                       )}
                                     </span>
+                                  ) : entry.vendor_commission_amount ? (
+                                    <span className="font-mono text-xs text-yellow-600">${entry.vendor_commission_amount?.toLocaleString()}</span>
                                   ) : <span className="text-slate-400 text-xs">-</span>}
                                 </TableCell>
                                 <TableCell>
