@@ -37,6 +37,14 @@ import { Textarea } from '../components/ui/textarea';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../components/ui/command';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../components/ui/pagination';
 import { toast } from 'sonner';
 import {
   ArrowLeftRight,
@@ -58,6 +66,8 @@ import {
   Download,
   FileSpreadsheet,
   FileText,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -106,6 +116,7 @@ export default function Transactions() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [isInitialMount, setIsInitialMount] = useState(true);
   
   const [formData, setFormData] = useState({
     client_id: '',
@@ -157,8 +168,10 @@ export default function Transactions() {
       if (searchTerm) params.append('search', searchTerm);
       if (dateFrom) params.append('date_from', dateFrom);
       if (dateTo) params.append('date_to', dateTo);
+      
+      const url = `${API_URL}/api/transactions?${params.toString()}`;
 
-      const response = await fetch(`${API_URL}/api/transactions?${params.toString()}`, { 
+      const response = await fetch(url, { 
         headers: getAuthHeaders(), 
         credentials: 'include' 
       });
@@ -249,13 +262,31 @@ export default function Transactions() {
     }
   };
 
+  // Initial fetch on mount and when page/filters change
   useEffect(() => {
-    fetchTransactions();
+    fetchTransactions(currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, pageSize]);
+  
+  // Fetch other data only on mount
+  useEffect(() => {
     fetchClients();
     fetchTreasuryAccounts();
     fetchPsps();
     fetchExchangers();
-  }, [typeFilter, statusFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  // Reset to page 1 and refetch when filters change (not on initial mount)
+  useEffect(() => {
+    if (isInitialMount) {
+      setIsInitialMount(false);
+      return;
+    }
+    setCurrentPage(1);
+    fetchTransactions(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typeFilter, statusFilter, searchTerm, dateFrom, dateTo]);
 
   // Auto-refresh: when user returns to tab or every 30s
   useAutoRefresh(fetchTransactions, 30000);
@@ -1550,6 +1581,63 @@ export default function Transactions() {
               </TableBody>
             </Table>
           </ScrollArea>
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
+              <div className="text-sm text-slate-500">
+                Showing page {currentPage} of {totalPages} ({totalItems} total transactions)
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                      className={`cursor-pointer ${currentPage === 1 ? 'pointer-events-none opacity-50' : ''}`}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <PaginationItem key={pageNum}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(pageNum)}
+                          isActive={currentPage === pageNum}
+                          className="cursor-pointer"
+                        >
+                          {pageNum}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                      className={`cursor-pointer ${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}`}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+          
+          {/* Single page indicator when no pagination needed */}
+          {totalPages === 1 && totalItems > 0 && (
+            <div className="px-4 py-2 border-t border-slate-200 text-sm text-slate-500">
+              Showing {totalItems} transaction{totalItems !== 1 ? 's' : ''}
+            </div>
+          )}
         </CardContent>
       </Card>
 

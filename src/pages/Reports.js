@@ -82,8 +82,8 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#1E293B]/95 backdrop-blur-md border border-slate-200 rounded-lg p-3">
-        <p className="text-xs text-[#94A3B8] mb-1">{label}</p>
+      <div className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-lg p-3">
+        <p className="text-xs text-slate-500 mb-1">{label}</p>
         {payload.map((entry, index) => (
           <p key={index} className="text-sm font-mono" style={{ color: entry.color }}>
             {entry.name}: {typeof entry.value === 'number' ? `$${entry.value.toLocaleString()}` : entry.value}
@@ -320,13 +320,13 @@ export default function Reports() {
   };
 
   const StatCard = ({ title, value, subtitle, icon: Icon, color = 'blue', trend }) => (
-    <Card className="bg-[#1E293B] border-slate-200">
+    <Card className="bg-white border-slate-200">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs text-[#94A3B8] uppercase tracking-wider mb-1">{title}</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{title}</p>
             <p className="text-2xl font-bold text-slate-800 font-mono">{value}</p>
-            {subtitle && <p className="text-xs text-[#94A3B8] mt-1">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
             {trend !== undefined && (
               <div className={`flex items-center gap-1 mt-2 ${trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -370,13 +370,13 @@ export default function Reports() {
           <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
             Reports & Analytics
           </h1>
-          <p className="text-[#94A3B8]">Comprehensive financial reports with base currency breakdown</p>
+          <p className="text-slate-500">Comprehensive financial reports with base currency breakdown</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             onClick={fetchReports}
             variant="outline"
-            className="border-slate-200 text-[#94A3B8] hover:text-slate-800 hover:bg-slate-100"
+            className="border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100"
             data-testid="refresh-reports-btn"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
@@ -386,26 +386,26 @@ export default function Reports() {
       </div>
 
       {/* Date Filters */}
-      <Card className="bg-[#1E293B] border-slate-200">
+      <Card className="bg-white border-slate-200">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1">
-              <Label className="text-xs text-[#94A3B8] uppercase">From Date</Label>
+              <Label className="text-xs text-slate-500 uppercase">From Date</Label>
               <Input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="w-40 bg-[#0F172A] border-slate-200 text-slate-800"
+                className="w-40 bg-slate-50 border-slate-200 text-slate-800"
                 data-testid="date-from"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs text-[#94A3B8] uppercase">To Date</Label>
+              <Label className="text-xs text-slate-500 uppercase">To Date</Label>
               <Input
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="w-40 bg-[#0F172A] border-slate-200 text-slate-800"
+                className="w-40 bg-slate-50 border-slate-200 text-slate-800"
                 data-testid="date-to"
               />
             </div>
@@ -421,7 +421,7 @@ export default function Reports() {
               <Button
                 onClick={() => { setDateFrom(''); setDateTo(''); }}
                 variant="ghost"
-                className="text-[#94A3B8] hover:text-slate-800"
+                className="text-slate-500 hover:text-slate-800"
               >
                 Clear
               </Button>
@@ -432,7 +432,7 @@ export default function Reports() {
 
       {/* Report Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="bg-[#1E293B] border border-slate-200 flex-wrap h-auto p-1">
+        <TabsList className="bg-white border border-slate-200 flex-wrap h-auto p-1">
           <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
             <ArrowLeftRight className="w-4 h-4 mr-2" />
             Transactions
@@ -510,7 +510,7 @@ export default function Reports() {
               </div>
 
               {/* Chart */}
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-blue-400" />
@@ -544,7 +544,7 @@ export default function Reports() {
 
               {/* Breakdown by Currency */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
                     <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                       <ArrowDownRight className="w-5 h-5 text-emerald-400" />
@@ -553,7 +553,7 @@ export default function Reports() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-[#94A3B8] hover:text-slate-800"
+                      className="text-slate-500 hover:text-slate-800"
                       onClick={() => downloadCSV(transactionReport.deposits_by_currency || [], 'deposits_by_currency', [
                         { key: 'currency', label: 'Currency' },
                         { key: 'amount', label: 'Amount (Base)' },
@@ -569,10 +569,10 @@ export default function Reports() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-slate-200">
-                            <TableHead className="text-[#94A3B8] text-xs">Currency</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Amount</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">USD</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Count</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Currency</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Amount</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">USD</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Count</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -581,7 +581,7 @@ export default function Reports() {
                               <TableCell className="text-slate-800 font-mono">{item.currency}</TableCell>
                               <TableCell className="text-emerald-400 font-mono text-right">{item.amount?.toLocaleString()}</TableCell>
                               <TableCell className="text-slate-800 font-mono text-right">${item.usd_equivalent?.toLocaleString()}</TableCell>
-                              <TableCell className="text-[#94A3B8] text-right">{item.count}</TableCell>
+                              <TableCell className="text-slate-500 text-right">{item.count}</TableCell>
                             </TableRow>
                           ))}
                           {/* Total Row */}
@@ -598,7 +598,7 @@ export default function Reports() {
                             </TableRow>
                           )}
                           {(!transactionReport.deposits_by_currency || transactionReport.deposits_by_currency.length === 0) && (
-                            <TableRow><TableCell colSpan={4} className="text-center text-[#94A3B8]">No data</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={4} className="text-center text-slate-500">No data</TableCell></TableRow>
                           )}
                         </TableBody>
                       </Table>
@@ -606,7 +606,7 @@ export default function Reports() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
                     <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                       <ArrowUpRight className="w-5 h-5 text-red-400" />
@@ -615,7 +615,7 @@ export default function Reports() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-[#94A3B8] hover:text-slate-800"
+                      className="text-slate-500 hover:text-slate-800"
                       onClick={() => downloadCSV(transactionReport.withdrawals_by_currency || [], 'withdrawals_by_currency', [
                         { key: 'currency', label: 'Currency' },
                         { key: 'amount', label: 'Amount (Base)' },
@@ -631,10 +631,10 @@ export default function Reports() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-slate-200">
-                            <TableHead className="text-[#94A3B8] text-xs">Currency</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Amount</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">USD</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Count</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Currency</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Amount</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">USD</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Count</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -643,7 +643,7 @@ export default function Reports() {
                               <TableCell className="text-slate-800 font-mono">{item.currency}</TableCell>
                               <TableCell className="text-red-400 font-mono text-right">{item.amount?.toLocaleString()}</TableCell>
                               <TableCell className="text-slate-800 font-mono text-right">${item.usd_equivalent?.toLocaleString()}</TableCell>
-                              <TableCell className="text-[#94A3B8] text-right">{item.count}</TableCell>
+                              <TableCell className="text-slate-500 text-right">{item.count}</TableCell>
                             </TableRow>
                           ))}
                           {/* Total Row */}
@@ -660,7 +660,7 @@ export default function Reports() {
                             </TableRow>
                           )}
                           {(!transactionReport.withdrawals_by_currency || transactionReport.withdrawals_by_currency.length === 0) && (
-                            <TableRow><TableCell colSpan={4} className="text-center text-[#94A3B8]">No data</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={4} className="text-center text-slate-500">No data</TableCell></TableRow>
                           )}
                         </TableBody>
                       </Table>
@@ -795,13 +795,13 @@ export default function Reports() {
                 />
               </div>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
                   <CardTitle className="text-lg font-semibold text-slate-800">Exchanger Settlement Summary</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#94A3B8] hover:text-slate-800"
+                    className="text-slate-500 hover:text-slate-800"
                     onClick={() => downloadCSV((vendorReport.vendors || []).map(v => ({
                       vendor_name: v.vendor_name,
                       deposits_usd: v.totals?.deposits_usd,
@@ -825,12 +825,12 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">Exchanger</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Deposits</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Withdrawals</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Commission</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Net Settlement</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Currencies</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Exchanger</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Deposits</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Withdrawals</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Commission</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Net Settlement</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Currencies</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -839,7 +839,7 @@ export default function Reports() {
                             <TableCell>
                               <div>
                                 <p className="text-slate-800 font-medium">{vendor.vendor_name}</p>
-                                <p className="text-xs text-[#94A3B8]">In: {vendor.deposit_commission_rate}% / Out: {vendor.withdrawal_commission_rate}%</p>
+                                <p className="text-xs text-slate-500">In: {vendor.deposit_commission_rate}% / Out: {vendor.withdrawal_commission_rate}%</p>
                               </div>
                             </TableCell>
                             <TableCell className="text-emerald-400 font-mono text-right">${(vendor.totals?.deposits_usd || 0).toLocaleString()}</TableCell>
@@ -851,7 +851,7 @@ export default function Reports() {
                             <TableCell>
                               <div className="flex flex-wrap gap-1">
                                 {Object.keys(vendor.currencies || {}).map(curr => (
-                                  <Badge key={curr} variant="outline" className="text-xs border-white/20 text-[#94A3B8]">{curr}</Badge>
+                                  <Badge key={curr} variant="outline" className="text-xs border-white/20 text-slate-500">{curr}</Badge>
                                 ))}
                               </div>
                             </TableCell>
@@ -877,7 +877,7 @@ export default function Reports() {
                           </TableRow>
                         )}
                         {(!vendorReport.vendors || vendorReport.vendors.length === 0) && (
-                          <TableRow><TableCell colSpan={6} className="text-center text-[#94A3B8] py-8">No vendor data</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={6} className="text-center text-slate-500 py-8">No vendor data</TableCell></TableRow>
                         )}
                       </TableBody>
                     </Table>
@@ -913,13 +913,13 @@ export default function Reports() {
                 />
               </div>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
                   <CardTitle className="text-lg font-semibold text-slate-800">Commission by Exchanger</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#94A3B8] hover:text-slate-800"
+                    className="text-slate-500 hover:text-slate-800"
                     onClick={() => downloadCSV(commissionReport.vendors || [], 'vendor_commissions', [
                       { key: 'vendor_name', label: 'Exchanger' },
                       { key: 'total_commission_usd', label: 'Total Commission (USD)' },
@@ -937,11 +937,11 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">Exchanger</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Total Commission</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">From Deposits</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">From Withdrawals</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Transactions</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Exchanger</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Total Commission</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">From Deposits</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">From Withdrawals</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Transactions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -951,11 +951,11 @@ export default function Reports() {
                             <TableCell className="text-amber-400 font-mono text-right font-bold">${(v.total_commission_usd || 0).toLocaleString()}</TableCell>
                             <TableCell className="text-emerald-400 font-mono text-right">${(v.deposit_commissions || 0).toLocaleString()}</TableCell>
                             <TableCell className="text-red-400 font-mono text-right">${(v.withdrawal_commissions || 0).toLocaleString()}</TableCell>
-                            <TableCell className="text-[#94A3B8] text-right">{v.transaction_count}</TableCell>
+                            <TableCell className="text-slate-500 text-right">{v.transaction_count}</TableCell>
                           </TableRow>
                         ))}
                         {(!commissionReport.vendors || commissionReport.vendors.length === 0) && (
-                          <TableRow><TableCell colSpan={5} className="text-center text-[#94A3B8] py-8">No commission data</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={5} className="text-center text-slate-500 py-8">No commission data</TableCell></TableRow>
                         )}
                       </TableBody>
                     </Table>
@@ -964,7 +964,7 @@ export default function Reports() {
               </Card>
 
               {/* Commission by Currency */}
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-semibold text-slate-800">Commission by Currency (All Exchangers)</CardTitle>
                 </CardHeader>
@@ -986,10 +986,10 @@ export default function Reports() {
                       }
                       return acc;
                     }, []).map((item, i) => (
-                      <div key={i} className="p-3 bg-[#0F172A] rounded-lg border border-slate-200">
-                        <p className="text-xs text-[#94A3B8] uppercase mb-1">{item.currency}</p>
+                      <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <p className="text-xs text-slate-500 uppercase mb-1">{item.currency}</p>
                         <p className="text-lg font-mono text-amber-400">{item.base?.toLocaleString()}</p>
-                        <p className="text-xs text-[#94A3B8]">≈ ${item.usd?.toLocaleString()} USD</p>
+                        <p className="text-xs text-slate-500">≈ ${item.usd?.toLocaleString()} USD</p>
                       </div>
                     ))}
                   </div>
@@ -1031,13 +1031,13 @@ export default function Reports() {
                 />
               </div>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
                   <CardTitle className="text-lg font-semibold text-slate-800">Client Balance Report</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#94A3B8] hover:text-slate-800"
+                    className="text-slate-500 hover:text-slate-800"
                     onClick={() => downloadCSV(clientReport.clients || [], 'client_balances', [
                       { key: 'client_id', label: 'Client ID' },
                       { key: 'name', label: 'Name' },
@@ -1058,12 +1058,12 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">Client</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Country</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Deposits</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Withdrawals</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Net Balance</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Txns</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Client</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Country</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Deposits</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Withdrawals</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Net Balance</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Txns</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1072,20 +1072,20 @@ export default function Reports() {
                             <TableCell>
                               <div>
                                 <p className="text-slate-800 font-medium">{client.name || 'Unknown'}</p>
-                                <p className="text-xs text-[#94A3B8] font-mono">{client.email}</p>
+                                <p className="text-xs text-slate-500 font-mono">{client.email}</p>
                               </div>
                             </TableCell>
-                            <TableCell className="text-[#94A3B8]">{client.country || '-'}</TableCell>
+                            <TableCell className="text-slate-500">{client.country || '-'}</TableCell>
                             <TableCell className="text-emerald-400 font-mono text-right">${(client.total_deposits_usd || 0).toLocaleString()}</TableCell>
                             <TableCell className="text-red-400 font-mono text-right">${(client.total_withdrawals_usd || 0).toLocaleString()}</TableCell>
                             <TableCell className={`font-mono text-right font-bold ${(client.net_balance || 0) >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
                               ${(client.net_balance || 0).toLocaleString()}
                             </TableCell>
-                            <TableCell className="text-[#94A3B8] text-right">{client.transaction_count || 0}</TableCell>
+                            <TableCell className="text-slate-500 text-right">{client.transaction_count || 0}</TableCell>
                           </TableRow>
                         ))}
                         {(!clientReport.clients || clientReport.clients.length === 0) && (
-                          <TableRow><TableCell colSpan={6} className="text-center text-[#94A3B8] py-8">No client data</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={6} className="text-center text-slate-500 py-8">No client data</TableCell></TableRow>
                         )}
                       </TableBody>
                     </Table>
@@ -1122,30 +1122,30 @@ export default function Reports() {
               </div>
 
               {/* Balance by Currency */}
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-semibold text-slate-800">Balance by Currency</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {(treasuryReport.balance_by_currency || []).map((item, i) => (
-                      <div key={i} className="p-3 bg-[#0F172A] rounded-lg border border-slate-200">
-                        <p className="text-xs text-[#94A3B8] uppercase mb-1">{item.currency}</p>
+                      <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <p className="text-xs text-slate-500 uppercase mb-1">{item.currency}</p>
                         <p className="text-lg font-mono text-slate-800">{item.total?.toLocaleString()}</p>
-                        <p className="text-xs text-[#94A3B8]">{item.account_count} accounts</p>
+                        <p className="text-xs text-slate-500">{item.account_count} accounts</p>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
                   <CardTitle className="text-lg font-semibold text-slate-800">Treasury Accounts</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#94A3B8] hover:text-slate-800"
+                    className="text-slate-500 hover:text-slate-800"
                     onClick={() => downloadCSV(treasuryReport.accounts || [], 'treasury_accounts', [
                       { key: 'account_name', label: 'Account Name' },
                       { key: 'account_type', label: 'Type' },
@@ -1165,12 +1165,12 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">Account</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Type</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Currency</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Balance</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">USD Equiv.</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Status</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Account</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Type</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Currency</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Balance</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">USD Equiv.</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Status</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1179,10 +1179,10 @@ export default function Reports() {
                             <TableCell>
                               <div>
                                 <p className="text-slate-800 font-medium">{acc.account_name}</p>
-                                <p className="text-xs text-[#94A3B8]">{acc.bank_name || '-'}</p>
+                                <p className="text-xs text-slate-500">{acc.bank_name || '-'}</p>
                               </div>
                             </TableCell>
-                            <TableCell className="text-[#94A3B8] capitalize">{acc.account_type?.replace('_', ' ')}</TableCell>
+                            <TableCell className="text-slate-500 capitalize">{acc.account_type?.replace('_', ' ')}</TableCell>
                             <TableCell className="text-slate-800 font-mono">{acc.currency}</TableCell>
                             <TableCell className="text-slate-800 font-mono text-right">{acc.balance?.toLocaleString()}</TableCell>
                             <TableCell className="text-blue-400 font-mono text-right">${acc.balance_usd?.toLocaleString()}</TableCell>
@@ -1246,13 +1246,13 @@ export default function Reports() {
                 />
               </div>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
                   <CardTitle className="text-lg font-semibold text-slate-800">PSP Summary</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#94A3B8] hover:text-slate-800"
+                    className="text-slate-500 hover:text-slate-800"
                     onClick={() => downloadCSV(pspReport.psps || [], 'psp_summary', [
                       { key: 'psp_name', label: 'PSP Name' },
                       { key: 'commission_rate', label: 'Commission Rate (%)' },
@@ -1272,29 +1272,29 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">PSP</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Rate</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Volume</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Commission</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Net</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Settled</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Pending</TableHead>
+                          <TableHead className="text-slate-500 text-xs">PSP</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Rate</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Volume</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Commission</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Net</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Settled</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Pending</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {(pspReport.psps || []).map((psp, i) => (
                           <TableRow key={i} className="border-slate-200">
                             <TableCell className="text-slate-800 font-medium">{psp.psp_name}</TableCell>
-                            <TableCell className="text-[#94A3B8] text-right">{psp.commission_rate}%</TableCell>
+                            <TableCell className="text-slate-500 text-right">{psp.commission_rate}%</TableCell>
                             <TableCell className="text-slate-800 font-mono text-right">${(psp.total_volume || 0).toLocaleString()}</TableCell>
                             <TableCell className="text-amber-400 font-mono text-right">${(psp.total_commission || 0).toLocaleString()}</TableCell>
                             <TableCell className="text-emerald-400 font-mono text-right">${(psp.total_net || 0).toLocaleString()}</TableCell>
-                            <TableCell className="text-[#94A3B8] text-right">{psp.settled_count || 0}</TableCell>
+                            <TableCell className="text-slate-500 text-right">{psp.settled_count || 0}</TableCell>
                             <TableCell className="text-amber-400 text-right">{psp.pending_count || 0}</TableCell>
                           </TableRow>
                         ))}
                         {(!pspReport.psps || pspReport.psps.length === 0) && (
-                          <TableRow><TableCell colSpan={7} className="text-center text-[#94A3B8] py-8">No PSP data</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={7} className="text-center text-slate-500 py-8">No PSP data</TableCell></TableRow>
                         )}
                       </TableBody>
                     </Table>
@@ -1340,7 +1340,7 @@ export default function Reports() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Income by Category */}
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                       <TrendingUp className="w-5 h-5 text-emerald-400" />
@@ -1372,14 +1372,14 @@ export default function Reports() {
                           </RechartsPieChart>
                         </ResponsiveContainer>
                       ) : (
-                        <div className="flex items-center justify-center h-full text-[#94A3B8]">No income data</div>
+                        <div className="flex items-center justify-center h-full text-slate-500">No income data</div>
                       )}
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Expenses by Category */}
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                       <TrendingDown className="w-5 h-5 text-red-400" />
@@ -1411,7 +1411,7 @@ export default function Reports() {
                           </RechartsPieChart>
                         </ResponsiveContainer>
                       ) : (
-                        <div className="flex items-center justify-center h-full text-[#94A3B8]">No expense data</div>
+                        <div className="flex items-center justify-center h-full text-slate-500">No expense data</div>
                       )}
                     </div>
                   </CardContent>
@@ -1420,7 +1420,7 @@ export default function Reports() {
 
               {/* Loans & Exchanger Commission Summary */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                       <Banknote className="w-5 h-5 text-purple-400" />
@@ -1429,27 +1429,27 @@ export default function Reports() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Disbursed</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Disbursed</span>
                         <span className="text-slate-800 font-mono">${(financialReport.loans?.total_disbursed || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Outstanding Balance</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Outstanding Balance</span>
                         <span className="text-amber-400 font-mono">${(financialReport.loans?.total_outstanding || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Repaid</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Repaid</span>
                         <span className="text-emerald-400 font-mono">${(financialReport.loans?.total_repaid || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Active Loans</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Active Loans</span>
                         <span className="text-slate-800 font-mono">{financialReport.loans?.active_loans || 0}</span>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                       <Percent className="w-5 h-5 text-amber-400" />
@@ -1458,13 +1458,13 @@ export default function Reports() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Commission Paid</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Commission Paid</span>
                         <span className="text-amber-400 font-mono font-bold">${(financialReport.vendor_commissions?.total_paid || 0).toLocaleString()}</span>
                       </div>
-                      <div className="p-3 bg-[#0F172A] rounded-lg">
-                        <p className="text-xs text-[#94A3B8] mb-2">This represents the total vendor commission deducted from settlements.</p>
-                        <p className="text-xs text-[#94A3B8]">Formula: Net Settlement = Deposits - Withdrawals - Commission</p>
+                      <div className="p-3 bg-slate-50 rounded-lg">
+                        <p className="text-xs text-slate-500 mb-2">This represents the total vendor commission deducted from settlements.</p>
+                        <p className="text-xs text-slate-500">Formula: Net Settlement = Deposits - Withdrawals - Commission</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1598,7 +1598,7 @@ export default function Reports() {
 
               {/* Aging Summary */}
               {outstandingReport.aging && (
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                       <Clock className="w-5 h-5 text-amber-400" />
@@ -1607,24 +1607,24 @@ export default function Reports() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-5 gap-4">
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">Current</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">Current</p>
                         <p className="text-2xl font-mono text-emerald-400 font-bold">${(outstandingReport.aging.current || 0).toLocaleString()}</p>
                       </div>
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">1-30 Days</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">1-30 Days</p>
                         <p className="text-2xl font-mono text-amber-400 font-bold">${(outstandingReport.aging.days_1_30 || 0).toLocaleString()}</p>
                       </div>
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">31-60 Days</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">31-60 Days</p>
                         <p className="text-2xl font-mono text-orange-400 font-bold">${(outstandingReport.aging.days_31_60 || 0).toLocaleString()}</p>
                       </div>
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">61-90 Days</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">61-90 Days</p>
                         <p className="text-2xl font-mono text-red-400 font-bold">${(outstandingReport.aging.days_61_90 || 0).toLocaleString()}</p>
                       </div>
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">90+ Days</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">90+ Days</p>
                         <p className="text-2xl font-mono text-red-500 font-bold">${(outstandingReport.aging.days_over_90 || 0).toLocaleString()}</p>
                       </div>
                     </div>
@@ -1635,7 +1635,7 @@ export default function Reports() {
               {/* Receivables & Payables Breakdown */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Receivables Details */}
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
                     <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                       <ArrowDownRight className="w-5 h-5 text-emerald-400" />
@@ -1644,7 +1644,7 @@ export default function Reports() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-[#94A3B8] hover:text-slate-800"
+                      className="text-slate-500 hover:text-slate-800"
                       onClick={() => downloadCSV(
                         debtsData.filter(d => d.debt_type === 'receivable').map(d => ({
                           party_name: d.party_name,
@@ -1675,16 +1675,16 @@ export default function Reports() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3 mb-4">
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Amount</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Amount</span>
                         <span className="text-slate-800 font-mono">${(outstandingReport.receivables?.total_amount || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Collected</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Collected</span>
                         <span className="text-emerald-400 font-mono">${(outstandingReport.receivables?.total_paid || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Outstanding</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Outstanding</span>
                         <span className="text-slate-800 font-mono font-bold">${(outstandingReport.receivables?.outstanding || 0).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-amber-500/10 rounded-lg">
@@ -1700,9 +1700,9 @@ export default function Reports() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-slate-200">
-                            <TableHead className="text-[#94A3B8] text-xs">Party</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Outstanding</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs">Status</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Party</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Outstanding</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Status</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -1725,7 +1725,7 @@ export default function Reports() {
                             </TableRow>
                           ))}
                           {debtsData.filter(d => d.debt_type === 'receivable').length === 0 && (
-                            <TableRow><TableCell colSpan={3} className="text-center text-[#94A3B8]">No receivables</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={3} className="text-center text-slate-500">No receivables</TableCell></TableRow>
                           )}
                         </TableBody>
                       </Table>
@@ -1734,7 +1734,7 @@ export default function Reports() {
                 </Card>
 
                 {/* Payables Details */}
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
                     <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                       <ArrowUpRight className="w-5 h-5 text-red-400" />
@@ -1743,7 +1743,7 @@ export default function Reports() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-[#94A3B8] hover:text-slate-800"
+                      className="text-slate-500 hover:text-slate-800"
                       onClick={() => downloadCSV(
                         debtsData.filter(d => d.debt_type === 'payable').map(d => ({
                           party_name: d.party_name,
@@ -1774,16 +1774,16 @@ export default function Reports() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3 mb-4">
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Amount</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Amount</span>
                         <span className="text-slate-800 font-mono">${(outstandingReport.payables?.total_amount || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Paid</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Paid</span>
                         <span className="text-emerald-400 font-mono">${(outstandingReport.payables?.total_paid || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Outstanding</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Outstanding</span>
                         <span className="text-slate-800 font-mono font-bold">${(outstandingReport.payables?.outstanding || 0).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-amber-500/10 rounded-lg">
@@ -1799,9 +1799,9 @@ export default function Reports() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-slate-200">
-                            <TableHead className="text-[#94A3B8] text-xs">Party</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Outstanding</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs">Status</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Party</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Outstanding</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Status</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -1824,7 +1824,7 @@ export default function Reports() {
                             </TableRow>
                           ))}
                           {debtsData.filter(d => d.debt_type === 'payable').length === 0 && (
-                            <TableRow><TableCell colSpan={3} className="text-center text-[#94A3B8]">No payables</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={3} className="text-center text-slate-500">No payables</TableCell></TableRow>
                           )}
                         </TableBody>
                       </Table>
