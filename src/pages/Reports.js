@@ -247,9 +247,9 @@ export default function Reports() {
         loansData: `${API_URL}/api/loans`,
         dealingPnL: `${API_URL}/api/dealing-pnl?limit=30`,
         dealingPnLSummary: `${API_URL}/api/dealing-pnl/summary?days=30`,
-        // Detailed data endpoints
-        allTransactions: `${API_URL}/api/transactions${queryStr ? `?${queryStr}` : ''}`,
-        allIE: `${API_URL}/api/income-expenses?limit=500`,
+        // Detailed data endpoints - use large page_size for reports
+        allTransactions: `${API_URL}/api/transactions?page_size=500${queryStr ? `&${queryStr}` : ''}`,
+        allIE: `${API_URL}/api/income-expenses?page_size=500`,
         allTreasuryTx: `${API_URL}/api/treasury/transactions?limit=500`,
       };
 
@@ -287,12 +287,34 @@ export default function Reports() {
       if (loansDataRes.ok) setLoansData(await loansDataRes.json());
       if (dealingRes.ok) setDealingPnLReport(await dealingRes.json());
       if (dealingSummaryRes.ok) setDealingPnLSummary(await dealingSummaryRes.json());
-      // Detailed data
-      if (allTxRes.ok) setAllTransactions(await allTxRes.json());
-      if (allIERes.ok) setAllIncomeExpenses(await allIERes.json());
+      // Detailed data - handle both paginated and array responses with error safety
+      if (allTxRes.ok) {
+        try {
+          const txData = await allTxRes.json();
+          setAllTransactions(Array.isArray(txData) ? txData : txData.items || []);
+        } catch (e) {
+          console.error('Error parsing transactions:', e);
+          setAllTransactions([]);
+        }
+      }
+      if (allIERes.ok) {
+        try {
+          const ieData = await allIERes.json();
+          // Handle both paginated and array responses
+          setAllIncomeExpenses(Array.isArray(ieData) ? ieData : ieData.items || []);
+        } catch (e) {
+          console.error('Error parsing income/expenses:', e);
+          setAllIncomeExpenses([]);
+        }
+      }
       if (allTreasuryTxRes.ok) {
-        const txData = await allTreasuryTxRes.json();
-        setAllTreasuryTransactions(Array.isArray(txData) ? txData : txData.transactions || []);
+        try {
+          const txData = await allTreasuryTxRes.json();
+          setAllTreasuryTransactions(Array.isArray(txData) ? txData : txData.transactions || []);
+        } catch (e) {
+          console.error('Error parsing treasury transactions:', e);
+          setAllTreasuryTransactions([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching reports:', error);
