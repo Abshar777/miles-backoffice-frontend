@@ -91,6 +91,34 @@ function BigCalendarView({ selectedDate, onSelectDate, datesWithTx, reconStatus,
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
   
+  // Get status by type for a specific date
+  const getStatusByType = (date) => {
+    if (!date) return null;
+    const dateStr = date.toISOString().split('T')[0];
+    const statusData = reconStatus[dateStr];
+    
+    // If it's the new detailed format with type breakdown
+    if (statusData && typeof statusData === 'object' && statusData.byType) {
+      return statusData.byType;
+    }
+    
+    // Legacy format - return null to show generic status
+    return null;
+  };
+  
+  // Type icons and colors
+  const typeConfig = {
+    treasury: { icon: Building2, label: 'Treasury', color: 'blue' },
+    psp: { icon: CreditCard, label: 'PSP', color: 'purple' },
+    exchanger: { icon: Store, label: 'Exchanger', color: 'orange' }
+  };
+  
+  const statusColors = {
+    completed: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle2 },
+    pending: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: Clock },
+    flagged: { bg: 'bg-red-100', text: 'text-red-700', icon: AlertTriangle }
+  };
+  
   const days = getDaysInMonth(currentMonth);
   
   return (
@@ -186,6 +214,7 @@ function BigCalendarView({ selectedDate, onSelectDate, datesWithTx, reconStatus,
           <div className="grid grid-cols-7">
             {days.map((date, index) => {
               const status = getDateStatus(date);
+              const statusByType = getStatusByType(date);
               const hasTx = hasTransactions(date);
               const today = isToday(date);
               const selected = isSelected(date);
@@ -212,31 +241,70 @@ function BigCalendarView({ selectedDate, onSelectDate, datesWithTx, reconStatus,
                         {date.getDate()}
                       </div>
                       
-                      {/* Status Indicators */}
+                      {/* Status Indicators by Type */}
                       <div className="mt-1 space-y-1">
-                        {status === 'completed' && (
-                          <div className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span>Done</span>
-                          </div>
-                        )}
-                        {status === 'pending' && (
-                          <div className="flex items-center gap-1 text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                            <Clock className="w-3 h-3" />
-                            <span>Pending</span>
-                          </div>
-                        )}
-                        {status === 'flagged' && (
-                          <div className="flex items-center gap-1 text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
-                            <AlertTriangle className="w-3 h-3" />
-                            <span>Flagged</span>
-                          </div>
-                        )}
-                        {hasTx && !status && (
-                          <div className="flex items-center gap-1 text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">
-                            <CalendarDays className="w-3 h-3" />
-                            <span>Transactions</span>
-                          </div>
+                        {statusByType ? (
+                          // Show status breakdown by type
+                          <>
+                            {statusByType.treasury && (
+                              <div className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded ${
+                                statusByType.treasury === 'completed' ? 'bg-green-100 text-green-700' :
+                                statusByType.treasury === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                <Building2 className="w-3 h-3" />
+                                <span className="truncate">Treasury</span>
+                              </div>
+                            )}
+                            {statusByType.psp && (
+                              <div className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded ${
+                                statusByType.psp === 'completed' ? 'bg-green-100 text-green-700' :
+                                statusByType.psp === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                <CreditCard className="w-3 h-3" />
+                                <span className="truncate">PSP</span>
+                              </div>
+                            )}
+                            {statusByType.exchanger && (
+                              <div className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded ${
+                                statusByType.exchanger === 'completed' ? 'bg-green-100 text-green-700' :
+                                statusByType.exchanger === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                <Store className="w-3 h-3" />
+                                <span className="truncate">Exchanger</span>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          // Fallback to legacy status display
+                          <>
+                            {status === 'completed' && (
+                              <div className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span>Done</span>
+                              </div>
+                            )}
+                            {status === 'pending' && (
+                              <div className="flex items-center gap-1 text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
+                                <Clock className="w-3 h-3" />
+                                <span>Pending</span>
+                              </div>
+                            )}
+                            {status === 'flagged' && (
+                              <div className="flex items-center gap-1 text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                                <AlertTriangle className="w-3 h-3" />
+                                <span>Flagged</span>
+                              </div>
+                            )}
+                            {hasTx && !status && (
+                              <div className="flex items-center gap-1 text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">
+                                <CalendarDays className="w-3 h-3" />
+                                <span>Transactions</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </>
@@ -249,7 +317,7 @@ function BigCalendarView({ selectedDate, onSelectDate, datesWithTx, reconStatus,
       </Card>
       
       {/* Legend */}
-      <div className="flex flex-wrap gap-6 justify-center text-sm">
+      <div className="flex flex-wrap gap-4 justify-center text-sm">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs">15</div>
           <span className="text-slate-600">Today</span>
@@ -258,23 +326,35 @@ function BigCalendarView({ selectedDate, onSelectDate, datesWithTx, reconStatus,
           <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold">15</div>
           <span className="text-slate-600">Has Transactions</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3" /> Done
+        <div className="border-l border-slate-300 pl-4 flex items-center gap-4">
+          <span className="text-slate-500 font-medium">Types:</span>
+          <div className="flex items-center gap-1">
+            <Building2 className="w-4 h-4 text-blue-600" />
+            <span className="text-slate-600">Treasury</span>
           </div>
-          <span className="text-slate-600">Reconciled</span>
+          <div className="flex items-center gap-1">
+            <CreditCard className="w-4 h-4 text-purple-600" />
+            <span className="text-slate-600">PSP</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Store className="w-4 h-4 text-orange-600" />
+            <span className="text-slate-600">Exchanger</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs flex items-center gap-1">
-            <Clock className="w-3 h-3" /> Pending
+        <div className="border-l border-slate-300 pl-4 flex items-center gap-4">
+          <span className="text-slate-500 font-medium">Status:</span>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <span className="text-slate-600">Reconciled</span>
           </div>
-          <span className="text-slate-600">In Progress</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs flex items-center gap-1">
-            <AlertTriangle className="w-3 h-3" /> Flagged
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <span className="text-slate-600">Pending</span>
           </div>
-          <span className="text-slate-600">Needs Attention</span>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+            <span className="text-slate-600">Flagged</span>
+          </div>
         </div>
       </div>
     </div>
@@ -320,6 +400,16 @@ export default function Reconciliation() {
   // History
   const [reconHistory, setReconHistory] = useState([]);
   const [historyDialog, setHistoryDialog] = useState({ open: false, item: null });
+  const [historyFilters, setHistoryFilters] = useState({
+    dateFrom: '',
+    dateTo: '',
+    type: 'all',
+    account: 'all',
+    matched: 'all',
+    flagged: 'all',
+    status: 'all'
+  });
+  const [exporting, setExporting] = useState(false);
   
   // Daily summary
   const [dailySummary, setDailySummary] = useState(null);
@@ -334,6 +424,8 @@ export default function Reconciliation() {
         const data = await response.json();
         setDatesWithTx(data.dates || []);
         setReconStatus(data.status || {});
+      } else {
+        console.error('Error fetching dates:', response.status);
       }
     } catch (error) {
       console.error('Error fetching dates:', error);
@@ -345,15 +437,27 @@ export default function Reconciliation() {
     try {
       const [treasuryRes, pspRes, exchangerRes] = await Promise.all([
         fetch(`${API_URL}/api/treasury`, { headers: getAuthHeaders() }),
-        fetch(`${API_URL}/api/psps`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/api/psp`, { headers: getAuthHeaders() }),
         fetch(`${API_URL}/api/vendors?page_size=100`, { headers: getAuthHeaders() })
       ]);
       
-      if (treasuryRes.ok) setTreasuryAccounts(await treasuryRes.json());
-      if (pspRes.ok) setPsps(await pspRes.json());
+      if (treasuryRes.ok) {
+        const data = await treasuryRes.json();
+        setTreasuryAccounts(Array.isArray(data) ? data : []);
+      } else {
+        console.error('Error fetching treasury:', treasuryRes.status);
+      }
+      if (pspRes.ok) {
+        const data = await pspRes.json();
+        setPsps(Array.isArray(data) ? data : []);
+      } else {
+        console.error('Error fetching psps:', pspRes.status);
+      }
       if (exchangerRes.ok) {
         const data = await exchangerRes.json();
-        setExchangers(data.items || data);
+        setExchangers(data.items || data || []);
+      } else {
+        console.error('Error fetching exchangers:', exchangerRes.status);
       }
     } catch (error) {
       console.error('Error fetching accounts:', error);
@@ -401,16 +505,83 @@ export default function Reconciliation() {
   // Fetch reconciliation history
   const fetchReconHistory = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/reconciliation/calendar-history?limit=50`, {
+      // Build query params with filters
+      const params = new URLSearchParams();
+      params.append('limit', '100');
+      
+      if (historyFilters.dateFrom) params.append('date_from', historyFilters.dateFrom);
+      if (historyFilters.dateTo) params.append('date_to', historyFilters.dateTo);
+      if (historyFilters.type !== 'all') params.append('account_type', historyFilters.type);
+      if (historyFilters.account !== 'all') params.append('account_id', historyFilters.account);
+      if (historyFilters.status !== 'all') params.append('status', historyFilters.status);
+      if (historyFilters.matched !== 'all') params.append('has_matched', historyFilters.matched === 'yes' ? 'true' : 'false');
+      if (historyFilters.flagged !== 'all') params.append('has_flagged', historyFilters.flagged === 'yes' ? 'true' : 'false');
+      
+      const response = await fetch(`${API_URL}/api/reconciliation/history?${params.toString()}`, {
         headers: getAuthHeaders()
       });
       if (response.ok) {
-        setReconHistory(await response.json());
+        const data = await response.json();
+        setReconHistory(Array.isArray(data) ? data : []);
+      } else {
+        console.error('Error fetching recon history:', response.status);
       }
     } catch (error) {
       console.error('Error fetching recon history:', error);
     }
-  }, [getAuthHeaders]);
+  }, [getAuthHeaders, historyFilters]);
+
+  // Export history to PDF or Excel
+  const handleExportHistory = async (format) => {
+    setExporting(true);
+    try {
+      const params = new URLSearchParams();
+      params.append('format', format);
+      
+      if (historyFilters.dateFrom) params.append('date_from', historyFilters.dateFrom);
+      if (historyFilters.dateTo) params.append('date_to', historyFilters.dateTo);
+      if (historyFilters.type !== 'all') params.append('account_type', historyFilters.type);
+      if (historyFilters.account !== 'all') params.append('account_id', historyFilters.account);
+      if (historyFilters.status !== 'all') params.append('status', historyFilters.status);
+      
+      const response = await fetch(`${API_URL}/api/reconciliation/history/export?${params.toString()}`, {
+        headers: getAuthHeaders()
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reconciliation_history_${new Date().toISOString().split('T')[0]}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success(`Exported to ${format.toUpperCase()}`);
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || 'Export failed');
+      }
+    } catch (error) {
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // Reset history filters
+  const resetHistoryFilters = () => {
+    setHistoryFilters({
+      dateFrom: '',
+      dateTo: '',
+      type: 'all',
+      account: 'all',
+      matched: 'all',
+      flagged: 'all',
+      status: 'all'
+    });
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -446,6 +617,7 @@ export default function Reconciliation() {
     formData.append('account_type', selectedType);
     formData.append('account_id', selectedAccount);
     formData.append('date', selectedDate.toISOString().split('T')[0]);
+    formData.append('statement_type', 'auto');  // Auto-detect bank or PSP
 
     try {
       const response = await fetch(`${API_URL}/api/reconciliation/upload-statement`, {
@@ -458,7 +630,11 @@ export default function Reconciliation() {
         const data = await response.json();
         setParsedEntries(data.entries || []);
         setShowParsed(true);
-        toast.success(`Parsed ${data.entries?.length || 0} entries from statement`);
+        
+        // Show detected source info (bank or PSP)
+        const sourceName = data.detected_source?.replace(/_/g, ' ').toUpperCase() || 'Unknown';
+        const sourceType = data.source_type === 'psp' ? 'PSP' : 'Bank';
+        toast.success(`Parsed ${data.entries?.length || 0} entries from ${sourceName} ${sourceType} statement`);
       } else {
         const error = await response.json();
         toast.error(error.detail || 'Failed to parse statement');
@@ -576,12 +752,21 @@ export default function Reconciliation() {
     return `${currency} ${(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  // Get selected account currency
+  const getSelectedAccountCurrency = () => {
+    if (selectedType === 'treasury' && selectedAccount) {
+      const account = treasuryAccounts.find(a => a.account_id === selectedAccount);
+      return account?.currency || 'USD';
+    }
+    return 'USD';
+  };
+
   // Get account name by ID
   const getAccountName = (type, id) => {
     if (type === 'treasury') {
       return treasuryAccounts.find(a => a.account_id === id)?.account_name || id;
     } else if (type === 'psp') {
-      return psps.find(p => p.psp_id === id)?.name || id;
+      return psps.find(p => p.psp_id === id)?.psp_name || id;
     } else if (type === 'exchanger') {
       return exchangers.find(e => e.vendor_id === id)?.vendor_name || id;
     }
@@ -719,7 +904,7 @@ export default function Reconciliation() {
                           ))}
                           {selectedType === 'psp' && psps.map(psp => (
                             <SelectItem key={psp.psp_id} value={psp.psp_id}>
-                              {psp.name}
+                              {psp.psp_name}
                             </SelectItem>
                           ))}
                           {selectedType === 'exchanger' && exchangers.map(ex => (
@@ -867,7 +1052,7 @@ export default function Reconciliation() {
                                           {entry.description}
                                         </TableCell>
                                         <TableCell className={`text-right font-medium ${entry.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                          {formatCurrency(entry.amount)}
+                                          {formatCurrency(entry.amount, getSelectedAccountCurrency())}
                                         </TableCell>
                                         <TableCell>
                                           <Button 
@@ -978,13 +1163,155 @@ export default function Reconciliation() {
         {/* History Tab */}
         <TabsContent value="history">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
                 <History className="w-5 h-5" /> Reconciliation History
               </CardTitle>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleExportHistory('xlsx')}
+                  disabled={exporting || reconHistory.length === 0}
+                  data-testid="export-xlsx-btn"
+                >
+                  {exporting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileSpreadsheet className="w-4 h-4 mr-1" />}
+                  Excel
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleExportHistory('pdf')}
+                  disabled={exporting || reconHistory.length === 0}
+                  data-testid="export-pdf-btn"
+                >
+                  {exporting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileText className="w-4 h-4 mr-1" />}
+                  PDF
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[500px]">
+              {/* Filters */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-4 p-4 bg-slate-50 rounded-lg">
+                <div>
+                  <Label className="text-xs text-slate-500">Date From</Label>
+                  <Input
+                    type="date"
+                    value={historyFilters.dateFrom}
+                    onChange={(e) => setHistoryFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
+                    className="h-9"
+                    data-testid="filter-date-from"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-slate-500">Date To</Label>
+                  <Input
+                    type="date"
+                    value={historyFilters.dateTo}
+                    onChange={(e) => setHistoryFilters(prev => ({ ...prev, dateTo: e.target.value }))}
+                    className="h-9"
+                    data-testid="filter-date-to"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-slate-500">Type</Label>
+                  <Select value={historyFilters.type} onValueChange={(v) => setHistoryFilters(prev => ({ ...prev, type: v }))}>
+                    <SelectTrigger className="h-9" data-testid="filter-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="treasury">Treasury</SelectItem>
+                      <SelectItem value="psp">PSP</SelectItem>
+                      <SelectItem value="exchanger">Exchanger</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs text-slate-500">Account</Label>
+                  <Select value={historyFilters.account} onValueChange={(v) => setHistoryFilters(prev => ({ ...prev, account: v }))}>
+                    <SelectTrigger className="h-9" data-testid="filter-account">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Accounts</SelectItem>
+                      {treasuryAccounts.map(acc => (
+                        <SelectItem key={acc.account_id} value={acc.account_id}>{acc.account_name}</SelectItem>
+                      ))}
+                      {psps.map(psp => (
+                        <SelectItem key={psp.psp_id} value={psp.psp_id}>{psp.psp_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs text-slate-500">Matched</Label>
+                  <Select value={historyFilters.matched} onValueChange={(v) => setHistoryFilters(prev => ({ ...prev, matched: v }))}>
+                    <SelectTrigger className="h-9" data-testid="filter-matched">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="yes">Has Matched</SelectItem>
+                      <SelectItem value="no">No Matched</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs text-slate-500">Flagged</Label>
+                  <Select value={historyFilters.flagged} onValueChange={(v) => setHistoryFilters(prev => ({ ...prev, flagged: v }))}>
+                    <SelectTrigger className="h-9" data-testid="filter-flagged">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="yes">Has Flagged</SelectItem>
+                      <SelectItem value="no">No Flagged</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs text-slate-500">Status</Label>
+                  <Select value={historyFilters.status} onValueChange={(v) => setHistoryFilters(prev => ({ ...prev, status: v }))}>
+                    <SelectTrigger className="h-9" data-testid="filter-status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {/* Filter Actions */}
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm text-slate-500">
+                  {reconHistory.length} record(s) found
+                </span>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={resetHistoryFilters}
+                    data-testid="reset-filters-btn"
+                  >
+                    <X className="w-4 h-4 mr-1" /> Reset
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={fetchReconHistory}
+                    data-testid="apply-filters-btn"
+                  >
+                    Apply Filters
+                  </Button>
+                </div>
+              </div>
+              
+              <ScrollArea className="h-[400px]">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1035,6 +1362,7 @@ export default function Reconciliation() {
                             variant="ghost" 
                             size="sm"
                             onClick={() => setHistoryDialog({ open: true, item })}
+                            data-testid={`view-history-${item.recon_id}`}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -1090,27 +1418,67 @@ export default function Reconciliation() {
       <Dialog open={historyDialog.open} onOpenChange={(open) => setHistoryDialog({ ...historyDialog, open })}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Reconciliation Details</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5" /> Reconciliation Details
+            </DialogTitle>
           </DialogHeader>
           {historyDialog.item && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><strong>Date:</strong> {formatDate(historyDialog.item.date)}</div>
-                <div><strong>Type:</strong> {historyDialog.item.account_type}</div>
-                <div><strong>Account:</strong> {getAccountName(historyDialog.item.account_type, historyDialog.item.account_id)}</div>
-                <div><strong>Status:</strong> {historyDialog.item.status}</div>
-                <div><strong>Matched:</strong> {historyDialog.item.matched_count || 0}</div>
-                <div><strong>Flagged:</strong> {historyDialog.item.flagged_count || 0}</div>
-                <div className="col-span-2"><strong>By:</strong> {historyDialog.item.created_by_name} on {formatDate(historyDialog.item.created_at)}</div>
+                <div className="p-3 bg-slate-50 rounded">
+                  <span className="text-slate-500 text-xs">Date</span>
+                  <p className="font-medium">{formatDate(historyDialog.item.date)}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded">
+                  <span className="text-slate-500 text-xs">Type</span>
+                  <p className="font-medium capitalize">{historyDialog.item.account_type}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded">
+                  <span className="text-slate-500 text-xs">Account</span>
+                  <p className="font-medium">{getAccountName(historyDialog.item.account_type, historyDialog.item.account_id)}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded">
+                  <span className="text-slate-500 text-xs">Status</span>
+                  <Badge className={
+                    historyDialog.item.status === 'completed' ? 'bg-green-100 text-green-700' :
+                    historyDialog.item.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }>
+                    {historyDialog.item.status}
+                  </Badge>
+                </div>
+                <div className="p-3 bg-green-50 rounded">
+                  <span className="text-green-600 text-xs">Matched Entries</span>
+                  <p className="font-medium text-green-700 text-lg">{historyDialog.item.matched_count || 0}</p>
+                </div>
+                <div className="p-3 bg-red-50 rounded">
+                  <span className="text-red-600 text-xs">Flagged Entries</span>
+                  <p className="font-medium text-red-700 text-lg">{historyDialog.item.flagged_count || 0}</p>
+                </div>
               </div>
+              
+              <div className="border-t pt-4">
+                <div className="text-sm text-slate-500">
+                  <span className="font-medium">Created by:</span> {historyDialog.item.created_by_name}
+                </div>
+                <div className="text-sm text-slate-500">
+                  <span className="font-medium">Created at:</span> {formatDate(historyDialog.item.created_at)}
+                </div>
+              </div>
+              
               {historyDialog.item.remarks && (
-                <div>
-                  <strong>Remarks:</strong>
-                  <p className="mt-1 text-sm bg-slate-50 p-3 rounded">{historyDialog.item.remarks}</p>
+                <div className="border-t pt-4">
+                  <span className="text-sm font-medium text-slate-600">Remarks:</span>
+                  <p className="mt-2 text-sm bg-slate-50 p-3 rounded">{historyDialog.item.remarks}</p>
                 </div>
               )}
             </div>
           )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setHistoryDialog({ open: false, item: null })}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
