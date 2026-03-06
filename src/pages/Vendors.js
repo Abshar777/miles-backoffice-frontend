@@ -1075,14 +1075,7 @@ export default function Exchangers() {
                               <TableCell>
                                 {tx.vendor_commission_base_amount ? (
                                   <div className="font-mono text-yellow-400">
-                                    <span>{tx.vendor_commission_base_amount?.toLocaleString()} {tx.vendor_commission_base_currency || tx.base_currency || tx.currency}</span>
-                                    {tx.vendor_commission_amount && (
-                                      <span className="text-slate-500 text-xs block">(${tx.vendor_commission_amount?.toLocaleString()} USD)</span>
-                                    )}
-                                  </div>
-                                ) : tx.vendor_commission_amount ? (
-                                  <div className="font-mono text-yellow-400">
-                                    <span>${tx.vendor_commission_amount?.toLocaleString()}</span>
+                                    <span>{tx.vendor_commission_base_amount?.toLocaleString()} {tx.vendor_commission_base_currency || tx.base_currency || 'USD'}</span>
                                   </div>
                                 ) : (
                                   <span className="text-slate-500 text-xs">-</span>
@@ -1228,12 +1221,7 @@ export default function Exchangers() {
                                   {entry.vendor_commission_base_amount ? (
                                     <span className="font-mono text-xs text-yellow-600">
                                       {entry.vendor_commission_base_amount?.toLocaleString()} {entry.vendor_commission_base_currency || entry.base_currency || entry.currency}
-                                      {entry.vendor_commission_amount && (
-                                        <span className="text-slate-400 block text-[10px]">(${entry.vendor_commission_amount?.toLocaleString()} USD)</span>
-                                      )}
                                     </span>
-                                  ) : entry.vendor_commission_amount ? (
-                                    <span className="font-mono text-xs text-yellow-600">${entry.vendor_commission_amount?.toLocaleString()}</span>
                                   ) : <span className="text-slate-400 text-xs">-</span>}
                                 </TableCell>
                                 <TableCell>
