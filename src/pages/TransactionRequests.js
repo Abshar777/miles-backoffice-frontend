@@ -118,7 +118,7 @@ function EditableRequestCard({ req, clients, treasuryAccounts, psps, vendors, au
             <span className="text-xs text-slate-400">{req.base_amount?.toLocaleString()} {req.base_currency}</span>
           )}
           {req.crm_reference && <span className="font-mono text-xs text-purple-600">{req.crm_reference}</span>}
-          <Badge className={isPending ? 'bg-yellow-100/50 text-yellow-700 text-xs' : 'bg-green-100 text-green-700 text-xs'}>
+          <Badge className={isPending ? 'bg-yellow-100 text-yellow-700 text-xs' : 'bg-green-100 text-green-700 text-xs'}>
             {req.status}
           </Badge>
         </div>
@@ -130,7 +130,7 @@ function EditableRequestCard({ req, clients, treasuryAccounts, psps, vendors, au
 
       {/* Expanded form */}
       {expanded && (
-        <CardContent className="pt-0 pb-4 px-4 border-t ">
+        <CardContent className="pt-0 pb-4 px-4 border-t border-slate-100">
           {isPending ? (
             <div className="space-y-4 mt-4">
               {/* Row 1: Type & Client */}
@@ -280,7 +280,7 @@ function EditableRequestCard({ req, clients, treasuryAccounts, psps, vendors, au
               </div>
 
               {/* Action buttons */}
-              <div className="flex gap-2 pt-2 border-t ">
+              <div className="flex gap-2 pt-2 border-t border-slate-100">
                 <Button onClick={handleSave} disabled={saving} className="bg-blue-600 text-white hover:bg-blue-700 flex-1" data-testid={`save-request-${req.request_id}`}>
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   Save Changes
@@ -385,7 +385,7 @@ export default function TransactionRequests() {
     const fetchData = async () => {
       try {
         const [cRes, tRes, pRes, vRes] = await Promise.all([
-          fetch(`${API_URL}/api/clients`, { headers: authHeaders() }),
+          fetch(`${API_URL}/api/clients?page_size=200`, { headers: authHeaders() }),
           fetch(`${API_URL}/api/treasury`, { headers: authHeaders() }),
           fetch(`${API_URL}/api/psp`, { headers: authHeaders() }),
           fetch(`${API_URL}/api/vendors?page_size=100`, { headers: authHeaders() }),
@@ -581,15 +581,15 @@ export default function TransactionRequests() {
 
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-yellow-50/10 "><CardContent className="p-4 flex items-center justify-between">
+        <Card className="bg-yellow-50 border-yellow-200"><CardContent className="p-4 flex items-center justify-between">
           <div><p className="text-xs text-yellow-600 uppercase">Pending</p><p className="text-3xl font-bold text-yellow-700">{requests.filter(r => r.status === 'pending').length}</p></div>
           <Clock className="w-8 h-8 text-yellow-500 opacity-50" />
         </CardContent></Card>
-        <Card className="bg-green-50/10 "><CardContent className="p-4 flex items-center justify-between">
+        <Card className="bg-green-50 border-green-200"><CardContent className="p-4 flex items-center justify-between">
           <div><p className="text-xs text-green-600 uppercase">Processed</p><p className="text-3xl font-bold text-green-700">{requests.filter(r => r.status === 'processed').length}</p></div>
           <CheckCircle className="w-8 h-8 text-green-500 opacity-50" />
         </CardContent></Card>
-        <Card className="bg-blue-50/10 "><CardContent className="p-4 flex items-center justify-between">
+        <Card className="bg-blue-50 border-blue-200"><CardContent className="p-4 flex items-center justify-between">
           <div><p className="text-xs text-blue-600 uppercase">Total</p><p className="text-3xl font-bold text-blue-700">{total}</p></div>
           <FileText className="w-8 h-8 text-blue-500 opacity-50" />
         </CardContent></Card>
