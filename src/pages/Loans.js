@@ -201,8 +201,8 @@ export default function Loans() {
       if (response.ok) {
         const data = await response.json();
         setLoans(Array.isArray(data) ? data : data.items || []);
-        if (data?.total_pages) setTotalPages(data?.total_pages);
-        if (data?.total) setTotalItems(data?.total);
+        if (data.total_pages) setTotalPages(data.total_pages);
+        if (data.total) setTotalItems(data.total);
       }
     } catch (error) {
       console.error("Error fetching loans:", error);
