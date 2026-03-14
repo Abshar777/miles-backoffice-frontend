@@ -224,6 +224,16 @@ function EditableRequestCard({ req, clients, treasuryAccounts, psps, vendors, au
           <Badge className={isPending ? 'bg-yellow-100 text-yellow-700 text-xs' : 'bg-green-100 text-green-700 text-xs'}>
             {req.status}
           </Badge>
+          {req.transaction_status && req.transaction_status !== 'pending' && (
+            <Badge className={
+              req.transaction_status === 'approved' ? 'bg-blue-100 text-blue-700 text-xs' :
+              req.transaction_status === 'rejected' ? 'bg-red-100 text-red-700 text-xs' :
+              req.transaction_status === 'completed' ? 'bg-emerald-100 text-emerald-700 text-xs' :
+              'bg-slate-100 text-slate-600 text-xs'
+            }>
+              {req.transaction_status}
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs text-slate-400">{formatDate(req.transaction_date || req.created_at)}</span>
@@ -454,6 +464,10 @@ export default function TransactionRequests() {
   const [captcha, setCaptcha] = useState({ a: 0, b: 0 });
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [processing, setProcessing] = useState(false);
+  // New request captcha
+  const [createReqCaptcha, setCreateReqCaptcha] = useState({ a: 0, b: 0 });
+  const [createReqCaptchaAnswer, setCreateReqCaptchaAnswer] = useState('');
+  const [showCreateReqCaptcha, setShowCreateReqCaptcha] = useState(false);
 
   // Data
   const [clients, setClients] = useState([]);
@@ -506,8 +520,21 @@ export default function TransactionRequests() {
     fetchData();
   }, [authHeaders]);
 
-  const handleCreate = async () => {
+  const handlePreCreate = () => {
     if (!form.client_id || !form.amount) { toast.error('Client and Amount are required'); return; }
+    const a = Math.floor(Math.random() * 10) + 1;
+    const b = Math.floor(Math.random() * 10) + 1;
+    setCreateReqCaptcha({ a, b });
+    setCreateReqCaptchaAnswer('');
+    setShowCreateReqCaptcha(true);
+  };
+
+  const handleCreate = async () => {
+    if (parseInt(createReqCaptchaAnswer) !== createReqCaptcha.a + createReqCaptcha.b) {
+      toast.error('Incorrect verification answer');
+      return;
+    }
+    setShowCreateReqCaptcha(false);
     setCreating(true);
     try {
       const fd = new FormData();
@@ -721,7 +748,7 @@ export default function TransactionRequests() {
           <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1 block">Status</label>
           <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
             className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md bg-white text-slate-800 h-8" data-testid="filter-status">
-            <option value="all">All</option><option value="pending">Pending</option><option value="processed">Processed</option>
+            <option value="all">All</option><option value="pending">Pending</option><option value="processed">Processed</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
           </select>
         </div>
         <div className="min-w-[110px]">
@@ -902,9 +929,34 @@ export default function TransactionRequests() {
               <Label className="text-xs text-slate-500 uppercase">Proof of Payment</Label>
               <Input type="file" accept="image/*,.pdf" onChange={e => setProofImage(e.target.files[0])} className="bg-slate-50" />
             </div>
-            <Button onClick={handleCreate} disabled={creating} className="w-full bg-blue-600 text-white hover:bg-blue-700">
+            <Button onClick={handlePreCreate} disabled={creating} className="w-full bg-blue-600 text-white hover:bg-blue-700">
               {creating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />} Create Request
             </Button>
+            {showCreateReqCaptcha && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-sm space-y-2 mt-2" data-testid="create-req-captcha">
+                <p className="text-sm text-amber-800 font-medium">Verify to confirm: What is {createReqCaptcha.a} + {createReqCaptcha.b}?</p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={createReqCaptchaAnswer}
+                    onChange={(e) => setCreateReqCaptchaAnswer(e.target.value)}
+                    className="bg-white border-amber-300 w-24 text-center font-mono"
+                    placeholder="?"
+                    autoFocus
+                    data-testid="create-req-captcha-input"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleCreate}
+                    disabled={creating || !createReqCaptchaAnswer}
+                    className="bg-green-600 text-white hover:bg-green-700 font-bold"
+                    data-testid="create-req-captcha-confirm"
+                  >
+                    {creating ? 'Creating...' : 'Confirm'}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
