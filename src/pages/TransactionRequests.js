@@ -481,7 +481,18 @@ export default function TransactionRequests() {
   const [createReqCaptcha, setCreateReqCaptcha] = useState({ a: 0, b: 0 });
   const [createReqCaptchaAnswer, setCreateReqCaptchaAnswer] = useState('');
   const [showCreateReqCaptcha, setShowCreateReqCaptcha] = useState(false);
-
+const [proofPreview, setProofPreview] = useState(null);
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProofImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProofPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   // Data
   const [clients, setClients] = useState([]);
   const [treasuryAccounts, setTreasuryAccounts] = useState([]);
@@ -542,6 +553,9 @@ export default function TransactionRequests() {
     setShowCreateReqCaptcha(true);
   };
 
+
+
+
   const handleCreate = async () => {
     if (parseInt(createReqCaptchaAnswer) !== createReqCaptcha.a + createReqCaptcha.b) {
       toast.error('Incorrect verification answer');
@@ -566,6 +580,7 @@ export default function TransactionRequests() {
         setCreateOpen(false);
         setForm({ ...defaultForm });
         setProofImage(null);
+        setProofPreview(null)
         fetchRequests();
       } else { const e = await res.json(); toast.error(e.detail || 'Failed'); }
     } catch { toast.error('Failed'); }
@@ -949,10 +964,45 @@ export default function TransactionRequests() {
             </div>
             <div><Label className="text-xs text-slate-500 uppercase">Transaction Date</Label><Input type="date" value={form.transaction_date} onChange={e => setForm({ ...form, transaction_date: e.target.value })} className="bg-slate-50" data-testid="txreq-transaction-date" /></div>
             <div><Label className="text-xs text-slate-500 uppercase">Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="bg-slate-50" rows={2} /></div>
-            <div>
-              <Label className="text-xs text-slate-500 uppercase">Proof of Payment</Label>
-              <Input type="file" accept="image/*,.pdf" onChange={e => setProofImage(e.target.files[0])} className="bg-slate-50" />
-            </div>
+            <div className="space-y-2">
+                  <Label className="text-slate-500 text-xs uppercase tracking-wider">
+                    Proof of Payment (Screenshot)
+                  </Label>
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-[#1FA21B]/50 transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      id="proof-upload"
+                      data-testid="proof-upload"
+                    />
+                    <label htmlFor="proof-upload" className="cursor-pointer">
+                      {proofPreview ? (
+                        <div className="space-y-2">
+                          <img
+                            src={proofPreview}
+                            alt="Proof preview"
+                            className="max-h-32 mx-auto rounded"
+                          />
+                          <p className="text-xs text-blue-600">
+                            Click to change
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <Upload className="w-8 h-8 mx-auto text-slate-500" />
+                          <p className="text-sm text-slate-500">
+                            Click to upload proof of payment
+                          </p>
+                          <p className="text-xs text-slate-500/60">
+                            PNG, JPG up to 5MB
+                          </p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
             <Button onClick={handlePreCreate} disabled={creating} className="w-full bg-blue-600 text-white hover:bg-blue-700">
               {creating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />} Create Request
             </Button>
