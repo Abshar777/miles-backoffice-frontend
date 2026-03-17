@@ -270,6 +270,7 @@ export default function Transactions() {
     base_amount: "",
     base_currency: "USD",
     exchange_rate: "",
+    transaction_date: "",
   });
   const [fieldEditSaving, setFieldEditSaving] = useState(false);
   const [proofImage, setProofImage] = useState(null);
@@ -788,6 +789,7 @@ export default function Transactions() {
       base_amount: tx.base_amount?.toString() || "",
       base_currency: tx.base_currency || "USD",
       exchange_rate: tx.exchange_rate?.toString() || "",
+      transaction_date: tx.transaction_date || "",
     });
     setFieldEditTx(tx);
   };
@@ -835,6 +837,10 @@ export default function Transactions() {
         (fieldEditTx.exchange_rate?.toString() || "")
       )
         payload.exchange_rate = parseFloat(fieldEditForm.exchange_rate) || null;
+      if (
+        fieldEditForm.transaction_date !== (fieldEditTx.transaction_date || "")
+      )
+        payload.transaction_date = fieldEditForm.transaction_date;
       if (Object.keys(payload).length === 0) {
         toast.info("No changes");
         setFieldEditTx(null);
@@ -1822,7 +1828,7 @@ export default function Transactions() {
 
                     {/* Cash collecting person details */}
                     {formData.transaction_mode === "cash" && (
-                      <div className="grid grid-cols-2 gap-4 p-3 bg-amber-50/5border border-amber-200 rounded-sm">
+                      <div className="grid grid-cols-2 gap-4 p-3 bg-amber-50 border border-amber-200 rounded-sm">
                         <div className="space-y-1">
                           <Label className="text-amber-700 text-xs uppercase">
                             Collecting Person Name
@@ -2379,7 +2385,7 @@ export default function Transactions() {
                 {/* Captcha Verification */}
                 {showCreateCaptcha && (
                   <div
-                    className="p-3 bg-amber-50/5border border-amber-200 rounded-sm space-y-2"
+                    className="p-3 bg-amber-50 border border-amber-200 rounded-sm space-y-2"
                     data-testid="create-tx-captcha"
                   >
                     <p className="text-sm text-amber-800 font-medium">
@@ -3399,6 +3405,23 @@ export default function Transactions() {
                   className="bg-slate-50 font-mono"
                   placeholder="Reference"
                   data-testid="field-edit-reference"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-slate-500 uppercase">
+                  Transaction Date
+                </Label>
+                <Input
+                  type="date"
+                  value={fieldEditForm.transaction_date}
+                  onChange={(e) =>
+                    setFieldEditForm({
+                      ...fieldEditForm,
+                      transaction_date: e.target.value,
+                    })
+                  }
+                  className="bg-slate-50"
+                  data-testid="field-edit-date"
                 />
               </div>
 
