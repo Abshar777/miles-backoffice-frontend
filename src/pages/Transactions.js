@@ -495,15 +495,11 @@ export default function Transactions() {
     }
   }, [formData.client_id, formData.destination_type]);
 
-  const handleImageChange = (e) => {
+    const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setProofImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProofPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setProofPreview(URL.createObjectURL(file));
     }
   };
 

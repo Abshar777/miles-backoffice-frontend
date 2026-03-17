@@ -482,15 +482,11 @@ export default function TransactionRequests() {
   const [createReqCaptchaAnswer, setCreateReqCaptchaAnswer] = useState('');
   const [showCreateReqCaptcha, setShowCreateReqCaptcha] = useState(false);
 const [proofPreview, setProofPreview] = useState(null);
-  const handleImageChange = (e) => {
+   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setProofImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProofPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setProofPreview(URL.createObjectURL(file));
     }
   };
   // Data
