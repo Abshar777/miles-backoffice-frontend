@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Badge } from '../components/ui/badge';
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Badge } from "../components/ui/badge";
 import {
   Table,
   TableBody,
@@ -11,38 +16,38 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../components/ui/table';
+} from "../components/ui/table";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../components/ui/dialog';
+} from "../components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
+} from "../components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../components/ui/dropdown-menu';
-import { Switch } from '../components/ui/switch';
-import { ScrollArea } from '../components/ui/scroll-area';
+} from "../components/ui/dropdown-menu";
+import { Switch } from "../components/ui/switch";
+import { ScrollArea } from "../components/ui/scroll-area";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '../components/ui/tabs';
-import { toast } from 'sonner';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+} from "../components/ui/tabs";
+import { toast } from "sonner";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import {
   Settings as SettingsIcon,
   Users,
@@ -67,7 +72,7 @@ import {
   Calendar,
   Eye,
   Lock,
-} from 'lucide-react';
+} from "lucide-react";
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -80,29 +85,29 @@ export default function Settings() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    role: 'sub_admin',
-    role_id: '',
+    email: "",
+    password: "",
+    name: "",
+    role: "sub_admin",
+    role_id: "",
     deposit_commission: 0,
     withdrawal_commission: 0,
   });
-  
+
   // Email Settings State
   const [emailSettings, setEmailSettings] = useState({
-    smtp_host: 'smtp.gmail.com',
+    smtp_host: "smtp.gmail.com",
     smtp_port: 587,
-    smtp_email: '',
-    smtp_password: '',
-    smtp_from_email: '',
+    smtp_email: "",
+    smtp_password: "",
+    smtp_from_email: "",
     director_emails: [],
     report_enabled: false,
-    report_time: '03:00',
+    report_time: "03:00",
     monthly_report_enabled: false,
   });
   const [emailLoading, setEmailLoading] = useState(true);
-  const [newDirectorEmail, setNewDirectorEmail] = useState('');
+  const [newDirectorEmail, setNewDirectorEmail] = useState("");
   const [emailLogs, setEmailLogs] = useState([]);
   const [sendingTest, setSendingTest] = useState(false);
   const [sendingReport, setSendingReport] = useState(false);
@@ -114,7 +119,7 @@ export default function Settings() {
   const [fxRatesUpdatedAt, setFxRatesUpdatedAt] = useState(null);
   const [fxRatesUpdatedBy, setFxRatesUpdatedBy] = useState(null);
   const [savingFxRates, setSavingFxRates] = useState(false);
-  const [newFxCurrency, setNewFxCurrency] = useState('');
+  const [newFxCurrency, setNewFxCurrency] = useState("");
 
   // Security Settings State
   const [twofaEnabled, setTwofaEnabled] = useState(false);
@@ -122,23 +127,26 @@ export default function Settings() {
   const [approvalNotifications, setApprovalNotifications] = useState(true);
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem("auth_token");
     return {
-      'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
   };
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/users`, { headers: getAuthHeaders(), credentials: 'include' });
+      const response = await fetch(`${API_URL}/api/users`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
       if (response.ok) {
         setUsers(await response.json());
       } else if (response.status === 403) {
-        toast.error('Admin access required');
+        toast.error("Admin access required");
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
     }
@@ -146,54 +154,63 @@ export default function Settings() {
 
   const fetchRoles = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/roles`, { headers: getAuthHeaders(), credentials: 'include' });
+      const response = await fetch(`${API_URL}/api/roles`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
       if (response.ok) {
         const rolesData = await response.json();
-        setRoles(rolesData.filter(r => r.is_active !== false));
+        setRoles(rolesData.filter((r) => r.is_active !== false));
       }
     } catch (error) {
-      console.error('Error fetching roles:', error);
+      console.error("Error fetching roles:", error);
     }
   };
-  
+
   const fetchEmailSettings = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/settings/email`, { headers: getAuthHeaders(), credentials: 'include' });
+      const response = await fetch(`${API_URL}/api/settings/email`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
       if (response.ok) {
         const data = await response.json();
         setEmailSettings({
-          smtp_host: data.smtp_host || 'smtp.gmail.com',
+          smtp_host: data.smtp_host || "smtp.gmail.com",
           smtp_port: data.smtp_port || 587,
-          smtp_email: data.smtp_email || '',
-          smtp_password: '',
+          smtp_email: data.smtp_email || "",
+          smtp_password: "",
           smtp_password_set: data.smtp_password_set,
-          smtp_from_email: data.smtp_from_email || '',
+          smtp_from_email: data.smtp_from_email || "",
           director_emails: data.director_emails || [],
           report_enabled: data.report_enabled || false,
-          report_time: data.report_time || '03:00',
+          report_time: data.report_time || "03:00",
           monthly_report_enabled: data.monthly_report_enabled || false,
         });
       }
     } catch (error) {
-      console.error('Error fetching email settings:', error);
+      console.error("Error fetching email settings:", error);
     } finally {
       setEmailLoading(false);
     }
   };
-  
+
   const fetchEmailLogs = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/reports/email-logs?limit=10`, { headers: getAuthHeaders(), credentials: 'include' });
+      const response = await fetch(
+        `${API_URL}/api/reports/email-logs?limit=10`,
+        { headers: getAuthHeaders(), credentials: "include" },
+      );
       if (response.ok) {
         setEmailLogs(await response.json());
       }
     } catch (error) {
-      console.error('Error fetching email logs:', error);
+      console.error("Error fetching email logs:", error);
     }
   };
 
   useEffect(() => {
-    const isAdmin = user?.role === 'admin';
+    const isAdmin = user?.role === "admin";
     if (isAdmin) {
       fetchUsers();
       fetchRoles();
@@ -206,27 +223,37 @@ export default function Settings() {
 
   const fetchSecuritySettings = async () => {
     try {
-      const endpoint = user?.role === 'admin' ? '/api/settings/security' : '/api/auth/security-status';
-      const response = await fetch(`${API_URL}${endpoint}`, { headers: getAuthHeaders() });
+      const endpoint =
+        user?.role === "admin"
+          ? "/api/settings/security"
+          : "/api/auth/security-status";
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        headers: getAuthHeaders(),
+      });
       if (response.ok) {
         const data = await response.json();
         setTwofaEnabled(data.twofa_enabled || false);
         setSessionTimeout(data.session_timeout_hours || 2);
       }
       // Fetch notification preferences for all users
-      const prefRes = await fetch(`${API_URL}/api/auth/notification-preferences`, { headers: getAuthHeaders() });
+      const prefRes = await fetch(
+        `${API_URL}/api/auth/notification-preferences`,
+        { headers: getAuthHeaders() },
+      );
       if (prefRes.ok) {
         const prefData = await prefRes.json();
         setApprovalNotifications(prefData.approval_notifications !== false);
       }
     } catch (error) {
-      console.error('Error fetching security settings:', error);
+      console.error("Error fetching security settings:", error);
     }
   };
 
   const fetchManualFxRates = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/settings/manual-fx-rates`, { headers: getAuthHeaders() });
+      const response = await fetch(`${API_URL}/api/settings/manual-fx-rates`, {
+        headers: getAuthHeaders(),
+      });
       if (response.ok) {
         const data = await response.json();
         setManualFxRates(data.rates || {});
@@ -234,7 +261,7 @@ export default function Settings() {
         setFxRatesUpdatedBy(data.updated_by_name);
       }
     } catch (error) {
-      console.error('Error fetching manual FX rates:', error);
+      console.error("Error fetching manual FX rates:", error);
     }
   };
 
@@ -242,18 +269,18 @@ export default function Settings() {
     setSavingFxRates(true);
     try {
       const response = await fetch(`${API_URL}/api/settings/manual-fx-rates`, {
-        method: 'PUT',
+        method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify({ rates: manualFxRates }),
       });
       if (response.ok) {
-        toast.success('Manual FX rates saved');
+        toast.success("Manual FX rates saved");
         fetchManualFxRates();
       } else {
-        toast.error('Failed to save FX rates');
+        toast.error("Failed to save FX rates");
       }
     } catch (error) {
-      toast.error('Failed to save FX rates');
+      toast.error("Failed to save FX rates");
     } finally {
       setSavingFxRates(false);
     }
@@ -265,69 +292,79 @@ export default function Settings() {
       const url = selectedUser
         ? `${API_URL}/api/users/${selectedUser.user_id}`
         : `${API_URL}/api/users`;
-      const method = selectedUser ? 'PUT' : 'POST';
+      const method = selectedUser ? "PUT" : "POST";
 
       // Include role_id when saving
       const body = selectedUser
-        ? { name: formData.name, role: formData.role, role_id: formData.role_id || formData.role, is_active: formData.is_active }
+        ? {
+            name: formData.name,
+            role: formData.role,
+            role_id: formData.role_id || formData.role,
+            is_active: formData.is_active,
+          }
         : formData;
 
       const response = await fetch(url, {
         method,
         headers: getAuthHeaders(),
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(body),
       });
 
       if (response.ok) {
-        toast.success(selectedUser ? 'User updated' : 'User created');
+        toast.success(selectedUser ? "User updated" : "User created");
         setIsDialogOpen(false);
         resetForm();
         fetchUsers();
       } else {
         const error = await response.json();
-        toast.error(error.detail || 'Operation failed');
+        toast.error(error.detail || "Operation failed");
       }
     } catch (error) {
-      toast.error('Operation failed');
+      toast.error("Operation failed");
     }
   };
 
   const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
       const response = await fetch(`${API_URL}/api/users/${userId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: getAuthHeaders(),
-        credentials: 'include',
+        credentials: "include",
       });
       if (response.ok) {
-        toast.success('User deleted');
+        toast.success("User deleted");
         fetchUsers();
       } else {
         const error = await response.json();
-        toast.error(error.detail || 'Delete failed');
+        toast.error(error.detail || "Delete failed");
       }
     } catch (error) {
-      toast.error('Delete failed');
+      toast.error("Delete failed");
     }
   };
 
   const handleImpersonate = async (targetUser) => {
-    if (!window.confirm(`Login as ${targetUser.name} (${targetUser.email})? You will be redirected to their dashboard.`)) return;
+    if (
+      !window.confirm(
+        `Login as ${targetUser.name} (${targetUser.email})? You will be redirected to their dashboard.`,
+      )
+    )
+      return;
     try {
       await startImpersonation(targetUser.user_id);
       toast.success(`Now impersonating ${targetUser.name}`);
       const role = targetUser.role;
-      if (role === 'vendor') {
-        navigate('/vendor-portal');
-      } else if (role === 'sub_admin') {
-        navigate('/clients');
+      if (role === "vendor") {
+        navigate("/vendor-portal");
+      } else if (role === "sub_admin") {
+        navigate("/clients");
       } else {
-        navigate('/dashboard');
+        navigate("/dashboard");
       }
     } catch (error) {
-      toast.error(error.message || 'Impersonation failed');
+      toast.error(error.message || "Impersonation failed");
     }
   };
 
@@ -335,7 +372,7 @@ export default function Settings() {
     setSelectedUser(userItem);
     setFormData({
       email: userItem.email,
-      password: '',
+      password: "",
       name: userItem.name,
       role: userItem.role,
       role_id: userItem.role_id || userItem.role,
@@ -347,16 +384,16 @@ export default function Settings() {
   const resetForm = () => {
     setSelectedUser(null);
     setFormData({
-      email: '',
-      password: '',
-      name: '',
-      role: 'sub_admin',
-      role_id: '',
+      email: "",
+      password: "",
+      name: "",
+      role: "sub_admin",
+      role_id: "",
       deposit_commission: 0,
       withdrawal_commission: 0,
     });
   };
-  
+
   // Email Settings Handlers
   const handleSaveEmailSettings = async () => {
     setSavingEmail(true);
@@ -371,75 +408,79 @@ export default function Settings() {
         report_time: emailSettings.report_time,
         monthly_report_enabled: emailSettings.monthly_report_enabled,
       };
-      
+
       // Only send password if it's been changed
       if (emailSettings.smtp_password) {
         payload.smtp_password = emailSettings.smtp_password;
       }
-      
+
       const response = await fetch(`${API_URL}/api/settings/email`, {
-        method: 'PUT',
+        method: "PUT",
         headers: getAuthHeaders(),
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(payload),
       });
-      
+
       if (response.ok) {
-        toast.success('Email settings saved');
-        setEmailSettings(prev => ({ ...prev, smtp_password: '', smtp_password_set: !!prev.smtp_password || prev.smtp_password_set }));
+        toast.success("Email settings saved");
+        setEmailSettings((prev) => ({
+          ...prev,
+          smtp_password: "",
+          smtp_password_set: !!prev.smtp_password || prev.smtp_password_set,
+        }));
         fetchEmailSettings();
       } else {
         const error = await response.json();
-        toast.error(error.detail || 'Failed to save settings');
+        toast.error(error.detail || "Failed to save settings");
       }
     } catch (error) {
-      toast.error('Failed to save settings');
+      toast.error("Failed to save settings");
     } finally {
       setSavingEmail(false);
     }
   };
-  
+
   const handleTestEmail = async () => {
     setSendingTest(true);
     try {
       const response = await fetch(`${API_URL}/api/settings/email/test`, {
-        method: 'POST',
+        method: "POST",
         headers: getAuthHeaders(),
-        credentials: 'include',
+        credentials: "include",
       });
-      
+
       if (response.ok) {
-        toast.success('Test email sent! Check your inbox.');
+        toast.success("Test email sent! Check your inbox.");
         fetchEmailLogs();
       } else {
         const error = await response.json();
-        toast.error(error.detail || 'Failed to send test email');
+        toast.error(error.detail || "Failed to send test email");
       }
     } catch (error) {
-      toast.error('Failed to send test email');
+      toast.error("Failed to send test email");
     } finally {
       setSendingTest(false);
     }
   };
-  
+
   const handleSendReportNow = async () => {
     setSendingReport(true);
     try {
       const response = await fetch(`${API_URL}/api/reports/send-now`, {
-        method: 'POST',
+        method: "POST",
         headers: getAuthHeaders(),
-        credentials: 'include',
+        credentials: "include",
       });
-      
+
       if (response.ok) {
-        toast.success('Daily report sent!');
+        toast.success("Daily report sent!");
         fetchEmailLogs();
       } else {
         const error = await response.json();
-        toast.error(error.detail || 'Failed to send report');
+        toast.error(error.detail || "Failed to send report");
       }
     } catch (error) {
-      toast.error('Failed to send report');
+      toast.error("Failed to send report");
     } finally {
       setSendingReport(false);
     }
@@ -449,84 +490,93 @@ export default function Settings() {
     setSendingMonthlyReport(true);
     try {
       const response = await fetch(`${API_URL}/api/reports/monthly/send-now`, {
-        method: 'POST',
+        method: "POST",
         headers: getAuthHeaders(),
-        credentials: 'include',
+        credentials: "include",
       });
-      
+
       if (response.ok) {
         const data = await response.json();
-        toast.success(data.message || 'Monthly report sent!');
+        toast.success(data.message || "Monthly report sent!");
         fetchEmailLogs();
       } else {
         const error = await response.json();
-        toast.error(error.detail || 'Failed to send monthly report');
+        toast.error(error.detail || "Failed to send monthly report");
       }
     } catch (error) {
-      toast.error('Failed to send monthly report');
+      toast.error("Failed to send monthly report");
     } finally {
       setSendingMonthlyReport(false);
     }
   };
-  
+
   const addDirectorEmail = () => {
     if (!newDirectorEmail) return;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newDirectorEmail)) {
-      toast.error('Invalid email address');
+      toast.error("Invalid email address");
       return;
     }
     if (emailSettings.director_emails.includes(newDirectorEmail)) {
-      toast.error('Email already added');
+      toast.error("Email already added");
       return;
     }
-    setEmailSettings(prev => ({
+    setEmailSettings((prev) => ({
       ...prev,
       director_emails: [...prev.director_emails, newDirectorEmail],
     }));
-    setNewDirectorEmail('');
+    setNewDirectorEmail("");
   };
-  
+
   const removeDirectorEmail = (email) => {
-    setEmailSettings(prev => ({
+    setEmailSettings((prev) => ({
       ...prev,
-      director_emails: prev.director_emails.filter(e => e !== email),
+      director_emails: prev.director_emails.filter((e) => e !== email),
     }));
   };
 
   const getRoleBadge = (role, roleId) => {
     // Try to find from roles list first
-    const foundRole = roles.find(r => r.role_id === roleId || r.name === role);
-    
+    const foundRole = roles.find(
+      (r) => r.role_id === roleId || r.name === role,
+    );
+
     const roleStyles = {
-      admin: 'bg-blue-100 text-blue-700 border border-blue-200',
-      super_admin: 'bg-red-100 text-red-700 border border-red-200',
-      sub_admin: 'bg-slate-100 text-slate-600 border border-slate-200',
-      accountant: 'bg-purple-100 text-purple-700 border border-purple-200',
-      vendor: 'bg-amber-100 text-amber-700 border border-amber-200',
-      exchanger: 'bg-amber-100 text-amber-700 border border-amber-200',
-      viewer: 'bg-green-100 text-green-700 border border-green-200',
+      admin: "bg-blue-100 text-blue-700 border border-blue-200",
+      super_admin: "bg-red-100 text-red-700 border border-red-200",
+      sub_admin: "bg-slate-100 text-slate-600 border border-slate-200",
+      accountant: "bg-purple-100 text-purple-700 border border-purple-200",
+      vendor: "bg-amber-100 text-amber-700 border border-amber-200",
+      exchanger: "bg-amber-100 text-amber-700 border border-amber-200",
+      viewer: "bg-green-100 text-green-700 border border-green-200",
     };
-    
+
     const displayName = foundRole?.display_name || role;
     const styleKey = roleId || role;
-    
+
     return (
-      <Badge className={`${roleStyles[styleKey] || 'bg-slate-100 text-slate-600 border border-slate-200'} text-xs uppercase`}>
+      <Badge
+        className={`${roleStyles[styleKey] || "bg-slate-100 text-slate-600 border border-slate-200"} text-xs uppercase`}
+      >
         {displayName}
       </Badge>
     );
   };
 
-  const isCurrentUserAdmin = user?.role === 'admin';
+  const isCurrentUserAdmin = user?.role === "admin";
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="settings-page">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold uppercase tracking-tight text-white" style={{ fontFamily: 'Barlow Condensed' }}>
+        <h1
+          className="text-4xl font-bold uppercase tracking-tight text-white"
+          style={{ fontFamily: "Barlow Condensed" }}
+        >
           Settings
         </h1>
-        <p className="text-[#C5C6C7]">System settings, user management, and email reports</p>
+        <p className="text-[#C5C6C7]">
+          System settings, user management, and email reports
+        </p>
       </div>
 
       {/* Current User Info */}
@@ -541,9 +591,15 @@ export default function Settings() {
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-[#66FCF1]/10 rounded-full flex items-center justify-center">
               {user?.picture ? (
-                <img src={user.picture} alt={user.name} className="w-16 h-16 rounded-full" />
+                <img
+                  src={user.picture}
+                  alt={user.name}
+                  className="w-16 h-16 rounded-full"
+                />
               ) : (
-                <span className="text-[#66FCF1] font-bold text-xl">{user?.name?.charAt(0) || 'U'}</span>
+                <span className="text-[#66FCF1] font-bold text-xl">
+                  {user?.name?.charAt(0) || "U"}
+                </span>
               )}
             </div>
             <div>
@@ -561,16 +617,22 @@ export default function Settings() {
       {isCurrentUserAdmin ? (
         <Tabs defaultValue="users" className="w-full">
           <TabsList className="bg-slate-50 border border-slate-200 mb-4">
-            <TabsTrigger value="users" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
+            <TabsTrigger
+              value="users"
+              className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]"
+            >
               <Users className="w-4 h-4 mr-2" />
               Users
             </TabsTrigger>
-            <TabsTrigger value="email" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
+            <TabsTrigger
+              value="email"
+              className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]"
+            >
               <Mail className="w-4 h-4 mr-2" />
               Email Reports
             </TabsTrigger>
           </TabsList>
-          
+
           {/* Users Tab */}
           <TabsContent value="users">
             <Card className="bg-white border-slate-200">
@@ -580,7 +642,13 @@ export default function Settings() {
                     <Users className="w-5 h-5 text-[#66FCF1]" />
                     User Management
                   </CardTitle>
-                  <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
+                  <Dialog
+                    open={isDialogOpen}
+                    onOpenChange={(open) => {
+                      setIsDialogOpen(open);
+                      if (!open) resetForm();
+                    }}
+                  >
                     <DialogTrigger asChild>
                       <Button
                         className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase tracking-wider rounded-sm text-sm"
@@ -592,16 +660,23 @@ export default function Settings() {
                     </DialogTrigger>
                     <DialogContent className="bg-white border-slate-200 text-white max-w-lg">
                       <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
-                          {selectedUser ? 'Edit User' : 'Add New User'}
+                        <DialogTitle
+                          className="text-2xl font-bold uppercase tracking-tight"
+                          style={{ fontFamily: "Barlow Condensed" }}
+                        >
+                          {selectedUser ? "Edit User" : "Add New User"}
                         </DialogTitle>
                       </DialogHeader>
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                          <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Name</Label>
+                          <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                            Name
+                          </Label>
                           <Input
                             value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, name: e.target.value })
+                            }
                             className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1]"
                             data-testid="user-name-input"
                             required
@@ -610,22 +685,36 @@ export default function Settings() {
                         {!selectedUser && (
                           <>
                             <div className="space-y-2">
-                              <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Email</Label>
+                              <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                                Email
+                              </Label>
                               <Input
                                 type="email"
                                 value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    email: e.target.value,
+                                  })
+                                }
                                 className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
                                 data-testid="user-email-input"
                                 required
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Password</Label>
+                              <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                                Password
+                              </Label>
                               <Input
                                 type="password"
                                 value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    password: e.target.value,
+                                  })
+                                }
                                 className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1]"
                                 data-testid="user-password-input"
                                 required
@@ -634,69 +723,106 @@ export default function Settings() {
                           </>
                         )}
                         <div className="space-y-2">
-                          <Label className="text-slate-500 text-xs uppercase tracking-wider">Role</Label>
+                          <Label className="text-slate-500 text-xs uppercase tracking-wider">
+                            Role
+                          </Label>
                           <Select
                             value={formData.role_id || formData.role}
                             onValueChange={(value) => {
-                              const selectedRole = roles.find(r => r.role_id === value || r.name === value);
-                              setFormData({ 
-                                ...formData, 
+                              const selectedRole = roles.find(
+                                (r) => r.role_id === value || r.name === value,
+                              );
+                              setFormData({
+                                ...formData,
                                 role: selectedRole?.name || value,
-                                role_id: selectedRole?.role_id || value 
+                                role_id: selectedRole?.role_id || value,
                               });
                             }}
                           >
-                            <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800" data-testid="user-role-select">
+                            <SelectTrigger
+                              className="bg-slate-50 border-slate-200 text-slate-800"
+                              data-testid="user-role-select"
+                            >
                               <SelectValue placeholder="Select role" />
                             </SelectTrigger>
                             <SelectContent className="bg-white border-slate-200">
                               {roles.map((role) => (
-                                <SelectItem key={role.role_id} value={role.role_id} className="text-slate-800 hover:bg-slate-100">
+                                <SelectItem
+                                  key={role.role_id}
+                                  value={role.role_id}
+                                  className="text-slate-800 hover:bg-slate-100"
+                                >
                                   {role.display_name}
-                                  {role.is_system_role && <span className="ml-2 text-xs text-slate-400">(System)</span>}
+                                  {role.is_system_role && (
+                                    <span className="ml-2 text-xs text-slate-400">
+                                      (System)
+                                    </span>
+                                  )}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         {/* Exchanger Commission Fields */}
-                        {(formData.role === 'vendor' || formData.role_id === 'exchanger') && !selectedUser && (
-                          <div className="space-y-3 p-3 bg-amber-50 border border-amber-200 rounded-sm">
-                            <p className="text-xs text-amber-700 font-semibold uppercase tracking-wider">Exchanger Commission Rates</p>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1">
-                                <Label className="text-slate-500 text-xs">Deposit Commission (%)</Label>
-                                <Input
-                                  type="number"
-                                  step="0.1"
-                                  min="0"
-                                  value={formData.deposit_commission}
-                                  onChange={(e) => setFormData({ ...formData, deposit_commission: parseFloat(e.target.value) || 0 })}
-                                  className="bg-white border-slate-200 text-slate-800"
-                                  placeholder="0.0"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-slate-500 text-xs">Withdrawal Commission (%)</Label>
-                                <Input
-                                  type="number"
-                                  step="0.1"
-                                  min="0"
-                                  value={formData.withdrawal_commission}
-                                  onChange={(e) => setFormData({ ...formData, withdrawal_commission: parseFloat(e.target.value) || 0 })}
-                                  className="bg-white border-slate-200 text-slate-800"
-                                  placeholder="0.0"
-                                />
+                        {(formData.role === "vendor" ||
+                          formData.role_id === "exchanger") &&
+                          !selectedUser && (
+                            <div className="space-y-3 p-3 bg-amber-50/5border border-amber-200 rounded-sm">
+                              <p className="text-xs text-amber-700 font-semibold uppercase tracking-wider">
+                                Exchanger Commission Rates
+                              </p>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                  <Label className="text-slate-500 text-xs">
+                                    Deposit Commission (%)
+                                  </Label>
+                                  <Input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    value={formData.deposit_commission}
+                                    onChange={(e) =>
+                                      setFormData({
+                                        ...formData,
+                                        deposit_commission:
+                                          parseFloat(e.target.value) || 0,
+                                      })
+                                    }
+                                    className="bg-white border-slate-200 text-slate-800"
+                                    placeholder="0.0"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-slate-500 text-xs">
+                                    Withdrawal Commission (%)
+                                  </Label>
+                                  <Input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    value={formData.withdrawal_commission}
+                                    onChange={(e) =>
+                                      setFormData({
+                                        ...formData,
+                                        withdrawal_commission:
+                                          parseFloat(e.target.value) || 0,
+                                      })
+                                    }
+                                    className="bg-white border-slate-200 text-slate-800"
+                                    placeholder="0.0"
+                                  />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                         {selectedUser && (
                           <div className="flex items-center justify-between p-3 bg-slate-50 rounded-sm border border-slate-200">
                             <Label className="text-[#C5C6C7]">Active</Label>
                             <Switch
                               checked={formData.is_active}
-                              onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                              onCheckedChange={(checked) =>
+                                setFormData({ ...formData, is_active: checked })
+                              }
                               data-testid="user-active-switch"
                             />
                           </div>
@@ -705,7 +831,10 @@ export default function Settings() {
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => { setIsDialogOpen(false); resetForm(); }}
+                            onClick={() => {
+                              setIsDialogOpen(false);
+                              resetForm();
+                            }}
                             className="border-slate-200 text-[#C5C6C7] hover:bg-white/5"
                           >
                             Cancel
@@ -715,7 +844,7 @@ export default function Settings() {
                             className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase tracking-wider"
                             data-testid="save-user-btn"
                           >
-                            {selectedUser ? 'Update' : 'Create'}
+                            {selectedUser ? "Update" : "Create"}
                           </Button>
                         </div>
                       </form>
@@ -728,11 +857,21 @@ export default function Settings() {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-slate-200 hover:bg-transparent">
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">User</TableHead>
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">Email</TableHead>
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">Role</TableHead>
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">Status</TableHead>
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs text-right">Actions</TableHead>
+                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">
+                          User
+                        </TableHead>
+                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">
+                          Email
+                        </TableHead>
+                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">
+                          Role
+                        </TableHead>
+                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">
+                          Status
+                        </TableHead>
+                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs text-right">
+                          Actions
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -744,58 +883,99 @@ export default function Settings() {
                         </TableRow>
                       ) : users.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-[#C5C6C7]">
+                          <TableCell
+                            colSpan={5}
+                            className="text-center py-8 text-[#C5C6C7]"
+                          >
                             No users found
                           </TableCell>
                         </TableRow>
                       ) : (
                         users.map((userItem) => (
-                          <TableRow key={userItem.user_id} className="border-slate-200 hover:bg-white/5">
+                          <TableRow
+                            key={userItem.user_id}
+                            className="border-slate-200 hover:bg-white/5"
+                          >
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-[#66FCF1]/10 rounded-full flex items-center justify-center">
                                   {userItem.picture ? (
-                                    <img src={userItem.picture} alt={userItem.name} className="w-10 h-10 rounded-full" />
+                                    <img
+                                      src={userItem.picture}
+                                      alt={userItem.name}
+                                      className="w-10 h-10 rounded-full"
+                                    />
                                   ) : (
-                                    <span className="text-[#66FCF1] font-bold text-sm">{userItem.name?.charAt(0) || 'U'}</span>
+                                    <span className="text-[#66FCF1] font-bold text-sm">
+                                      {userItem.name?.charAt(0) || "U"}
+                                    </span>
                                   )}
                                 </div>
                                 <div>
-                                  <p className="text-white font-medium">{userItem.name}</p>
-                                  <p className="text-xs text-[#C5C6C7] font-mono">{userItem.user_id}</p>
+                                  <p className="text-white font-medium">
+                                    {userItem.name}
+                                  </p>
+                                  <p className="text-xs text-[#C5C6C7] font-mono">
+                                    {userItem.user_id}
+                                  </p>
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="text-white font-mono">{userItem.email}</TableCell>
-                            <TableCell>{getRoleBadge(userItem.role, userItem.role_id)}</TableCell>
+                            <TableCell className="text-white font-mono">
+                              {userItem.email}
+                            </TableCell>
                             <TableCell>
-                              <Badge className={`${userItem.is_active !== false ? 'status-approved' : 'status-rejected'} text-xs uppercase`}>
-                                {userItem.is_active !== false ? 'Active' : 'Inactive'}
+                              {getRoleBadge(userItem.role, userItem.role_id)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={`${userItem.is_active !== false ? "status-approved" : "status-rejected"} text-xs uppercase`}
+                              >
+                                {userItem.is_active !== false
+                                  ? "Active"
+                                  : "Inactive"}
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="text-[#C5C6C7] hover:text-white hover:bg-white/5" data-testid={`user-actions-${userItem.user_id}`}>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-[#C5C6C7] hover:text-white hover:bg-white/5"
+                                    data-testid={`user-actions-${userItem.user_id}`}
+                                  >
                                     <MoreVertical className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-white border-slate-200">
-                                  <DropdownMenuItem onClick={() => handleEdit(userItem)} className="text-white hover:bg-white/5 cursor-pointer">
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="bg-white border-slate-200"
+                                >
+                                  <DropdownMenuItem
+                                    onClick={() => handleEdit(userItem)}
+                                    className="text-white hover:bg-white/5 cursor-pointer"
+                                  >
                                     <Edit className="w-4 h-4 mr-2" /> Edit
                                   </DropdownMenuItem>
-                                  {userItem.role !== 'admin' && userItem.user_id !== user?.user_id && (
-                                    <DropdownMenuItem
-                                      onClick={() => handleImpersonate(userItem)}
-                                      className="text-amber-500 hover:bg-white/5 cursor-pointer"
-                                      data-testid={`impersonate-${userItem.user_id}`}
-                                    >
-                                      <LogIn className="w-4 h-4 mr-2" /> Login as User
-                                    </DropdownMenuItem>
-                                  )}
+                                  {userItem.role !== "admin" &&
+                                    userItem.user_id !== user?.user_id && (
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleImpersonate(userItem)
+                                        }
+                                        className="text-amber-500 hover:bg-white/5 cursor-pointer"
+                                        data-testid={`impersonate-${userItem.user_id}`}
+                                      >
+                                        <LogIn className="w-4 h-4 mr-2" /> Login
+                                        as User
+                                      </DropdownMenuItem>
+                                    )}
                                   {userItem.user_id !== user?.user_id && (
                                     <DropdownMenuItem
-                                      onClick={() => handleDelete(userItem.user_id)}
+                                      onClick={() =>
+                                        handleDelete(userItem.user_id)
+                                      }
                                       className="text-red-500 hover:bg-white/5 cursor-pointer"
                                       data-testid={`delete-user-${userItem.user_id}`}
                                     >
@@ -814,7 +994,7 @@ export default function Settings() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           {/* Email Reports Tab */}
           <TabsContent value="email">
             <div className="grid gap-6 md:grid-cols-2">
@@ -829,22 +1009,36 @@ export default function Settings() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">SMTP Host</Label>
+                      <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                        SMTP Host
+                      </Label>
                       <Input
                         type="text"
                         value={emailSettings.smtp_host}
-                        onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_host: e.target.value }))}
+                        onChange={(e) =>
+                          setEmailSettings((prev) => ({
+                            ...prev,
+                            smtp_host: e.target.value,
+                          }))
+                        }
                         className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono text-sm"
                         placeholder="smtp.gmail.com"
                         data-testid="smtp-host"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Port</Label>
+                      <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                        Port
+                      </Label>
                       <Input
                         type="number"
                         value={emailSettings.smtp_port}
-                        onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_port: e.target.value }))}
+                        onChange={(e) =>
+                          setEmailSettings((prev) => ({
+                            ...prev,
+                            smtp_port: e.target.value,
+                          }))
+                        }
                         className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono text-sm"
                         placeholder="587"
                         data-testid="smtp-port"
@@ -852,11 +1046,18 @@ export default function Settings() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Username (Email)</Label>
+                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                      Username (Email)
+                    </Label>
                     <Input
                       type="email"
                       value={emailSettings.smtp_email}
-                      onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_email: e.target.value }))}
+                      onChange={(e) =>
+                        setEmailSettings((prev) => ({
+                          ...prev,
+                          smtp_email: e.target.value,
+                        }))
+                      }
                       className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
                       placeholder="no-reply@milescapitals.com"
                       data-testid="smtp-email"
@@ -864,23 +1065,42 @@ export default function Settings() {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
-                      Password {emailSettings.smtp_password_set && <span className="text-green-400">(Set)</span>}
+                      Password{" "}
+                      {emailSettings.smtp_password_set && (
+                        <span className="text-green-400">(Set)</span>
+                      )}
                     </Label>
                     <Input
                       type="password"
                       value={emailSettings.smtp_password}
-                      onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_password: e.target.value }))}
+                      onChange={(e) =>
+                        setEmailSettings((prev) => ({
+                          ...prev,
+                          smtp_password: e.target.value,
+                        }))
+                      }
                       className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
-                      placeholder={emailSettings.smtp_password_set ? "••••••••••••••••" : "Enter SMTP password"}
+                      placeholder={
+                        emailSettings.smtp_password_set
+                          ? "••••••••••••••••"
+                          : "Enter SMTP password"
+                      }
                       data-testid="smtp-password"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Send From Email</Label>
+                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                      Send From Email
+                    </Label>
                     <Input
                       type="email"
                       value={emailSettings.smtp_from_email}
-                      onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_from_email: e.target.value }))}
+                      onChange={(e) =>
+                        setEmailSettings((prev) => ({
+                          ...prev,
+                          smtp_from_email: e.target.value,
+                        }))
+                      }
                       className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
                       placeholder="no-reply@milescapitals.com"
                       data-testid="smtp-from-email"
@@ -888,7 +1108,12 @@ export default function Settings() {
                   </div>
                   <Button
                     onClick={handleTestEmail}
-                    disabled={sendingTest || !emailSettings.smtp_email || (!emailSettings.smtp_password && !emailSettings.smtp_password_set)}
+                    disabled={
+                      sendingTest ||
+                      !emailSettings.smtp_email ||
+                      (!emailSettings.smtp_password &&
+                        !emailSettings.smtp_password_set)
+                    }
                     variant="outline"
                     className="w-full border-[#66FCF1]/30 text-[#66FCF1] hover:bg-[#66FCF1]/10"
                     data-testid="test-email-btn"
@@ -902,7 +1127,7 @@ export default function Settings() {
                   </Button>
                 </CardContent>
               </Card>
-              
+
               {/* Director Emails Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
@@ -919,7 +1144,10 @@ export default function Settings() {
                       onChange={(e) => setNewDirectorEmail(e.target.value)}
                       className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
                       placeholder="director@company.com"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addDirectorEmail())}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" &&
+                        (e.preventDefault(), addDirectorEmail())
+                      }
                       data-testid="director-email-input"
                     />
                     <Button
@@ -932,11 +1160,18 @@ export default function Settings() {
                   </div>
                   <div className="space-y-2 max-h-[200px] overflow-y-auto">
                     {emailSettings.director_emails.length === 0 ? (
-                      <p className="text-[#C5C6C7] text-sm text-center py-4">No directors added yet</p>
+                      <p className="text-[#C5C6C7] text-sm text-center py-4">
+                        No directors added yet
+                      </p>
                     ) : (
                       emailSettings.director_emails.map((email, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-slate-50 rounded-sm border border-slate-200">
-                          <span className="text-white font-mono text-sm">{email}</span>
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-slate-50 rounded-sm border border-slate-200"
+                        >
+                          <span className="text-white font-mono text-sm">
+                            {email}
+                          </span>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -951,7 +1186,7 @@ export default function Settings() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               {/* Schedule Settings Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
@@ -964,41 +1199,65 @@ export default function Settings() {
                   <div className="flex items-center justify-between p-3 bg-slate-50 rounded-sm border border-slate-200">
                     <div>
                       <Label className="text-white">Enable Daily Reports</Label>
-                      <p className="text-xs text-[#C5C6C7]">Auto-send reports to directors</p>
+                      <p className="text-xs text-[#C5C6C7]">
+                        Auto-send reports to directors
+                      </p>
                     </div>
                     <Switch
                       checked={emailSettings.report_enabled}
                       onCheckedChange={async (checked) => {
-                        setEmailSettings(prev => ({ ...prev, report_enabled: checked }));
+                        setEmailSettings((prev) => ({
+                          ...prev,
+                          report_enabled: checked,
+                        }));
                         // Auto-save the toggle change
                         try {
-                          const response = await fetch(`${API_URL}/api/settings/email`, {
-                            method: 'PUT',
-                            headers: getAuthHeaders(),
-                            credentials: 'include',
-                            body: JSON.stringify({ report_enabled: checked }),
-                          });
+                          const response = await fetch(
+                            `${API_URL}/api/settings/email`,
+                            {
+                              method: "PUT",
+                              headers: getAuthHeaders(),
+                              credentials: "include",
+                              body: JSON.stringify({ report_enabled: checked }),
+                            },
+                          );
                           if (response.ok) {
-                            toast.success(checked ? 'Daily reports enabled' : 'Daily reports disabled');
+                            toast.success(
+                              checked
+                                ? "Daily reports enabled"
+                                : "Daily reports disabled",
+                            );
                           }
                         } catch (error) {
-                          toast.error('Failed to update setting');
-                          setEmailSettings(prev => ({ ...prev, report_enabled: !checked }));
+                          toast.error("Failed to update setting");
+                          setEmailSettings((prev) => ({
+                            ...prev,
+                            report_enabled: !checked,
+                          }));
                         }
                       }}
                       data-testid="report-enabled-switch"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Report Time (UTC)</Label>
+                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                      Report Time (UTC)
+                    </Label>
                     <Input
                       type="time"
                       value={emailSettings.report_time}
-                      onChange={(e) => setEmailSettings(prev => ({ ...prev, report_time: e.target.value }))}
+                      onChange={(e) =>
+                        setEmailSettings((prev) => ({
+                          ...prev,
+                          report_time: e.target.value,
+                        }))
+                      }
                       className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1]"
                       data-testid="report-time"
                     />
-                    <p className="text-xs text-[#C5C6C7]">Currently set to: {emailSettings.report_time} UTC</p>
+                    <p className="text-xs text-[#C5C6C7]">
+                      Currently set to: {emailSettings.report_time} UTC
+                    </p>
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -1016,7 +1275,10 @@ export default function Settings() {
                     </Button>
                     <Button
                       onClick={handleSendReportNow}
-                      disabled={sendingReport || emailSettings.director_emails.length === 0}
+                      disabled={
+                        sendingReport ||
+                        emailSettings.director_emails.length === 0
+                      }
                       variant="outline"
                       className="border-[#66FCF1]/30 text-[#66FCF1] hover:bg-[#66FCF1]/10"
                       data-testid="send-report-now-btn"
@@ -1043,36 +1305,62 @@ export default function Settings() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-3 bg-slate-50 rounded-sm border border-slate-200">
                     <div>
-                      <Label className="text-white">Enable Monthly Reports</Label>
-                      <p className="text-xs text-[#C5C6C7]">Auto-send on the last day of each month</p>
+                      <Label className="text-white">
+                        Enable Monthly Reports
+                      </Label>
+                      <p className="text-xs text-[#C5C6C7]">
+                        Auto-send on the last day of each month
+                      </p>
                     </div>
                     <Switch
                       checked={emailSettings.monthly_report_enabled}
                       onCheckedChange={async (checked) => {
-                        setEmailSettings(prev => ({ ...prev, monthly_report_enabled: checked }));
+                        setEmailSettings((prev) => ({
+                          ...prev,
+                          monthly_report_enabled: checked,
+                        }));
                         try {
-                          const response = await fetch(`${API_URL}/api/settings/email`, {
-                            method: 'PUT',
-                            headers: getAuthHeaders(),
-                            credentials: 'include',
-                            body: JSON.stringify({ monthly_report_enabled: checked }),
-                          });
+                          const response = await fetch(
+                            `${API_URL}/api/settings/email`,
+                            {
+                              method: "PUT",
+                              headers: getAuthHeaders(),
+                              credentials: "include",
+                              body: JSON.stringify({
+                                monthly_report_enabled: checked,
+                              }),
+                            },
+                          );
                           if (response.ok) {
-                            toast.success(checked ? 'Monthly reports enabled' : 'Monthly reports disabled');
+                            toast.success(
+                              checked
+                                ? "Monthly reports enabled"
+                                : "Monthly reports disabled",
+                            );
                           }
                         } catch (error) {
-                          toast.error('Failed to update setting');
-                          setEmailSettings(prev => ({ ...prev, monthly_report_enabled: !checked }));
+                          toast.error("Failed to update setting");
+                          setEmailSettings((prev) => ({
+                            ...prev,
+                            monthly_report_enabled: !checked,
+                          }));
                         }
                       }}
                       data-testid="monthly-report-enabled-switch"
                     />
                   </div>
-                  <p className="text-xs text-[#C5C6C7]">Includes: Transaction Summary, Treasury Balances, I&E, Loans, Exchanger Settlements, PSP Summary, Outstanding Accounts</p>
+                  <p className="text-xs text-[#C5C6C7]">
+                    Includes: Transaction Summary, Treasury Balances, I&E,
+                    Loans, Exchanger Settlements, PSP Summary, Outstanding
+                    Accounts
+                  </p>
                   <div className="flex gap-2">
                     <Button
                       onClick={handleSendMonthlyReportNow}
-                      disabled={sendingMonthlyReport || emailSettings.director_emails.length === 0}
+                      disabled={
+                        sendingMonthlyReport ||
+                        emailSettings.director_emails.length === 0
+                      }
                       variant="outline"
                       className="flex-1 border-purple-400/30 text-purple-400 hover:bg-purple-400/10"
                       data-testid="send-monthly-report-btn"
@@ -1087,7 +1375,12 @@ export default function Settings() {
                     <Button
                       variant="outline"
                       className="border-slate-400/30 text-slate-400 hover:bg-slate-400/10"
-                      onClick={() => window.open(`${API_URL}/api/reports/monthly/preview`, '_blank')}
+                      onClick={() =>
+                        window.open(
+                          `${API_URL}/api/reports/monthly/preview`,
+                          "_blank",
+                        )
+                      }
                       data-testid="preview-monthly-report-btn"
                     >
                       <Eye className="w-4 h-4 mr-2" />
@@ -1096,7 +1389,7 @@ export default function Settings() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               {/* Security Settings Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
@@ -1108,8 +1401,12 @@ export default function Settings() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-3 bg-slate-50 rounded-sm border border-slate-200">
                     <div>
-                      <Label className="text-white">Enable 2FA (Email OTP)</Label>
-                      <p className="text-xs text-[#C5C6C7]">Require email verification code on every login</p>
+                      <Label className="text-white">
+                        Enable 2FA (Email OTP)
+                      </Label>
+                      <p className="text-xs text-[#C5C6C7]">
+                        Require email verification code on every login
+                      </p>
                     </div>
                     <Switch
                       checked={twofaEnabled}
@@ -1117,30 +1414,51 @@ export default function Settings() {
                         setTwofaEnabled(checked);
                         try {
                           await fetch(`${API_URL}/api/settings/security`, {
-                            method: 'PUT', headers: getAuthHeaders(),
+                            method: "PUT",
+                            headers: getAuthHeaders(),
                             body: JSON.stringify({ twofa_enabled: checked }),
                           });
-                          toast.success(checked ? '2FA enabled — all users will need email verification' : '2FA disabled');
-                        } catch { toast.error('Failed to update'); setTwofaEnabled(!checked); }
+                          toast.success(
+                            checked
+                              ? "2FA enabled — all users will need email verification"
+                              : "2FA disabled",
+                          );
+                        } catch {
+                          toast.error("Failed to update");
+                          setTwofaEnabled(!checked);
+                        }
                       }}
                       data-testid="twofa-toggle"
                     />
                   </div>
                   <div className="p-3 bg-slate-50 rounded-sm border border-slate-200">
                     <Label className="text-white">Session Timeout</Label>
-                    <p className="text-xs text-[#C5C6C7] mb-2">Auto-logout after inactivity (current: {sessionTimeout}h)</p>
+                    <p className="text-xs text-[#C5C6C7] mb-2">
+                      Auto-logout after inactivity (current: {sessionTimeout}h)
+                    </p>
                     <div className="flex items-center gap-2">
-                      <select value={sessionTimeout} onChange={async (e) => {
-                        const val = parseInt(e.target.value);
-                        setSessionTimeout(val);
-                        try {
-                          await fetch(`${API_URL}/api/settings/security`, {
-                            method: 'PUT', headers: getAuthHeaders(),
-                            body: JSON.stringify({ session_timeout_hours: val }),
-                          });
-                          toast.success(`Session timeout set to ${val} hours`);
-                        } catch { toast.error('Failed to update'); }
-                      }} className="bg-slate-50 border-slate-200 text-white px-3 py-1.5 rounded-md text-sm">
+                      <select
+                        value={sessionTimeout}
+                        onChange={async (e) => {
+                          const val = parseInt(e.target.value);
+                          setSessionTimeout(val);
+                          try {
+                            await fetch(`${API_URL}/api/settings/security`, {
+                              method: "PUT",
+                              headers: getAuthHeaders(),
+                              body: JSON.stringify({
+                                session_timeout_hours: val,
+                              }),
+                            });
+                            toast.success(
+                              `Session timeout set to ${val} hours`,
+                            );
+                          } catch {
+                            toast.error("Failed to update");
+                          }
+                        }}
+                        className="bg-slate-50 border-slate-200 text-white px-3 py-1.5 rounded-md text-sm"
+                      >
                         <option value="1">1 hour</option>
                         <option value="2">2 hours</option>
                         <option value="4">4 hours</option>
@@ -1151,20 +1469,37 @@ export default function Settings() {
                   <div className="p-3 bg-slate-50 rounded-sm border border-slate-200">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-white">My Approval Notifications</Label>
-                        <p className="text-xs text-[#C5C6C7]">Receive email when transactions need approval</p>
+                        <Label className="text-white">
+                          My Approval Notifications
+                        </Label>
+                        <p className="text-xs text-[#C5C6C7]">
+                          Receive email when transactions need approval
+                        </p>
                       </div>
                       <Switch
                         checked={approvalNotifications}
                         onCheckedChange={async (checked) => {
                           setApprovalNotifications(checked);
                           try {
-                            await fetch(`${API_URL}/api/auth/notification-preferences`, {
-                              method: 'PUT', headers: getAuthHeaders(),
-                              body: JSON.stringify({ approval_notifications: checked }),
-                            });
-                            toast.success(checked ? 'Notifications enabled' : 'Notifications disabled');
-                          } catch { toast.error('Failed to update'); setApprovalNotifications(!checked); }
+                            await fetch(
+                              `${API_URL}/api/auth/notification-preferences`,
+                              {
+                                method: "PUT",
+                                headers: getAuthHeaders(),
+                                body: JSON.stringify({
+                                  approval_notifications: checked,
+                                }),
+                              },
+                            );
+                            toast.success(
+                              checked
+                                ? "Notifications enabled"
+                                : "Notifications disabled",
+                            );
+                          } catch {
+                            toast.error("Failed to update");
+                            setApprovalNotifications(!checked);
+                          }
                         }}
                         data-testid="admin-approval-notif-toggle"
                       />
@@ -1172,7 +1507,7 @@ export default function Settings() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               {/* Manual FX Rates Card */}
               <Card className="bg-white border-slate-200 md:col-span-2">
                 <CardHeader className="pb-2">
@@ -1182,46 +1517,81 @@ export default function Settings() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-xs text-[#C5C6C7]">Set exchange rates for currency conversion in Treasury and Dashboard. These replace live FX rates.</p>
-                  
+                  <p className="text-xs text-[#C5C6C7]">
+                    Set exchange rates for currency conversion in Treasury and
+                    Dashboard. These replace live FX rates.
+                  </p>
+
                   {Object.keys(manualFxRates).length > 0 ? (
                     <div className="space-y-2">
-                      {Object.entries(manualFxRates).sort().map(([currency, rate]) => (
-                        <div key={currency} className="flex items-center gap-2">
-                          <span className="text-sm font-mono text-slate-800 w-16 font-bold">{currency}</span>
-                          <span className="text-xs text-[#C5C6C7]">1 {currency} =</span>
-                          <Input
-                            type="number"
-                            step="0.000001"
-                            value={rate}
-                            onChange={(e) => setManualFxRates(prev => ({ ...prev, [currency]: parseFloat(e.target.value) || 0 }))}
-                            className="w-32 bg-slate-50 border-slate-200 text-white text-sm"
-                          />
-                          <span className="text-xs text-[#C5C6C7]">USD</span>
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:text-red-600"
-                            onClick={() => { const r = { ...manualFxRates }; delete r[currency]; setManualFxRates(r); }}>
-                            <X className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      ))}
+                      {Object.entries(manualFxRates)
+                        .sort()
+                        .map(([currency, rate]) => (
+                          <div
+                            key={currency}
+                            className="flex items-center gap-2"
+                          >
+                            <span className="text-sm font-mono text-slate-800 w-16 font-bold">
+                              {currency}
+                            </span>
+                            <span className="text-xs text-[#C5C6C7]">
+                              1 {currency} =
+                            </span>
+                            <Input
+                              type="number"
+                              step="0.000001"
+                              value={rate}
+                              onChange={(e) =>
+                                setManualFxRates((prev) => ({
+                                  ...prev,
+                                  [currency]: parseFloat(e.target.value) || 0,
+                                }))
+                              }
+                              className="w-32 bg-slate-50 border-slate-200 text-white text-sm"
+                            />
+                            <span className="text-xs text-[#C5C6C7]">USD</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-red-400 hover:text-red-600"
+                              onClick={() => {
+                                const r = { ...manualFxRates };
+                                delete r[currency];
+                                setManualFxRates(r);
+                              }}
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-[#C5C6C7]">No manual rates set. USD equivalents won't be shown for non-USD accounts.</p>
+                    <p className="text-sm text-[#C5C6C7]">
+                      No manual rates set. USD equivalents won't be shown for
+                      non-USD accounts.
+                    </p>
                   )}
-                  
+
                   <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
                     <Input
                       placeholder="Currency code (e.g., INR)"
                       value={newFxCurrency}
-                      onChange={(e) => setNewFxCurrency(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setNewFxCurrency(e.target.value.toUpperCase())
+                      }
                       className="w-40 bg-slate-50 border-slate-200 text-white text-sm"
                       data-testid="new-fx-currency"
                     />
-                    <Button variant="outline" size="sm"
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => {
                         if (newFxCurrency && newFxCurrency.length >= 3) {
-                          setManualFxRates(prev => ({ ...prev, [newFxCurrency]: 0 }));
-                          setNewFxCurrency('');
+                          setManualFxRates((prev) => ({
+                            ...prev,
+                            [newFxCurrency]: 0,
+                          }));
+                          setNewFxCurrency("");
                         }
                       }}
                       className="text-green-400 border-green-400/30 hover:bg-green-400/10"
@@ -1230,21 +1600,34 @@ export default function Settings() {
                       + Add Currency
                     </Button>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-[#C5C6C7]">
-                      {fxRatesUpdatedAt && <span>Last updated: {new Date(fxRatesUpdatedAt).toLocaleString()}{fxRatesUpdatedBy && ` by ${fxRatesUpdatedBy}`}</span>}
+                      {fxRatesUpdatedAt && (
+                        <span>
+                          Last updated:{" "}
+                          {new Date(fxRatesUpdatedAt).toLocaleString()}
+                          {fxRatesUpdatedBy && ` by ${fxRatesUpdatedBy}`}
+                        </span>
+                      )}
                     </div>
-                    <Button onClick={handleSaveFxRates} disabled={savingFxRates}
+                    <Button
+                      onClick={handleSaveFxRates}
+                      disabled={savingFxRates}
                       className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold"
-                      data-testid="save-fx-rates-btn">
-                      {savingFxRates ? <div className="w-4 h-4 border-2 border-[#0B0C10] border-t-transparent rounded-full animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                      data-testid="save-fx-rates-btn"
+                    >
+                      {savingFxRates ? (
+                        <div className="w-4 h-4 border-2 border-[#0B0C10] border-t-transparent rounded-full animate-spin mr-2" />
+                      ) : (
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                      )}
                       Save FX Rates
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              
+
               {/* Email Logs Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
@@ -1256,27 +1639,44 @@ export default function Settings() {
                 <CardContent>
                   <ScrollArea className="h-[250px]">
                     {emailLogs.length === 0 ? (
-                      <p className="text-[#C5C6C7] text-sm text-center py-8">No emails sent yet</p>
+                      <p className="text-[#C5C6C7] text-sm text-center py-8">
+                        No emails sent yet
+                      </p>
                     ) : (
                       <div className="space-y-2">
                         {emailLogs.map((log, index) => (
-                          <div key={index} className="p-3 bg-slate-50 rounded-sm border border-slate-200">
+                          <div
+                            key={index}
+                            className="p-3 bg-slate-50 rounded-sm border border-slate-200"
+                          >
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs text-[#C5C6C7] uppercase">{log.type}</span>
-                              {log.status === 'sent' ? (
-                                <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Sent</Badge>
+                              <span className="text-xs text-[#C5C6C7] uppercase">
+                                {log.type}
+                              </span>
+                              {log.status === "sent" ? (
+                                <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                                  Sent
+                                </Badge>
                               ) : (
-                                <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Failed</Badge>
+                                <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
+                                  Failed
+                                </Badge>
                               )}
                             </div>
                             <p className="text-white text-sm">
-                              {log.recipients?.length > 0 ? `To: ${log.recipients.join(', ')}` : 'No recipients'}
+                              {log.recipients?.length > 0
+                                ? `To: ${log.recipients.join(", ")}`
+                                : "No recipients"}
                             </p>
                             <p className="text-xs text-[#C5C6C7] mt-1">
-                              {new Date(log.sent_at || log.attempted_at).toLocaleString()}
+                              {new Date(
+                                log.sent_at || log.attempted_at,
+                              ).toLocaleString()}
                             </p>
                             {log.error && (
-                              <p className="text-xs text-red-400 mt-1">{log.error}</p>
+                              <p className="text-xs text-red-400 mt-1">
+                                {log.error}
+                              </p>
                             )}
                           </div>
                         ))}
@@ -1301,7 +1701,9 @@ export default function Settings() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Current Password</Label>
+                <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                  Current Password
+                </Label>
                 <Input
                   type="password"
                   id="current-password"
@@ -1311,7 +1713,9 @@ export default function Settings() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">New Password</Label>
+                <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                  New Password
+                </Label>
                 <Input
                   type="password"
                   id="new-password"
@@ -1321,7 +1725,9 @@ export default function Settings() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Confirm New Password</Label>
+                <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                  Confirm New Password
+                </Label>
                 <Input
                   type="password"
                   id="confirm-password"
@@ -1334,27 +1740,47 @@ export default function Settings() {
                 className="w-full bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase"
                 data-testid="change-password-btn"
                 onClick={async () => {
-                  const curPw = document.getElementById('current-password').value;
-                  const newPw = document.getElementById('new-password').value;
-                  const confirmPw = document.getElementById('confirm-password').value;
-                  if (!curPw || !newPw) { toast.error('Please fill all fields'); return; }
-                  if (newPw !== confirmPw) { toast.error('New passwords do not match'); return; }
-                  if (newPw.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+                  const curPw =
+                    document.getElementById("current-password").value;
+                  const newPw = document.getElementById("new-password").value;
+                  const confirmPw =
+                    document.getElementById("confirm-password").value;
+                  if (!curPw || !newPw) {
+                    toast.error("Please fill all fields");
+                    return;
+                  }
+                  if (newPw !== confirmPw) {
+                    toast.error("New passwords do not match");
+                    return;
+                  }
+                  if (newPw.length < 6) {
+                    toast.error("Password must be at least 6 characters");
+                    return;
+                  }
                   try {
-                    const response = await fetch(`${API_URL}/api/auth/change-password`, {
-                      method: 'POST', headers: getAuthHeaders(),
-                      body: JSON.stringify({ current_password: curPw, new_password: newPw }),
-                    });
+                    const response = await fetch(
+                      `${API_URL}/api/auth/change-password`,
+                      {
+                        method: "POST",
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({
+                          current_password: curPw,
+                          new_password: newPw,
+                        }),
+                      },
+                    );
                     if (response.ok) {
-                      toast.success('Password changed successfully');
-                      document.getElementById('current-password').value = '';
-                      document.getElementById('new-password').value = '';
-                      document.getElementById('confirm-password').value = '';
+                      toast.success("Password changed successfully");
+                      document.getElementById("current-password").value = "";
+                      document.getElementById("new-password").value = "";
+                      document.getElementById("confirm-password").value = "";
                     } else {
                       const err = await response.json();
-                      toast.error(err.detail || 'Failed to change password');
+                      toast.error(err.detail || "Failed to change password");
                     }
-                  } catch { toast.error('Failed to change password'); }
+                  } catch {
+                    toast.error("Failed to change password");
+                  }
                 }}
               >
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -1376,10 +1802,18 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white font-medium">2FA (Email OTP)</p>
-                    <p className="text-xs text-[#C5C6C7]">Email verification on every login</p>
+                    <p className="text-xs text-[#C5C6C7]">
+                      Email verification on every login
+                    </p>
                   </div>
-                  <Badge className={twofaEnabled ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}>
-                    {twofaEnabled ? 'ENABLED' : 'DISABLED'}
+                  <Badge
+                    className={
+                      twofaEnabled
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-slate-500/20 text-slate-400"
+                    }
+                  >
+                    {twofaEnabled ? "ENABLED" : "DISABLED"}
                   </Badge>
                 </div>
               </div>
@@ -1387,29 +1821,52 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white font-medium">Session Timeout</p>
-                    <p className="text-xs text-[#C5C6C7]">Auto-logout after inactivity</p>
+                    <p className="text-xs text-[#C5C6C7]">
+                      Auto-logout after inactivity
+                    </p>
                   </div>
-                  <Badge className="bg-blue-500/20 text-blue-400">{sessionTimeout} hours</Badge>
+                  <Badge className="bg-blue-500/20 text-blue-400">
+                    {sessionTimeout} hours
+                  </Badge>
                 </div>
               </div>
-              <p className="text-xs text-[#C5C6C7]">Security settings are managed by your system administrator.</p>
+              <p className="text-xs text-[#C5C6C7]">
+                Security settings are managed by your system administrator.
+              </p>
               <div className="p-3 bg-slate-50 rounded-sm border border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-white font-medium">Approval Notifications</p>
-                    <p className="text-xs text-[#C5C6C7]">Receive email when transactions need approval</p>
+                    <p className="text-white font-medium">
+                      Approval Notifications
+                    </p>
+                    <p className="text-xs text-[#C5C6C7]">
+                      Receive email when transactions need approval
+                    </p>
                   </div>
                   <Switch
                     checked={approvalNotifications}
                     onCheckedChange={async (checked) => {
                       setApprovalNotifications(checked);
                       try {
-                        await fetch(`${API_URL}/api/auth/notification-preferences`, {
-                          method: 'PUT', headers: getAuthHeaders(),
-                          body: JSON.stringify({ approval_notifications: checked }),
-                        });
-                        toast.success(checked ? 'Approval notifications enabled' : 'Approval notifications disabled');
-                      } catch { toast.error('Failed to update'); setApprovalNotifications(!checked); }
+                        await fetch(
+                          `${API_URL}/api/auth/notification-preferences`,
+                          {
+                            method: "PUT",
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({
+                              approval_notifications: checked,
+                            }),
+                          },
+                        );
+                        toast.success(
+                          checked
+                            ? "Approval notifications enabled"
+                            : "Approval notifications disabled",
+                        );
+                      } catch {
+                        toast.error("Failed to update");
+                        setApprovalNotifications(!checked);
+                      }
                     }}
                     data-testid="approval-notif-toggle"
                   />
