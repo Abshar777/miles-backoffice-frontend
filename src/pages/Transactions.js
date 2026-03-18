@@ -286,7 +286,7 @@ export default function Transactions() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
 
   const [formData, setFormData] = useState({
     client_id: "",
@@ -2553,7 +2553,10 @@ export default function Transactions() {
               data-testid="filter-date-to"
             />
           </div>
-          {(dateFrom || dateTo || destinationFilter !== "all" || emailFilter) && (
+          {(dateFrom ||
+            dateTo ||
+            destinationFilter !== "all" ||
+            emailFilter) && (
             <Button
               variant="ghost"
               size="sm"
