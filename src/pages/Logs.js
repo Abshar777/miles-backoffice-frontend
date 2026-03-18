@@ -124,7 +124,7 @@ export default function Logs() {
   useEffect(() => {
     fetchLogs(activeTab === 'all' ? '' : activeTab);
     fetchStats();
-  }, [activeTab]);
+  }, [activeTab, currentPage, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = () => {
     fetchLogs(activeTab === 'all' ? '' : activeTab);
@@ -495,7 +495,7 @@ export default function Logs() {
         </TabsContent>
       </Tabs>
 
-      <PaginationControls currentPage={currentPage} totalPages={totalPages} totalItems={total} pageSize={pageSize} onPageChange={p => { setCurrentPage(p); fetchLogs(activeTab === 'all' ? '' : activeTab, p); }} onPageSizeChange={s => { setPageSize(s); setCurrentPage(1); fetchLogs(activeTab === 'all' ? '' : activeTab, 1); }} />
+      <PaginationControls currentPage={currentPage} totalPages={totalPages} totalItems={total} pageSize={pageSize} onPageChange={p => { setCurrentPage(p); fetchLogs(activeTab === 'all' ? '' : activeTab, p); }} onPageSizeChange={s => { setPageSize(s); setCurrentPage(1); }} />
 
       {/* Most Active Users & Common Actions */}
       {stats && (

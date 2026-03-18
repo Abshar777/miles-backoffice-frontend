@@ -155,7 +155,7 @@ export default function ExchangerDashboard() {
     }
   };
 
-  const fetchTransactions = async (pg) => {
+  const fetchTransactions = async (pg, size) => {
     try {
       const p = pg || txPage;
       const params = new URLSearchParams();
@@ -164,7 +164,7 @@ export default function ExchangerDashboard() {
       if (txDateFrom) params.append('date_from', txDateFrom);
       if (txDateTo) params.append('date_to', txDateTo);
       params.append('page', p);
-      params.append('page_size', txPageSize);
+      params.append('page_size', size ?? txPageSize);
       const qs = `?${params.toString()}`;
       const response = await fetch(`${API_URL}/api/vendor/transactions${qs}`, { 
         headers: getAuthHeaders(), 
@@ -181,11 +181,11 @@ export default function ExchangerDashboard() {
     }
   };
 
-  const fetchSettlements = async (pg) => {
+  const fetchSettlements = async (pg, size) => {
     if (!vendorInfo) return;
     try {
       const p = pg || stPage;
-      const response = await fetch(`${API_URL}/api/vendor/settlements?page=${p}&page_size=${stPageSize}`, {
+      const response = await fetch(`${API_URL}/api/vendor/settlements?page=${p}&page_size=${size ?? stPageSize}`, {
         headers: getAuthHeaders(),
         credentials: 'include'
       });
@@ -200,10 +200,10 @@ export default function ExchangerDashboard() {
     }
   };
 
-  const fetchIeEntries = async (pg) => {
+  const fetchIeEntries = async (pg, size) => {
     try {
       const p = pg || iePage;
-      const response = await fetch(`${API_URL}/api/vendor/income-expenses?page=${p}&page_size=${iePageSize}`, {
+      const response = await fetch(`${API_URL}/api/vendor/income-expenses?page=${p}&page_size=${size ?? iePageSize}`, {
         headers: getAuthHeaders(),
         credentials: 'include'
       });
@@ -1257,7 +1257,7 @@ export default function ExchangerDashboard() {
             </Table>
           </ScrollArea>
         </CardContent>
-        <PaginationControls currentPage={txPage} totalPages={txTotalPages} totalItems={txTotal} pageSize={txPageSize} onPageChange={p => { setTxPage(p); fetchTransactions(p); }} onPageSizeChange={s => { setTxPageSize(s); setTxPage(1); fetchTransactions(1); }} />
+        <PaginationControls currentPage={txPage} totalPages={txTotalPages} totalItems={txTotal} pageSize={txPageSize} onPageChange={p => { setTxPage(p); fetchTransactions(p); }} onPageSizeChange={s => { setTxPageSize(s); setTxPage(1); fetchTransactions(1, s); }} />
       </Card>
         </TabsContent>
 
@@ -1446,7 +1446,7 @@ export default function ExchangerDashboard() {
               )}
             </CardContent>
           </Card>
-          <PaginationControls currentPage={iePage} totalPages={ieTotalPages} totalItems={ieTotal} pageSize={iePageSize} onPageChange={p => { setIePage(p); fetchIeEntries(p); }} onPageSizeChange={s => { setIePageSize(s); setIePage(1); fetchIeEntries(1); }} />
+          <PaginationControls currentPage={iePage} totalPages={ieTotalPages} totalItems={ieTotal} pageSize={iePageSize} onPageChange={p => { setIePage(p); fetchIeEntries(p); }} onPageSizeChange={s => { setIePageSize(s); setIePage(1); fetchIeEntries(1, s); }} />
         </TabsContent>
 
         {/* Settlements Tab */}
@@ -1588,7 +1588,7 @@ export default function ExchangerDashboard() {
           )}
         </CardContent>
       </Card>
-      <PaginationControls currentPage={stPage} totalPages={stTotalPages} totalItems={stTotal} pageSize={stPageSize} onPageChange={p => { setStPage(p); fetchSettlements(p); }} onPageSizeChange={s => { setStPageSize(s); setStPage(1); fetchSettlements(1); }} />
+      <PaginationControls currentPage={stPage} totalPages={stTotalPages} totalItems={stTotal} pageSize={stPageSize} onPageChange={p => { setStPage(p); fetchSettlements(p); }} onPageSizeChange={s => { setStPageSize(s); setStPage(1); fetchSettlements(1, s); }} />
         </TabsContent>
       </Tabs>
 

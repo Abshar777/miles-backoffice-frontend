@@ -1004,6 +1004,7 @@ export default function TransactionRequests() {
     },
     [
       page,
+      pageSize,
       statusFilter,
       typeFilter,
       searchQuery,
@@ -1568,7 +1569,7 @@ export default function TransactionRequests() {
         onPageSizeChange={(s) => {
           setPageSize(s);
           setPage(1);
-          fetchRequests(1);
+          // pageSize in useCallback deps recreates fetchRequests → useEffect triggers re-fetch
         }}
       />
 
