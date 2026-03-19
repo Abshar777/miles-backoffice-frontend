@@ -73,6 +73,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  ArrowLeft,
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -516,6 +517,447 @@ export default function Exchangers() {
   const pendingApproved = pendingTransactions.filter(t => t.status === 'approved' && !t.settled);
 
   return (
+    <>
+    {viewExchanger ? (
+      <div className="space-y-6 animate-fade-in" data-testid="exchanger-detail-page">
+        {/* Back button + Header */}
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => { setViewExchanger(null); setPendingTransactions([]); setSettlements([]); }} className="text-slate-500 hover:text-slate-800 h-8 w-8 p-0" data-testid="back-to-exchangers">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <Store className="w-6 h-6 text-blue-600" />
+          <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+            {viewExchanger?.vendor_name}
+          </h1>
+          {detailLoading && <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />}
+        </div>
+
+        {/* Exchanger Info */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-sm">
+          <div>
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Money In (Bank)</p>
+            <p className="text-xl font-mono text-slate-800">{viewExchanger.deposit_commission || 0}%</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Money In (Cash)</p>
+            <p className="text-xl font-mono text-amber-600">{viewExchanger.deposit_commission_cash || 0}%</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Money Out (Bank)</p>
+            <p className="text-xl font-mono text-slate-800">{viewExchanger.withdrawal_commission || 0}%</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Money Out (Cash)</p>
+            <p className="text-xl font-mono text-amber-600">{viewExchanger.withdrawal_commission_cash || 0}%</p>
+          </div>
+        </div>
+              <div className="p-4 bg-slate-50 rounded-sm border-l-4 border-l-[#66FCF1]">
+                <p className="text-xs text-blue-600 uppercase tracking-wider mb-3">Settlement Balance (Money In - Money Out - Commission)</p>
+                {viewExchanger.settlement_by_currency && viewExchanger.settlement_by_currency.length > 0 ? (
+                  <div className="space-y-3">
+                    {viewExchanger.settlement_by_currency.map((item, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge className={`${
+                              item.currency === 'USD' ? 'bg-green-500/20 text-green-400' :
+                              item.currency === 'EUR' ? 'bg-blue-500/20 text-blue-400' :
+                              item.currency === 'AED' ? 'bg-purple-500/20 text-purple-400' :
+                              item.currency === 'GBP' ? 'bg-yellow-500/20 text-yellow-400' :
+                              item.currency === 'INR' ? 'bg-orange-500/20 text-orange-400' :
+                              'bg-gray-500/20 text-gray-400'
+                            }`}>
+                              {item.currency}
+                            </Badge>
+                            <span className="text-xs text-slate-500">({item.transaction_count} entries)</span>
+                          </div>
+                          <div className="text-right">
+                            <span className={`text-lg font-bold font-mono ${item.amount >= 0 ? 'text-blue-600' : 'text-red-400'}`}>
+                              {item.amount?.toLocaleString()}
+                            </span>
+                            {item.currency !== 'USD' && (
+                              <span className="text-xs text-slate-500 block">≈ ${item.usd_equivalent?.toLocaleString()} USD</span>
+                            )}
+                          </div>
+                        </div>
+                        {/* Money In breakdown */}
+                        <div className="pl-2 text-xs space-y-0.5">
+                          <div className="flex justify-between text-green-400">
+                            <span>Money In:</span>
+                            <span>+{item.total_in?.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-400 pl-3">
+                            <span>Deposits ({item.deposit_count})</span>
+                            <span>+{item.deposit_amount?.toLocaleString()}</span>
+                          </div>
+                          {(item.ie_in > 0) && <div className="flex justify-between text-slate-400 pl-3"><span>I&E In</span><span>+{item.ie_in?.toLocaleString()}</span></div>}
+                          {(item.loan_in > 0) && <div className="flex justify-between text-slate-400 pl-3"><span>Loan In</span><span>+{item.loan_in?.toLocaleString()}</span></div>}
+                          {/* Money Out breakdown */}
+                          <div className="flex justify-between text-red-400">
+                            <span>Money Out:</span>
+                            <span>-{item.total_out?.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-400 pl-3">
+                            <span>Withdrawals ({item.withdrawal_count})</span>
+                            <span>-{item.withdrawal_amount?.toLocaleString()}</span>
+                          </div>
+                          {(item.ie_out > 0) && <div className="flex justify-between text-slate-400 pl-3"><span>I&E Out</span><span>-{item.ie_out?.toLocaleString()}</span></div>}
+                          {(item.loan_out > 0) && <div className="flex justify-between text-slate-400 pl-3"><span>Loan Out</span><span>-{item.loan_out?.toLocaleString()}</span></div>}
+                          {/* Commission */}
+                          <div className="flex justify-between text-yellow-400">
+                            <span>Commission:</span>
+                            <span>-{item.commission_earned_base?.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="border-t border-slate-200 pt-2 mt-2">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-slate-500 text-sm">Total Commission:</span>
+                        <span className="text-sm font-bold font-mono text-yellow-400">
+                          ${viewExchanger.settlement_by_currency.reduce((sum, item) => sum + (item.commission_earned_usd || 0), 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500 text-sm">Net Settlement (USD):</span>
+                        <span className={`text-lg font-bold font-mono ${viewExchanger.settlement_by_currency.reduce((sum, item) => sum + (item.usd_equivalent || 0), 0) >= 0 ? 'text-slate-800' : 'text-red-400'}`}>
+                          ${viewExchanger.settlement_by_currency.reduce((sum, item) => sum + (item.usd_equivalent || 0), 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-slate-500">No pending settlement</p>
+                )}
+              </div>
+
+              {/* Settle Button */}
+              {isAccountantOrAdmin && pendingTransactions.filter(t => (t.status === 'approved' || t.status === 'completed') && !t.settled).length > 0 && (
+                <Button
+                  onClick={() => setSettleDialogOpen(true)}
+                  className="w-full bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30"
+                  data-testid="settle-vendor-btn"
+                >
+                  <Wallet className="w-4 h-4 mr-2" />
+                  Settle Exchanger Balance (${viewExchanger?.settlement_by_currency?.reduce((sum, item) => sum + (item.usd_equivalent || 0), 0).toLocaleString() || '0'})
+                </Button>
+              )}
+
+              {/* Tabs */}
+              <Tabs defaultValue="transactions" className="w-full">
+                <TabsList className="bg-slate-50 border border-slate-200">
+                  <TabsTrigger value="transactions" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
+                    Transactions ({pendingTransactions.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
+                    Settlement History
+                  </TabsTrigger>
+                  <TabsTrigger value="ie" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
+                    Income/Expenses ({vendorIeEntries.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="loans" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
+                    Loan Transactions ({vendorLoanTxs.length})
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="transactions" className="mt-4">
+                  <ScrollArea className="h-[500px]">
+                    {pendingTransactions.length === 0 ? (
+                      <div className="text-center py-8 text-slate-500">
+                        No transactions
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-slate-200 hover:bg-transparent">
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Reference</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Type</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Client</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Amount</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Currency</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Commission</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Mode</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Status</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Settled</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {pendingTransactions.map((tx) => {
+                            const displayCurrency = tx.base_currency || tx.currency || 'USD';
+                            const displayAmount = tx.base_amount || tx.amount;
+                            return (
+                            <TableRow key={tx.transaction_id} className="border-slate-200 hover:bg-slate-100">
+                              <TableCell className="font-mono text-slate-800">{tx.reference}</TableCell>
+                              <TableCell>
+                                <span className={`flex items-center gap-1 ${tx.transaction_type === 'deposit' ? 'text-green-400' : 'text-red-400'}`}>
+                                  {tx.transaction_type === 'deposit' ? <ArrowDownRight className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
+                                  {tx.transaction_type}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-slate-800">{tx.client_name}</TableCell>
+                              <TableCell className="font-mono text-slate-800">
+                                {displayAmount?.toLocaleString()}
+                                {tx.base_currency && tx.base_currency !== tx.currency && (
+                                  <span className="text-xs text-slate-500 block">(${tx.amount?.toLocaleString()} USD)</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={`${
+                                  displayCurrency === 'USD' ? 'bg-green-500/20 text-green-400' :
+                                  displayCurrency === 'EUR' ? 'bg-blue-500/20 text-blue-400' :
+                                  displayCurrency === 'AED' ? 'bg-purple-500/20 text-purple-400' :
+                                  displayCurrency === 'GBP' ? 'bg-yellow-500/20 text-yellow-400' :
+                                  displayCurrency === 'INR' ? 'bg-orange-500/20 text-orange-400' :
+                                  'bg-gray-500/20 text-gray-400'
+                                }`}>
+                                  {displayCurrency}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {tx.vendor_commission_base_amount ? (
+                                  <div className="font-mono text-yellow-400">
+                                    <span>{tx.vendor_commission_base_amount?.toLocaleString()} {tx.vendor_commission_base_currency || tx.base_currency || 'USD'}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-500 text-xs">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={tx.transaction_mode === 'cash' ? 'bg-amber-100 text-amber-700 text-[10px]' : 'bg-blue-100 text-blue-700 text-[10px]'}>
+                                  {tx.transaction_mode === 'cash' ? 'Cash' : 'Bank'}
+                                </Badge>
+                                {tx.transaction_mode === 'cash' && tx.collecting_person_name && (
+                                  <div className="text-[10px] text-slate-600 mt-0.5 space-y-0.5">
+                                    <p className="font-medium">{tx.collecting_person_name}</p>
+                                    {tx.collecting_person_number && <p className="text-slate-500">{tx.collecting_person_number}</p>}
+                                  </div>
+                                )}
+                              </TableCell>
+                              <TableCell>{getStatusBadge(tx.status)}</TableCell>
+                              <TableCell>
+                                {tx.settled ? (
+                                  <Badge className="bg-green-500/20 text-green-400">Yes</Badge>
+                                ) : (
+                                  <Badge className="bg-yellow-500/20 text-yellow-400">No</Badge>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          )})}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+                
+                <TabsContent value="history" className="mt-4">
+                  <ScrollArea className="h-[500px]">
+                    {settlements.length === 0 ? (
+                      <div className="text-center py-8 text-slate-500">
+                        No settlement history
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-slate-200 hover:bg-transparent">
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">ID</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Type</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Gross</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Deductions</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Settled</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Date</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {settlements.map((settlement) => (
+                            <TableRow key={settlement.settlement_id} className="border-slate-200 hover:bg-slate-100">
+                              <TableCell className="font-mono text-slate-800 text-xs">{settlement.settlement_id}</TableCell>
+                              <TableCell>
+                                <Badge className={settlement.settlement_type === 'bank' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}>
+                                  {settlement.settlement_type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="font-mono text-slate-800">
+                                {settlement.source_currency && settlement.source_currency !== 'USD'
+                                  ? `${settlement.source_currency} ${settlement.gross_amount?.toLocaleString()}`
+                                  : `$${settlement.gross_amount?.toLocaleString()}`}
+                              </TableCell>
+                              <TableCell className="font-mono text-red-400">
+                                <div className="text-xs">
+                                  <div>Comm: -{settlement.source_currency && settlement.source_currency !== 'USD' ? `${settlement.source_currency} ` : '$'}{settlement.commission_amount?.toLocaleString()}</div>
+                                  {settlement.charges_amount > 0 && (
+                                    <div>Charges: -{settlement.source_currency && settlement.source_currency !== 'USD' ? `${settlement.source_currency} ` : '$'}{settlement.charges_amount?.toLocaleString()}</div>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="font-mono text-green-400">
+                                {settlement.destination_currency && settlement.destination_currency !== 'USD' ? (
+                                  <span>{settlement.destination_currency} {settlement.settlement_amount?.toLocaleString()}</span>
+                                ) : (
+                                  <span>${settlement.settlement_amount?.toLocaleString()}</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-slate-500">{formatDate(settlement.settled_at)}</TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => openStatement(settlement.settlement_id)}
+                                  className="text-blue-600 hover:bg-blue-100 h-7 px-2"
+                                  data-testid={`view-statement-${settlement.settlement_id}`}
+                                >
+                                  <FileText className="w-3.5 h-3.5 mr-1" />
+                                  <span className="text-xs">Statement</span>
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="ie" className="mt-4">
+                  <ScrollArea className="h-[500px]">
+                    {vendorIeEntries.length === 0 ? (
+                      <div className="text-center py-8 text-slate-500">
+                        <p>No income/expense entries for this exchanger</p>
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-slate-200">
+                            <TableHead className="text-slate-500 text-xs uppercase">Reference</TableHead>
+                            <TableHead className="text-slate-500 text-xs uppercase">Type</TableHead>
+                            <TableHead className="text-slate-500 text-xs uppercase">Category</TableHead>
+                            <TableHead className="text-slate-500 text-xs uppercase">Amount</TableHead>
+                            <TableHead className="text-slate-500 text-xs uppercase">Currency</TableHead>
+                            <TableHead className="text-slate-500 text-xs uppercase">Commission</TableHead>
+                            <TableHead className="text-slate-500 text-xs uppercase">Mode</TableHead>
+                            <TableHead className="text-slate-500 text-xs uppercase">Status</TableHead>
+                            <TableHead className="text-slate-500 text-xs uppercase">Date</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {vendorIeEntries.map((entry) => {
+                            const isIncome = entry.entry_type === 'income';
+                            return (
+                              <TableRow key={entry.entry_id} className="border-slate-200 hover:bg-slate-50">
+                                <TableCell className="font-mono text-xs text-slate-800">{entry.entry_id?.slice(-10)?.toUpperCase()}</TableCell>
+                                <TableCell>
+                                  <span className={`flex items-center gap-1 text-xs ${isIncome ? 'text-green-600' : 'text-red-500'}`}>
+                                    {isIncome ? <ArrowDownRight className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
+                                    {isIncome ? 'Income' : 'Expense'}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-slate-600 text-xs capitalize">{entry.category?.replace('_', ' ') || '-'}</TableCell>
+                                <TableCell className={`font-mono text-xs ${isIncome ? 'text-green-600' : 'text-red-500'}`}>
+                                  {isIncome ? '+' : '-'}{entry.amount?.toLocaleString()}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className="text-[10px] bg-slate-100 text-slate-600">{entry.currency || 'USD'}</Badge>
+                                </TableCell>
+                                <TableCell>
+                                  {entry.vendor_commission_base_amount ? (
+                                    <span className="font-mono text-xs text-yellow-600">
+                                      {entry.vendor_commission_base_amount?.toLocaleString()} {entry.vendor_commission_base_currency || entry.base_currency || entry.currency}
+                                    </span>
+                                  ) : <span className="text-slate-400 text-xs">-</span>}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className={entry.transaction_mode === 'cash' ? 'bg-amber-100 text-amber-700 text-[10px]' : 'bg-blue-100 text-blue-700 text-[10px]'}>
+                                    {entry.transaction_mode === 'cash' ? 'Cash' : 'Bank'}
+                                  </Badge>
+                                  {entry.transaction_mode === 'cash' && entry.collecting_person_name && (
+                                    <div className="text-[10px] text-slate-600 mt-0.5 space-y-0.5">
+                                      <p className="font-medium">{entry.collecting_person_name}</p>
+                                      {entry.collecting_person_number && <p className="text-slate-500">{entry.collecting_person_number}</p>}
+                                    </div>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  {entry.status === 'pending_vendor' && <Badge className="bg-amber-100 text-amber-700 text-[10px]">Pending</Badge>}
+                                  {entry.status === 'completed' && <Badge className="bg-green-100 text-green-700 text-[10px]">Completed</Badge>}
+                                  {entry.status === 'rejected' && <Badge className="bg-red-100 text-red-700 text-[10px]">Rejected</Badge>}
+                                  {entry.status === 'active' && <Badge className="bg-blue-100 text-blue-700 text-[10px]">Active</Badge>}
+                                </TableCell>
+                                <TableCell className="text-slate-500 text-xs">
+                                  {entry.date ? new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+
+                {/* Loan Transactions Tab */}
+                <TabsContent value="loans" className="mt-4">
+                  <ScrollArea className="h-[500px]">
+                    {vendorLoanTxs.length === 0 ? (
+                      <div className="text-center py-8 text-slate-500">
+                        No loan transactions involving this exchanger
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-slate-200 hover:bg-transparent">
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Reference</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Type</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Borrower</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Amount</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Currency</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Status</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Date</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {vendorLoanTxs.map((tx) => {
+                            const isDisbursement = tx.transaction_type === 'disbursement';
+                            const isVendorSource = tx.source_vendor_id === viewExchanger?.vendor_id;
+                            return (
+                              <TableRow key={tx.transaction_id} className="border-slate-200 hover:bg-slate-100">
+                                <TableCell className="font-mono text-slate-800 text-xs">{tx.transaction_id?.slice(-12).toUpperCase()}</TableCell>
+                                <TableCell>
+                                  <span className={`flex items-center gap-1 ${isVendorSource ? 'text-red-400' : 'text-green-400'}`}>
+                                    {isVendorSource ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                                    <span className="text-xs font-medium">{isVendorSource ? 'OUT (Disbursement)' : 'IN (Repayment)'}</span>
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-slate-800 text-sm">{tx.borrower_name || '-'}</TableCell>
+                                <TableCell className={`font-mono ${isVendorSource ? 'text-red-400' : 'text-green-400'}`}>
+                                  {isVendorSource ? '-' : '+'}{tx.amount?.toLocaleString()}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className="bg-green-500/20 text-green-400">{tx.currency || 'USD'}</Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className={
+                                    tx.status === 'pending_vendor' ? 'bg-amber-100 text-amber-700 text-[10px]' :
+                                    tx.status === 'completed' ? 'bg-green-100 text-green-700 text-[10px]' :
+                                    tx.status === 'rejected' ? 'bg-red-100 text-red-700 text-[10px]' :
+                                    'bg-slate-100 text-slate-600 text-[10px]'
+                                  }>
+                                    {tx.status === 'pending_vendor' ? 'Pending' : tx.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-slate-500 text-xs">
+                                  {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </div>
+    ) : (
     <div className="space-y-6 animate-fade-in" data-testid="vendors-page">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -888,455 +1330,8 @@ export default function Exchangers() {
           </Pagination>
         </div>
       )}
-
-      {/* View Exchanger Details Dialog */}
-      <Dialog open={!!viewExchanger} onOpenChange={() => { setViewExchanger(null); setPendingTransactions([]); setSettlements([]); }}>
-        <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-4xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight flex items-center gap-3" style={{ fontFamily: 'Barlow Condensed' }}>
-              <Store className="w-6 h-6 text-blue-600" />
-              {viewExchanger?.vendor_name}
-              {detailLoading && <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />}
-            </DialogTitle>
-          </DialogHeader>
-          {viewExchanger && (
-            <div className="space-y-4">
-              {detailLoading && (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="w-6 h-6 animate-spin text-blue-500 mr-2" />
-                  <span className="text-slate-500">Loading exchanger data...</span>
-                </div>
-              )}
-              {/* Exchanger Info */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-sm">
-                <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Money In (Bank)</p>
-                  <p className="text-xl font-mono text-slate-800">{viewExchanger.deposit_commission || 0}%</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Money In (Cash)</p>
-                  <p className="text-xl font-mono text-amber-600">{viewExchanger.deposit_commission_cash || 0}%</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Money Out (Bank)</p>
-                  <p className="text-xl font-mono text-slate-800">{viewExchanger.withdrawal_commission || 0}%</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Money Out (Cash)</p>
-                  <p className="text-xl font-mono text-amber-600">{viewExchanger.withdrawal_commission_cash || 0}%</p>
-                </div>
-              </div>
-              
-              {/* Settlement Balance by Currency */}
-              <div className="p-4 bg-slate-50 rounded-sm border-l-4 border-l-[#66FCF1]">
-                <p className="text-xs text-blue-600 uppercase tracking-wider mb-3">Settlement Balance (Money In - Money Out - Commission)</p>
-                {viewExchanger.settlement_by_currency && viewExchanger.settlement_by_currency.length > 0 ? (
-                  <div className="space-y-3">
-                    {viewExchanger.settlement_by_currency.map((item, idx) => (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Badge className={`${
-                              item.currency === 'USD' ? 'bg-green-500/20 text-green-400' :
-                              item.currency === 'EUR' ? 'bg-blue-500/20 text-blue-400' :
-                              item.currency === 'AED' ? 'bg-purple-500/20 text-purple-400' :
-                              item.currency === 'GBP' ? 'bg-yellow-500/20 text-yellow-400' :
-                              item.currency === 'INR' ? 'bg-orange-500/20 text-orange-400' :
-                              'bg-gray-500/20 text-gray-400'
-                            }`}>
-                              {item.currency}
-                            </Badge>
-                            <span className="text-xs text-slate-500">({item.transaction_count} entries)</span>
-                          </div>
-                          <div className="text-right">
-                            <span className={`text-lg font-bold font-mono ${item.amount >= 0 ? 'text-blue-600' : 'text-red-400'}`}>
-                              {item.amount?.toLocaleString()}
-                            </span>
-                            {item.currency !== 'USD' && (
-                              <span className="text-xs text-slate-500 block">≈ ${item.usd_equivalent?.toLocaleString()} USD</span>
-                            )}
-                          </div>
-                        </div>
-                        {/* Money In breakdown */}
-                        <div className="pl-2 text-xs space-y-0.5">
-                          <div className="flex justify-between text-green-400">
-                            <span>Money In:</span>
-                            <span>+{item.total_in?.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between text-slate-400 pl-3">
-                            <span>Deposits ({item.deposit_count})</span>
-                            <span>+{item.deposit_amount?.toLocaleString()}</span>
-                          </div>
-                          {(item.ie_in > 0) && <div className="flex justify-between text-slate-400 pl-3"><span>I&E In</span><span>+{item.ie_in?.toLocaleString()}</span></div>}
-                          {(item.loan_in > 0) && <div className="flex justify-between text-slate-400 pl-3"><span>Loan In</span><span>+{item.loan_in?.toLocaleString()}</span></div>}
-                          {/* Money Out breakdown */}
-                          <div className="flex justify-between text-red-400">
-                            <span>Money Out:</span>
-                            <span>-{item.total_out?.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between text-slate-400 pl-3">
-                            <span>Withdrawals ({item.withdrawal_count})</span>
-                            <span>-{item.withdrawal_amount?.toLocaleString()}</span>
-                          </div>
-                          {(item.ie_out > 0) && <div className="flex justify-between text-slate-400 pl-3"><span>I&E Out</span><span>-{item.ie_out?.toLocaleString()}</span></div>}
-                          {(item.loan_out > 0) && <div className="flex justify-between text-slate-400 pl-3"><span>Loan Out</span><span>-{item.loan_out?.toLocaleString()}</span></div>}
-                          {/* Commission */}
-                          <div className="flex justify-between text-yellow-400">
-                            <span>Commission:</span>
-                            <span>-{item.commission_earned_base?.toLocaleString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="border-t border-slate-200 pt-2 mt-2">
-                      <div className="flex justify-between mb-1">
-                        <span className="text-slate-500 text-sm">Total Commission:</span>
-                        <span className="text-sm font-bold font-mono text-yellow-400">
-                          ${viewExchanger.settlement_by_currency.reduce((sum, item) => sum + (item.commission_earned_usd || 0), 0).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500 text-sm">Net Settlement (USD):</span>
-                        <span className={`text-lg font-bold font-mono ${viewExchanger.settlement_by_currency.reduce((sum, item) => sum + (item.usd_equivalent || 0), 0) >= 0 ? 'text-slate-800' : 'text-red-400'}`}>
-                          ${viewExchanger.settlement_by_currency.reduce((sum, item) => sum + (item.usd_equivalent || 0), 0).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-slate-500">No pending settlement</p>
-                )}
-              </div>
-
-              {/* Settle Button */}
-              {isAccountantOrAdmin && pendingTransactions.filter(t => (t.status === 'approved' || t.status === 'completed') && !t.settled).length > 0 && (
-                <Button
-                  onClick={() => setSettleDialogOpen(true)}
-                  className="w-full bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30"
-                  data-testid="settle-vendor-btn"
-                >
-                  <Wallet className="w-4 h-4 mr-2" />
-                  Settle Exchanger Balance (${viewExchanger?.settlement_by_currency?.reduce((sum, item) => sum + (item.usd_equivalent || 0), 0).toLocaleString() || '0'})
-                </Button>
-              )}
-
-              {/* Tabs */}
-              <Tabs defaultValue="transactions" className="w-full">
-                <TabsList className="bg-slate-50 border border-slate-200">
-                  <TabsTrigger value="transactions" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-                    Transactions ({pendingTransactions.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="history" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-                    Settlement History
-                  </TabsTrigger>
-                  <TabsTrigger value="ie" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-                    Income/Expenses ({vendorIeEntries.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="loans" className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]">
-                    Loan Transactions ({vendorLoanTxs.length})
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="transactions" className="mt-4">
-                  <ScrollArea className="h-[250px]">
-                    {pendingTransactions.length === 0 ? (
-                      <div className="text-center py-8 text-slate-500">
-                        No transactions
-                      </div>
-                    ) : (
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="border-slate-200 hover:bg-transparent">
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Reference</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Type</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Client</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Amount</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Currency</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Commission</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Mode</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Status</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Settled</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {pendingTransactions.map((tx) => {
-                            const displayCurrency = tx.base_currency || tx.currency || 'USD';
-                            const displayAmount = tx.base_amount || tx.amount;
-                            return (
-                            <TableRow key={tx.transaction_id} className="border-slate-200 hover:bg-slate-100">
-                              <TableCell className="font-mono text-slate-800">{tx.reference}</TableCell>
-                              <TableCell>
-                                <span className={`flex items-center gap-1 ${tx.transaction_type === 'deposit' ? 'text-green-400' : 'text-red-400'}`}>
-                                  {tx.transaction_type === 'deposit' ? <ArrowDownRight className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
-                                  {tx.transaction_type}
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-slate-800">{tx.client_name}</TableCell>
-                              <TableCell className="font-mono text-slate-800">
-                                {displayAmount?.toLocaleString()}
-                                {tx.base_currency && tx.base_currency !== tx.currency && (
-                                  <span className="text-xs text-slate-500 block">(${tx.amount?.toLocaleString()} USD)</span>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <Badge className={`${
-                                  displayCurrency === 'USD' ? 'bg-green-500/20 text-green-400' :
-                                  displayCurrency === 'EUR' ? 'bg-blue-500/20 text-blue-400' :
-                                  displayCurrency === 'AED' ? 'bg-purple-500/20 text-purple-400' :
-                                  displayCurrency === 'GBP' ? 'bg-yellow-500/20 text-yellow-400' :
-                                  displayCurrency === 'INR' ? 'bg-orange-500/20 text-orange-400' :
-                                  'bg-gray-500/20 text-gray-400'
-                                }`}>
-                                  {displayCurrency}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                {tx.vendor_commission_base_amount ? (
-                                  <div className="font-mono text-yellow-400">
-                                    <span>{tx.vendor_commission_base_amount?.toLocaleString()} {tx.vendor_commission_base_currency || tx.base_currency || 'USD'}</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-slate-500 text-xs">-</span>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <Badge className={tx.transaction_mode === 'cash' ? 'bg-amber-100 text-amber-700 text-[10px]' : 'bg-blue-100 text-blue-700 text-[10px]'}>
-                                  {tx.transaction_mode === 'cash' ? 'Cash' : 'Bank'}
-                                </Badge>
-                                {tx.transaction_mode === 'cash' && tx.collecting_person_name && (
-                                  <div className="text-[10px] text-slate-600 mt-0.5 space-y-0.5">
-                                    <p className="font-medium">{tx.collecting_person_name}</p>
-                                    {tx.collecting_person_number && <p className="text-slate-500">{tx.collecting_person_number}</p>}
-                                  </div>
-                                )}
-                              </TableCell>
-                              <TableCell>{getStatusBadge(tx.status)}</TableCell>
-                              <TableCell>
-                                {tx.settled ? (
-                                  <Badge className="bg-green-500/20 text-green-400">Yes</Badge>
-                                ) : (
-                                  <Badge className="bg-yellow-500/20 text-yellow-400">No</Badge>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          )})}
-                        </TableBody>
-                      </Table>
-                    )}
-                  </ScrollArea>
-                </TabsContent>
-                
-                <TabsContent value="history" className="mt-4">
-                  <ScrollArea className="h-[250px]">
-                    {settlements.length === 0 ? (
-                      <div className="text-center py-8 text-slate-500">
-                        No settlement history
-                      </div>
-                    ) : (
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="border-slate-200 hover:bg-transparent">
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">ID</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Type</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Gross</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Deductions</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Settled</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Date</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {settlements.map((settlement) => (
-                            <TableRow key={settlement.settlement_id} className="border-slate-200 hover:bg-slate-100">
-                              <TableCell className="font-mono text-slate-800 text-xs">{settlement.settlement_id}</TableCell>
-                              <TableCell>
-                                <Badge className={settlement.settlement_type === 'bank' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}>
-                                  {settlement.settlement_type}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="font-mono text-slate-800">
-                                {settlement.source_currency && settlement.source_currency !== 'USD'
-                                  ? `${settlement.source_currency} ${settlement.gross_amount?.toLocaleString()}`
-                                  : `$${settlement.gross_amount?.toLocaleString()}`}
-                              </TableCell>
-                              <TableCell className="font-mono text-red-400">
-                                <div className="text-xs">
-                                  <div>Comm: -{settlement.source_currency && settlement.source_currency !== 'USD' ? `${settlement.source_currency} ` : '$'}{settlement.commission_amount?.toLocaleString()}</div>
-                                  {settlement.charges_amount > 0 && (
-                                    <div>Charges: -{settlement.source_currency && settlement.source_currency !== 'USD' ? `${settlement.source_currency} ` : '$'}{settlement.charges_amount?.toLocaleString()}</div>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell className="font-mono text-green-400">
-                                {settlement.destination_currency && settlement.destination_currency !== 'USD' ? (
-                                  <span>{settlement.destination_currency} {settlement.settlement_amount?.toLocaleString()}</span>
-                                ) : (
-                                  <span>${settlement.settlement_amount?.toLocaleString()}</span>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-slate-500">{formatDate(settlement.settled_at)}</TableCell>
-                              <TableCell className="text-right">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => openStatement(settlement.settlement_id)}
-                                  className="text-blue-600 hover:bg-blue-100 h-7 px-2"
-                                  data-testid={`view-statement-${settlement.settlement_id}`}
-                                >
-                                  <FileText className="w-3.5 h-3.5 mr-1" />
-                                  <span className="text-xs">Statement</span>
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    )}
-                  </ScrollArea>
-                </TabsContent>
-
-                <TabsContent value="ie" className="mt-4">
-                  <ScrollArea className="h-[300px]">
-                    {vendorIeEntries.length === 0 ? (
-                      <div className="text-center py-8 text-slate-500">
-                        <p>No income/expense entries for this exchanger</p>
-                      </div>
-                    ) : (
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="border-slate-200">
-                            <TableHead className="text-slate-500 text-xs uppercase">Reference</TableHead>
-                            <TableHead className="text-slate-500 text-xs uppercase">Type</TableHead>
-                            <TableHead className="text-slate-500 text-xs uppercase">Category</TableHead>
-                            <TableHead className="text-slate-500 text-xs uppercase">Amount</TableHead>
-                            <TableHead className="text-slate-500 text-xs uppercase">Currency</TableHead>
-                            <TableHead className="text-slate-500 text-xs uppercase">Commission</TableHead>
-                            <TableHead className="text-slate-500 text-xs uppercase">Mode</TableHead>
-                            <TableHead className="text-slate-500 text-xs uppercase">Status</TableHead>
-                            <TableHead className="text-slate-500 text-xs uppercase">Date</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {vendorIeEntries.map((entry) => {
-                            const isIncome = entry.entry_type === 'income';
-                            return (
-                              <TableRow key={entry.entry_id} className="border-slate-200 hover:bg-slate-50">
-                                <TableCell className="font-mono text-xs text-slate-800">{entry.entry_id?.slice(-10)?.toUpperCase()}</TableCell>
-                                <TableCell>
-                                  <span className={`flex items-center gap-1 text-xs ${isIncome ? 'text-green-600' : 'text-red-500'}`}>
-                                    {isIncome ? <ArrowDownRight className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
-                                    {isIncome ? 'Income' : 'Expense'}
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-slate-600 text-xs capitalize">{entry.category?.replace('_', ' ') || '-'}</TableCell>
-                                <TableCell className={`font-mono text-xs ${isIncome ? 'text-green-600' : 'text-red-500'}`}>
-                                  {isIncome ? '+' : '-'}{entry.amount?.toLocaleString()}
-                                </TableCell>
-                                <TableCell>
-                                  <Badge className="text-[10px] bg-slate-100 text-slate-600">{entry.currency || 'USD'}</Badge>
-                                </TableCell>
-                                <TableCell>
-                                  {entry.vendor_commission_base_amount ? (
-                                    <span className="font-mono text-xs text-yellow-600">
-                                      {entry.vendor_commission_base_amount?.toLocaleString()} {entry.vendor_commission_base_currency || entry.base_currency || entry.currency}
-                                    </span>
-                                  ) : <span className="text-slate-400 text-xs">-</span>}
-                                </TableCell>
-                                <TableCell>
-                                  <Badge className={entry.transaction_mode === 'cash' ? 'bg-amber-100 text-amber-700 text-[10px]' : 'bg-blue-100 text-blue-700 text-[10px]'}>
-                                    {entry.transaction_mode === 'cash' ? 'Cash' : 'Bank'}
-                                  </Badge>
-                                  {entry.transaction_mode === 'cash' && entry.collecting_person_name && (
-                                    <div className="text-[10px] text-slate-600 mt-0.5 space-y-0.5">
-                                      <p className="font-medium">{entry.collecting_person_name}</p>
-                                      {entry.collecting_person_number && <p className="text-slate-500">{entry.collecting_person_number}</p>}
-                                    </div>
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  {entry.status === 'pending_vendor' && <Badge className="bg-amber-100 text-amber-700 text-[10px]">Pending</Badge>}
-                                  {entry.status === 'completed' && <Badge className="bg-green-100 text-green-700 text-[10px]">Completed</Badge>}
-                                  {entry.status === 'rejected' && <Badge className="bg-red-100 text-red-700 text-[10px]">Rejected</Badge>}
-                                  {entry.status === 'active' && <Badge className="bg-blue-100 text-blue-700 text-[10px]">Active</Badge>}
-                                </TableCell>
-                                <TableCell className="text-slate-500 text-xs">
-                                  {entry.date ? new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    )}
-                  </ScrollArea>
-                </TabsContent>
-
-                {/* Loan Transactions Tab */}
-                <TabsContent value="loans" className="mt-4">
-                  <ScrollArea className="h-[250px]">
-                    {vendorLoanTxs.length === 0 ? (
-                      <div className="text-center py-8 text-slate-500">
-                        No loan transactions involving this exchanger
-                      </div>
-                    ) : (
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="border-slate-200 hover:bg-transparent">
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Reference</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Type</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Borrower</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Amount</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Currency</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Status</TableHead>
-                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Date</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {vendorLoanTxs.map((tx) => {
-                            const isDisbursement = tx.transaction_type === 'disbursement';
-                            const isVendorSource = tx.source_vendor_id === viewExchanger?.vendor_id;
-                            return (
-                              <TableRow key={tx.transaction_id} className="border-slate-200 hover:bg-slate-100">
-                                <TableCell className="font-mono text-slate-800 text-xs">{tx.transaction_id?.slice(-12).toUpperCase()}</TableCell>
-                                <TableCell>
-                                  <span className={`flex items-center gap-1 ${isVendorSource ? 'text-red-400' : 'text-green-400'}`}>
-                                    {isVendorSource ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                    <span className="text-xs font-medium">{isVendorSource ? 'OUT (Disbursement)' : 'IN (Repayment)'}</span>
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-slate-800 text-sm">{tx.borrower_name || '-'}</TableCell>
-                                <TableCell className={`font-mono ${isVendorSource ? 'text-red-400' : 'text-green-400'}`}>
-                                  {isVendorSource ? '-' : '+'}{tx.amount?.toLocaleString()}
-                                </TableCell>
-                                <TableCell>
-                                  <Badge className="bg-green-500/20 text-green-400">{tx.currency || 'USD'}</Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge className={
-                                    tx.status === 'pending_vendor' ? 'bg-amber-100 text-amber-700 text-[10px]' :
-                                    tx.status === 'completed' ? 'bg-green-100 text-green-700 text-[10px]' :
-                                    tx.status === 'rejected' ? 'bg-red-100 text-red-700 text-[10px]' :
-                                    'bg-slate-100 text-slate-600 text-[10px]'
-                                  }>
-                                    {tx.status === 'pending_vendor' ? 'Pending' : tx.status}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-500 text-xs">
-                                  {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    )}
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+    </div>
+    )}
 
       {/* Settle Exchanger Dialog */}
       <Dialog open={settleDialogOpen} onOpenChange={() => { 
@@ -1813,6 +1808,6 @@ export default function Exchangers() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
