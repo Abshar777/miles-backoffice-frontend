@@ -897,6 +897,67 @@ export default function Transactions() {
     }
   };
 
+
+
+
+  // Bulk upload handlers
+  const handleBulkValidate = async () => {
+    if (!bulkFile) return;
+    setBulkLoading(true);
+    setBulkValidation(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', bulkFile);
+      const res = await fetch(`${API_URL}/api/transactions/bulk-validate`, {
+        method: 'POST', headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }, body: fd
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBulkValidation(data);
+      } else {
+        const err = await res.json();
+        toast.error(err.detail || 'Validation failed');
+      }
+    } catch (e) { toast.error('Failed to validate file: ' + (e.message || 'Network error')); }
+    finally { setBulkLoading(false); }
+  };
+
+  const handleBulkCreate = async () => {
+    if (!bulkValidation?.can_proceed) return;
+    setBulkCreating(true);
+    try {
+      const res = await fetch(`${API_URL}/api/transactions/bulk-create`, {
+        method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows: bulkValidation.rows })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(`Successfully created ${data.created} transactions`);
+        setBulkOpen(false); setBulkFile(null); setBulkValidation(null);
+        fetchTransactions();
+      } else {
+        const err = await res.json();
+        toast.error(err.detail || 'Bulk creation failed');
+      }
+    } catch { toast.error('Failed to create transactions'); }
+    finally { setBulkCreating(false); }
+  };
+
+  const handleDownloadTemplate = async (format) => {
+    try {
+      const res = await fetch(`${API_URL}/api/transactions/bulk-template?format=${format}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url;
+        a.download = `bulk_transactions_template.${format}`; a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch { toast.error('Failed to download template'); }
+  };
+
   // All filtering is done server-side — use transactions directly
   const filteredTransactions = transactions;
 
