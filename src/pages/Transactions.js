@@ -897,9 +897,6 @@ export default function Transactions() {
     }
   };
 
-
-
-
   // Bulk upload handlers
   const handleBulkValidate = async () => {
     if (!bulkFile) return;
@@ -907,19 +904,26 @@ export default function Transactions() {
     setBulkValidation(null);
     try {
       const fd = new FormData();
-      fd.append('file', bulkFile);
+      fd.append("file", bulkFile);
       const res = await fetch(`${API_URL}/api/transactions/bulk-validate`, {
-        method: 'POST', headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }, body: fd
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+        },
+        body: fd,
       });
       if (res.ok) {
         const data = await res.json();
         setBulkValidation(data);
       } else {
         const err = await res.json();
-        toast.error(err.detail || 'Validation failed');
+        toast.error(err.detail || "Validation failed");
       }
-    } catch (e) { toast.error('Failed to validate file: ' + (e.message || 'Network error')); }
-    finally { setBulkLoading(false); }
+    } catch (e) {
+      toast.error("Failed to validate file: " + (e.message || "Network error"));
+    } finally {
+      setBulkLoading(false);
+    }
   };
 
   const handleBulkCreate = async () => {
@@ -927,35 +931,50 @@ export default function Transactions() {
     setBulkCreating(true);
     try {
       const res = await fetch(`${API_URL}/api/transactions/bulk-create`, {
-        method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows: bulkValidation.rows })
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ rows: bulkValidation.rows }),
       });
       if (res.ok) {
         const data = await res.json();
         toast.success(`Successfully created ${data.created} transactions`);
-        setBulkOpen(false); setBulkFile(null); setBulkValidation(null);
+        setBulkOpen(false);
+        setBulkFile(null);
+        setBulkValidation(null);
         fetchTransactions();
       } else {
         const err = await res.json();
-        toast.error(err.detail || 'Bulk creation failed');
+        toast.error(err.detail || "Bulk creation failed");
       }
-    } catch { toast.error('Failed to create transactions'); }
-    finally { setBulkCreating(false); }
+    } catch {
+      toast.error("Failed to create transactions");
+    } finally {
+      setBulkCreating(false);
+    }
   };
 
   const handleDownloadTemplate = async (format) => {
     try {
-      const res = await fetch(`${API_URL}/api/transactions/bulk-template?format=${format}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-      });
+      const res = await fetch(
+        `${API_URL}/api/transactions/bulk-template?format=${format}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          },
+        },
+      );
       if (res.ok) {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url;
-        a.download = `bulk_transactions_template.${format}`; a.click();
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `bulk_transactions_template.${format}`;
+        a.click();
         URL.revokeObjectURL(url);
       }
-    } catch { toast.error('Failed to download template'); }
+    } catch {
+      toast.error("Failed to download template");
+    }
   };
 
   // All filtering is done server-side — use transactions directly
@@ -984,36 +1003,44 @@ export default function Transactions() {
     });
   };
 
-  // Download functions
+  const getDestinationDisplay = (tx) => {
+    if (tx.destination_type === "treasury" || tx.destination_type === "usdt")
+      return tx.destination_account_name || tx.destination_type?.toUpperCase();
+    if (tx.destination_type === "psp") return tx.psp_name || "PSP";
+    if (tx.destination_type === "vendor") return tx.vendor_name || "Exchanger";
+    if (tx.destination_type === "bank")
+      return tx.client_bank_name || "Bank Transfer";
+    return tx.destination_type || "-";
+  };
+
   const downloadCSV = () => {
     const headers = [
       "Date",
       "Client",
       "Type",
+      "Payment Currency",
       "Amount",
-      "Currency",
-      "USD Equivalent",
+      "Exchange Rate",
+      "USD Amount",
       "Status",
       "Destination",
       "Reference",
+      "CRM Reference",
       "Description",
     ];
     const rows = filteredTransactions.map((tx) => [
       formatDate(tx.transaction_date || tx.created_at),
       tx.client_name || getClientName(tx.client_id),
       tx.transaction_type,
+      tx.base_currency || tx.currency || "USD",
+      tx.base_amount || tx.amount,
+      tx.exchange_rate ||
+        (tx.base_currency && tx.base_currency !== "USD" ? "" : "1"),
       tx.amount,
-      tx.currency,
-      tx.amount_usd || tx.amount,
       tx.status,
-      tx.destination_type === "treasury"
-        ? tx.treasury_account_name
-        : tx.destination_type === "psp"
-          ? tx.psp_name
-          : tx.destination_type === "vendor"
-            ? tx.vendor_name
-            : tx.destination_type,
+      getDestinationDisplay(tx),
       tx.reference || "",
+      tx.crm_reference || "",
       tx.description || "",
     ]);
 
@@ -1039,30 +1066,29 @@ export default function Transactions() {
       "Date",
       "Client",
       "Type",
+      "Payment Currency",
       "Amount",
-      "Currency",
-      "USD Equivalent",
+      "Exchange Rate",
+      "USD Amount",
       "Status",
       "Destination",
       "Reference",
+      "CRM Reference",
       "Description",
     ];
     const rows = filteredTransactions.map((tx) => [
       formatDate(tx.transaction_date || tx.created_at),
       tx.client_name || getClientName(tx.client_id),
       tx.transaction_type,
+      tx.base_currency || tx.currency || "USD",
+      tx.base_amount || tx.amount,
+      tx.exchange_rate ||
+        (tx.base_currency && tx.base_currency !== "USD" ? "" : "1"),
       tx.amount,
-      tx.currency,
-      tx.amount_usd || tx.amount,
       tx.status,
-      tx.destination_type === "treasury"
-        ? tx.treasury_account_name
-        : tx.destination_type === "psp"
-          ? tx.psp_name
-          : tx.destination_type === "vendor"
-            ? tx.vendor_name
-            : tx.destination_type,
+      getDestinationDisplay(tx),
       tx.reference || "",
+      tx.crm_reference || "",
       tx.description || "",
     ]);
 
@@ -1093,8 +1119,9 @@ export default function Transactions() {
       "Date",
       "Client",
       "Type",
+      "Payment Currency",
       "Amount",
-      "Currency",
+      "USD Amount",
       "Status",
       "Destination",
     ];
@@ -1102,16 +1129,11 @@ export default function Transactions() {
       formatDate(tx.transaction_date || tx.created_at),
       tx.client_name || getClientName(tx.client_id),
       tx.transaction_type,
-      `${tx.amount} ${tx.currency}`,
-      tx.amount_usd ? `$${tx.amount_usd}` : "-",
+      tx.base_currency || tx.currency || "USD",
+      tx.base_amount || tx.amount,
+      tx.amount,
       tx.status,
-      tx.destination_type === "treasury"
-        ? tx.treasury_account_name
-        : tx.destination_type === "psp"
-          ? tx.psp_name
-          : tx.destination_type === "vendor"
-            ? tx.vendor_name
-            : tx.destination_type,
+      getDestinationDisplay(tx),
     ]);
 
     // Calculate summary
