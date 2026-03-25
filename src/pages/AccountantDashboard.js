@@ -192,6 +192,7 @@ export default function AccountantDashboard() {
   const [approvalProofPreview, setApprovalProofPreview] = useState(null);
   const [bankReceiptDate, setBankReceiptDate] = useState("");
   const [treasuryAccounts, setTreasuryAccounts] = useState([]);
+  const [psps, setPsps] = useState([]);
 
   // Captcha states
   const [showCaptcha, setShowCaptcha] = useState(false);
@@ -220,6 +221,22 @@ export default function AccountantDashboard() {
     }
   };
 
+  const fetchPsps = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/psp`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (response.ok) {
+        const d = await response.json();
+        setPsps(Array.isArray(d) ? d : d.items || []);
+      }
+    } catch (error) {
+      console.error("Error fetching PSPs:", error);
+    }
+  };
+
+
   const fetchPendingTransactions = async (page = currentPage) => {
     try {
       const params = new URLSearchParams();
@@ -238,8 +255,8 @@ export default function AccountantDashboard() {
       const response = await fetch(
         `${API_URL}/api/transactions/pending?${params.toString()}`,
         {
-          headers: getAuthHeaders(),
-          credentials: "include",
+        headers: getAuthHeaders(),
+        credentials: "include",
         },
       );
       if (response.ok) {
@@ -277,6 +294,7 @@ export default function AccountantDashboard() {
         fetchPendingTransactions(1),
         fetchPendingSettlements(),
         fetchTreasuryAccounts(),
+        fetchPsps(),
       ]);
       setLoading(false);
     };
@@ -756,35 +774,35 @@ export default function AccountantDashboard() {
             </Select>
 
             {/* Type filter */}
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[140px] bg-slate-50 border-slate-200 text-slate-800 h-9">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-slate-200">
-                <SelectItem
-                  value="all"
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  <SelectItem
+                    value="all"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  All Types
-                </SelectItem>
-                <SelectItem
-                  value="deposit"
+                  >
+                    All Types
+                  </SelectItem>
+                  <SelectItem
+                    value="deposit"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  Deposit
-                </SelectItem>
-                <SelectItem
-                  value="withdrawal"
+                  >
+                    Deposit
+                  </SelectItem>
+                  <SelectItem
+                    value="withdrawal"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  Withdrawal
-                </SelectItem>
-                <SelectItem
-                  value="transfer"
+                  >
+                    Withdrawal
+                  </SelectItem>
+                  <SelectItem
+                    value="transfer"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  Transfer
-                </SelectItem>
+                  >
+                    Transfer
+                  </SelectItem>
                 <SelectItem
                   value="commission"
                   className="text-slate-800 hover:bg-slate-100"
@@ -797,53 +815,53 @@ export default function AccountantDashboard() {
                 >
                   Rebate
                 </SelectItem>
-              </SelectContent>
-            </Select>
+                </SelectContent>
+              </Select>
 
             {/* Destination filter */}
-            <Select value={destFilter} onValueChange={setDestFilter}>
+              <Select value={destFilter} onValueChange={setDestFilter}>
               <SelectTrigger className="w-[155px] bg-slate-50 border-slate-200 text-slate-800 h-9">
-                <SelectValue placeholder="Destination" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-slate-200">
-                <SelectItem
-                  value="all"
+                  <SelectValue placeholder="Destination" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  <SelectItem
+                    value="all"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  All Destinations
-                </SelectItem>
-                <SelectItem
-                  value="treasury"
+                  >
+                    All Destinations
+                  </SelectItem>
+                  <SelectItem
+                    value="treasury"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  Treasury
-                </SelectItem>
-                <SelectItem
-                  value="bank"
+                  >
+                    Treasury
+                  </SelectItem>
+                  <SelectItem
+                    value="bank"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  Client Bank
-                </SelectItem>
-                <SelectItem
-                  value="usdt"
+                  >
+                    Client Bank
+                  </SelectItem>
+                  <SelectItem
+                    value="usdt"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  USDT
-                </SelectItem>
-                <SelectItem
-                  value="psp"
+                  >
+                    USDT
+                  </SelectItem>
+                  <SelectItem
+                    value="psp"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  PSP
-                </SelectItem>
-                <SelectItem
-                  value="vendor"
+                  >
+                    PSP
+                  </SelectItem>
+                  <SelectItem
+                    value="vendor"
                   className="text-slate-800 hover:bg-slate-100"
-                >
-                  Exchanger
-                </SelectItem>
-              </SelectContent>
-            </Select>
+                  >
+                    Exchanger
+                  </SelectItem>
+                </SelectContent>
+              </Select>
 
             {/* Date range */}
             <div className="flex items-center gap-1.5">
@@ -866,30 +884,30 @@ export default function AccountantDashboard() {
             </div>
 
             {/* Clear all */}
-            {(typeFilter !== "all" ||
+              {(typeFilter !== "all" ||
               statusFilter !== "pending" ||
-              destFilter !== "all" ||
+                destFilter !== "all" ||
               clientFilter ||
               emailFilter ||
               dateFrom ||
               dateTo) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setTypeFilter("all");
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setTypeFilter("all");
                   setStatusFilter("pending");
-                  setDestFilter("all");
-                  setClientFilter("");
+                    setDestFilter("all");
+                    setClientFilter("");
                   setEmailFilter("");
                   setDateFrom("");
                   setDateTo("");
-                }}
+                  }}
                 className="text-red-500 hover:text-red-600 hover:bg-red-50 h-9"
-              >
-                Clear Filters
-              </Button>
-            )}
+                >
+                  Clear Filters
+                </Button>
+              )}
           </div>
         </CardContent>
       </Card>
@@ -2143,9 +2161,14 @@ export default function AccountantDashboard() {
                       className="bg-slate-50 border-slate-200 text-white"
                       data-testid="approval-source-account"
                     >
-                      <SelectValue placeholder="Select treasury/USDT account" />
+                      <SelectValue placeholder="Select treasury, USDT or PSP account" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-slate-200 max-h-[200px]">
+                    <SelectContent className="bg-white border-slate-200 max-h-[250px]">
+                      {treasuryAccounts.length > 0 && (
+                        <div className="px-2 py-1 text-[10px] text-slate-400 uppercase tracking-wider font-bold border-b border-slate-100">
+                          Treasury / USDT
+                        </div>
+                      )}
                       {treasuryAccounts.map((account) => (
                         <SelectItem
                           key={account.account_id}
@@ -2163,11 +2186,36 @@ export default function AccountantDashboard() {
                               ({account.currency})
                             </span>
                             <span className="text-[#66FCF1] font-mono text-xs">
-                              ${account.balance?.toLocaleString()}
+                              {account.balance?.toLocaleString()}
                             </span>
                           </div>
                         </SelectItem>
                       ))}
+                      {psps.length > 0 && (
+                        <div className="px-2 py-1 text-[10px] text-slate-400 uppercase tracking-wider font-bold border-b border-slate-100 mt-1">
+                          PSP
+                        </div>
+                      )}
+                      {psps
+                        .filter((p) => p.status === "active")
+                        .map((psp) => (
+                          <SelectItem
+                            key={`psp_${psp.psp_id}`}
+                            value={`psp_${psp.psp_id}`}
+                            className="text-white hover:bg-white/5"
+                          >
+                            <div className="flex items-center gap-2">
+                              <CreditCard className="w-3 h-3 text-purple-400" />
+                              <span>{psp.psp_name}</span>
+                              <span className="text-[#C5C6C7] text-xs">
+                                ({psp.currency || "USD"})
+                              </span>
+                              <span className="text-purple-400 font-mono text-xs">
+                                {psp.current_balance?.toLocaleString() || "0"}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
