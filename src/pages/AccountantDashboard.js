@@ -190,6 +190,7 @@ const [clientTags, setClientTags] = useState([]);
   const [showApprovalDialog, setShowApprovalDialog] = useState(null);
   const [approvalSourceAccount, setApprovalSourceAccount] = useState("");
   const [approvalProofs, setApprovalProofs] = useState([]);
+  
   const [approvalProofPreviews, setApprovalProofPreviews] = useState([]);
   const [bankReceiptDate, setBankReceiptDate] = useState("");
   const [treasuryAccounts, setTreasuryAccounts] = useState([]);
@@ -433,8 +434,8 @@ const [clientTags, setClientTags] = useState([]);
 
     // Reset approval dialog state
     setApprovalSourceAccount("");
-    setApprovalProof(null);
-    setApprovalProofPreview(null);
+    setApprovalProofs([]);
+    setApprovalProofPreviews([]);
     setCaptchaAction(null);
   };
 
@@ -2385,8 +2386,8 @@ const [clientTags, setClientTags] = useState([]);
                   onClick={() => {
                     setShowApprovalDialog(null);
                     setApprovalSourceAccount("");
-                    setApprovalProof(null);
-                    setApprovalProofPreview(null);
+                    setApprovalProofs([]);
+                    setApprovalProofPreviews([]);
                     setBankReceiptDate("");
                   }}
                   className="flex-1 border-slate-200 text-[#C5C6C7] hover:bg-white/5"

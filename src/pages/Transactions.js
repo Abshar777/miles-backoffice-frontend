@@ -829,8 +829,8 @@ export default function Transactions() {
       client_usdt_address: "",
       client_usdt_network: "",
     });
-    setProofImage(null);
-    setProofPreview(null);
+    setProofImages([]);
+    setProofPreviews([]);
     setSelectedBankAccount("new");
     setClientBankAccounts([]);
   };
