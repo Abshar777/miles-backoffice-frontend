@@ -112,6 +112,9 @@ export default function Treasury() {
   
   // Transfer state
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
+   const [balanceFixAccount, setBalanceFixAccount] = useState(null);
+    const [balanceFixForm, setBalanceFixForm] = useState({ actual_balance: '', effective_date: '', reason: '' });
+    const [balanceFixSaving, setBalanceFixSaving] = useState(false);
   const [transferData, setTransferData] = useState({
     source_account_id: '',
     destination_account_id: '',

@@ -53,7 +53,12 @@ import {
   Filter,
   AlertTriangle,
   Search,
+  DollarSign,
+  HandCoins,
+  ReceiptText,
+  Landmark,
 } from "lucide-react";
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -158,13 +163,19 @@ export default function AccountantDashboard() {
   const { user } = useAuth();
   const [pendingTransactions, setPendingTransactions] = useState([]);
   const [pendingSettlements, setPendingSettlements] = useState([]);
+  const [pendingIE, setPendingIE] = useState([]);
+  const [pendingLoans, setPendingLoans] = useState([]);
+  const [pendingRepayments, setPendingRepayments] = useState([]);
+  const [pendingPSPSettlements, setPendingPSPSettlements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewTransaction, setViewTransaction] = useState(null);
   const [viewSettlement, setViewSettlement] = useState(null);
+  const [viewItem, setViewItem] = useState(null); // Generic view for IE/Loan/Repayment/PSP
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectDialog, setShowRejectDialog] = useState(null);
   const [showSettlementRejectDialog, setShowSettlementRejectDialog] =
     useState(null);
+  const [showGenericRejectDialog, setShowGenericRejectDialog] = useState(null); // { type, id }
   const [processingId, setProcessingId] = useState(null);
   const [activeTab, setActiveTab] = useState("transactions");
   const [uploadingProof, setUploadingProof] = useState(null);
@@ -287,6 +298,24 @@ const [clientTags, setClientTags] = useState([]);
     }
   };
 
+  const fetchPendingApprovals = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/pending-approvals/all`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPendingIE(data.income_expenses || []);
+        setPendingLoans(data.loans || []);
+        setPendingRepayments(data.loan_repayments || []);
+        setPendingPSPSettlements(data.psp_settlements || []);
+      }
+    } catch (error) {
+      console.error("Error fetching pending approvals:", error);
+    }
+  };
+
   const fetchClientTags = async () => {
     try {
       const response = await fetch(`${API_URL}/api/tags/clients`, {
@@ -306,6 +335,7 @@ const [clientTags, setClientTags] = useState([]);
       await Promise.all([
         fetchPendingTransactions(1),
         fetchPendingSettlements(),
+        fetchPendingApprovals(),
         fetchTreasuryAccounts(),
         fetchPsps(),
         fetchClientTags(),
@@ -314,6 +344,12 @@ const [clientTags, setClientTags] = useState([]);
     };
     loadData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useAutoRefresh(() => {
+    fetchPendingTransactions(currentPage);
+    fetchPendingSettlements();
+    fetchPendingApprovals();
+  }, 15000); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Re-fetch when select/date/pageSize filters change
   useEffect(() => {
@@ -415,6 +451,8 @@ const [clientTags, setClientTags] = useState([]);
     if (captchaAction.type === "approve") {
       if (captchaAction.isSettlement) {
         await executeApproveSettlement(captchaAction.transactionId);
+      } else if (captchaAction.genericType) {
+        await executeGenericApprove(captchaAction.genericType, captchaAction.genericId);
       } else {
         await executeApprove(
           captchaAction.transactionId,
@@ -427,6 +465,8 @@ const [clientTags, setClientTags] = useState([]);
     } else if (captchaAction.type === "reject") {
       if (captchaAction.isSettlement) {
         await executeRejectSettlement(captchaAction.transactionId);
+      } else if (captchaAction.genericType) {
+        await executeGenericReject(captchaAction.genericType, captchaAction.genericId);
       } else {
         await executeReject(captchaAction.transactionId);
       }
@@ -590,6 +630,82 @@ const [clientTags, setClientTags] = useState([]);
     }
   };
 
+  // ---- Generic Approve/Reject for IE, Loans, Repayments, PSP Settlements ----
+  const initiateGenericApprove = (type, id) => {
+    setCaptchaAction({ type: "approve", genericType: type, genericId: id });
+    setShowCaptcha(true);
+  };
+
+  const initiateGenericReject = (type, id) => {
+    setCaptchaAction({ type: "reject", genericType: type, genericId: id });
+    setShowGenericRejectDialog({ type, id });
+  };
+
+  const handleGenericRejectWithCaptcha = () => {
+    setShowGenericRejectDialog(null);
+    setShowCaptcha(true);
+  };
+
+  const executeGenericApprove = async (type, id) => {
+    setProcessingId(id);
+    const urlMap = {
+      ie: `/api/income-expenses/${id}/approve`,
+      loan: `/api/loans/${id}/approve-disbursement`,
+      repayment: `/api/loan-repayments/${id}/approve`,
+      psp_settlement: `/api/psp-settlements/${id}/approve`,
+    };
+    try {
+      const response = await fetch(`${API_URL}${urlMap[type]}`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (response.ok) {
+        toast.success("Approved successfully");
+        fetchPendingApprovals();
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || "Approval failed");
+      }
+    } catch {
+      toast.error("Approval failed");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const executeGenericReject = async (type, id) => {
+    setProcessingId(id);
+    const urlMap = {
+      ie: `/api/income-expenses/${id}/reject`,
+      loan: `/api/loans/${id}/reject-disbursement`,
+      repayment: `/api/loan-repayments/${id}/reject`,
+      psp_settlement: `/api/psp-settlements/${id}/reject`,
+    };
+    try {
+      const response = await fetch(
+        `${API_URL}${urlMap[type]}?reason=${encodeURIComponent(rejectReason)}`,
+        {
+          method: "POST",
+          headers: getAuthHeaders(),
+          credentials: "include",
+        },
+      );
+      if (response.ok) {
+        toast.success("Rejected successfully");
+        setRejectReason("");
+        fetchPendingApprovals();
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || "Rejection failed");
+      }
+    } catch {
+      toast.error("Rejection failed");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const handleProofUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !uploadingProof) return;
@@ -663,6 +779,11 @@ const [clientTags, setClientTags] = useState([]);
     });
   };
 
+  const formatCurrency = (amount, currency = "USD") => {
+    if (amount == null) return "-";
+    return `${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+  };
+
   // All filtering is handled server-side; pendingTransactions already contains the filtered page.
 
   return (
@@ -684,45 +805,35 @@ const [clientTags, setClientTags] = useState([]);
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-white border-slate-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">
-                  Pending Transactions
-                </p>
-                <p className="text-4xl font-bold font-mono text-yellow-400">
-                  {totalItems}
-                </p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {[
+          { label: "Transactions", count: totalItems, icon: Clock, color: "yellow", tab: "transactions" },
+          { label: "Vendor Settlements", count: pendingSettlements.length, icon: Store, color: "purple", tab: "settlements" },
+          { label: "Income/Expenses", count: pendingIE.length, icon: ReceiptText, color: "blue", tab: "ie" },
+          { label: "Loan Disbursements", count: pendingLoans.length, icon: HandCoins, color: "orange", tab: "loans" },
+          { label: "Loan Repayments", count: pendingRepayments.length, icon: DollarSign, color: "emerald", tab: "repayments" },
+          { label: "PSP Settlements", count: pendingPSPSettlements.length, icon: Landmark, color: "pink", tab: "psp_settlements" },
+        ].map(({ label, count, icon: Icon, color, tab }) => (
+          <Card
+            key={tab}
+            className={`bg-white border-slate-200 cursor-pointer transition-colors ${activeTab === tab ? `border-${color}-400` : `hover:border-${color}-400/50`}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-1">{label}</p>
+                  <p className={`text-2xl font-bold font-mono text-${color}-400`}>{count}</p>
+                </div>
+                <Icon className={`w-5 h-5 text-${color}-400 opacity-50`} />
               </div>
-              <div className="p-4 bg-yellow-500/10 rounded-sm">
-                <Clock className="w-8 h-8 text-yellow-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-slate-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">
-                  Pending Settlements
-                </p>
-                <p className="text-4xl font-bold font-mono text-purple-400">
-                  {pendingSettlements.length}
-                </p>
-              </div>
-              <div className="p-4 bg-purple-500/10 rounded-sm">
-                <Wallet className="w-8 h-8 text-purple-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Filters */}
+      {/* Filters (for Transactions tab only) */}
+      {activeTab === "transactions" && (
       <Card className="bg-white border-slate-200">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -932,21 +1043,46 @@ const [clientTags, setClientTags] = useState([]);
           </div>
         </CardContent>
       </Card>
+      )}
 
-      {/* Tabs for Transactions and Settlements */}
+      {/* Tabs for Transactions, Settlements, and More */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-slate-50 border border-slate-200 mb-4">
+        <TabsList className="bg-slate-50 border border-slate-200 mb-4 flex-wrap h-auto gap-1 p-1">
           <TabsTrigger
             value="transactions"
-            className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]"
+            className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10] text-xs"
           >
             Transactions ({totalItems})
           </TabsTrigger>
           <TabsTrigger
             value="settlements"
-            className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]"
+            className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10] text-xs"
           >
-            Settlements ({pendingSettlements.length})
+            Vendor Settl. ({pendingSettlements.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="ie"
+            className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10] text-xs"
+          >
+            Income/Exp ({pendingIE.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="loans"
+            className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10] text-xs"
+          >
+            Loans ({pendingLoans.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="repayments"
+            className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10] text-xs"
+          >
+            Repayments ({pendingRepayments.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="psp_settlements"
+            className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10] text-xs"
+          >
+            PSP Settl. ({pendingPSPSettlements.length})
           </TabsTrigger>
         </TabsList>
 
