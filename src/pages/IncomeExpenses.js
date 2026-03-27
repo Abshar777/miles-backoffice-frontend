@@ -1264,11 +1264,11 @@ export default function IncomeExpenses() {
                       <SelectItem value="completed" className="text-green-600">
                         Completed
                       </SelectItem>
-                      <SelectItem
-                        value="pending_vendor"
-                        className="text-amber-600"
-                      >
-                        Pending
+                      <SelectItem value="pending" className="text-amber-600">
+                        Pending Approval
+                      </SelectItem>
+                      <SelectItem value="approved" className="text-green-600">
+                        Approved
                       </SelectItem>
                       <SelectItem value="rejected" className="text-red-600">
                         Rejected
@@ -3123,7 +3123,7 @@ function EntriesTable({
           Loan
         </Badge>
       );
-    if (entry.status === "pending_vendor")
+    if (entry.status === "pending" || entry.status === "pending_vendor")
       return (
         <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30 text-[10px]">
           <Clock className="w-2.5 h-2.5 mr-1" />
@@ -3136,10 +3136,10 @@ function EntriesTable({
           Rejected
         </Badge>
       );
-    if (entry.status === "completed")
+    if (entry.status === "approved" || entry.status === "completed")
       return (
         <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-[10px]">
-          Completed
+          Approved
         </Badge>
       );
     if (entry.status === "active")
