@@ -946,7 +946,8 @@ export default function TransactionRequests() {
     client_usdt_network: "",
   };
   const [form, setForm] = useState({ ...defaultForm });
-  const [proofImage, setProofImage] = useState(null);
+  const [proofImages, setProofImages] = useState([]);
+  const [proofPreviews, setProofPreviews] = useState([]);
 
   // Process dialog
   const [processDialog, setProcessDialog] = useState(null);
@@ -957,13 +958,16 @@ export default function TransactionRequests() {
   const [createReqCaptcha, setCreateReqCaptcha] = useState({ a: 0, b: 0 });
   const [createReqCaptchaAnswer, setCreateReqCaptchaAnswer] = useState("");
   const [showCreateReqCaptcha, setShowCreateReqCaptcha] = useState(false);
-  const [proofPreview, setProofPreview] = useState(null);
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProofImage(file);
-      setProofPreview(URL.createObjectURL(file));
+    const files = Array.from(e.target.files);
+    if (files.length) {
+      setProofImages(prev => [...prev, ...files]);
+      setProofPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
     }
+  };
+  const removeProofImage = (idx) => {
+    setProofImages(prev => prev.filter((_, i) => i !== idx));
+    setProofPreviews(prev => prev.filter((_, i) => i !== idx));
   };
   // Data
   const [clients, setClients] = useState([]);
@@ -1087,7 +1091,7 @@ export default function TransactionRequests() {
       Object.entries(form).forEach(([k, v]) => {
         if (v) fd.append(k, v);
       });
-      if (proofImage) fd.append("proof_image", proofImage);
+      proofImages.forEach(img => fd.append("proof_images", img));
       if (formTags.length > 0) fd.append("client_tags", formTags.join(","));
       const headers = authHeaders();
       delete headers["Content-Type"];
@@ -2066,38 +2070,32 @@ export default function TransactionRequests() {
               </Label>
               <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-[#1FA21B]/50 transition-colors">
                 <input
-                type="file"
+                  type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleImageChange}
                   className="hidden"
                   id="proof-upload"
                   data-testid="proof-upload"
                 />
-                <label htmlFor="proof-upload" className="cursor-pointer">
-                  {proofPreview ? (
+                <label htmlFor="proof-upload" className="cursor-pointer block">
+                  {proofPreviews.length > 0 ? (
                     <div className="space-y-2">
-                      <img
-                        src={proofPreview}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (typeof window !== "undefined") {
-                            window.open(proofPreview, "_blank");
-                          }
-                        }}
-                        alt="Proof preview"
-                        className="max-h-32 mx-auto rounded"
-                      />
-                      <p className="text-xs text-blue-600">Click to change</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {proofPreviews.map((src, i) => (
+                          <div key={i} className="relative group">
+                            <img src={src} alt={`Proof ${i+1}`} className="w-full h-20 object-cover rounded border border-slate-200 cursor-pointer" onClick={(e) => { e.preventDefault(); window.open(src, "_blank"); }} />
+                            <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); removeProofImage(i); }} className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-blue-600 text-center">{proofPreviews.length} image(s) — click to add more</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       <Upload className="w-8 h-8 mx-auto text-slate-500" />
-                      <p className="text-sm text-slate-500">
-                        Click to upload proof of payment
-                      </p>
-                      <p className="text-xs text-slate-500/60">
-                        PNG, JPG up to 5MB
-                      </p>
+                      <p className="text-sm text-slate-500">Click to upload proof of payment</p>
+                      <p className="text-xs text-slate-500/60">PNG, JPG up to 5MB · multiple allowed</p>
                     </div>
                   )}
                 </label>
@@ -2206,6 +2204,23 @@ export default function TransactionRequests() {
                   </div>
                 )}
               </div>
+              {(() => {
+                const imgs = processDialog?.proof_images?.length
+                  ? processDialog.proof_images
+                  : processDialog?.proof_image ? [processDialog.proof_image] : [];
+                if (!imgs.length) return null;
+                return (
+                  <div className="pt-2 border-t border-slate-200">
+                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Proof of Payment ({imgs.length})</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {imgs.map((url, i) => {
+                        const src = url?.startsWith("http") ? url : `data:image/png;base64,${url}`;
+                        return <img key={i} src={src} alt={`Proof ${i+1}`} className="w-full h-16 object-cover rounded border border-slate-200 cursor-pointer hover:opacity-80" onClick={() => window.open(src, "_blank")} />;
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
                 <p className="text-sm font-medium text-yellow-800 mb-2">
                   Verify: What is {captcha.a} + {captcha.b}?
