@@ -175,6 +175,7 @@ export default function AccountantDashboard() {
   const [statusFilter, setStatusFilter] = useState("pending");
   const [destFilter, setDestFilter] = useState("all");
   const [clientFilter, setClientFilter] = useState("");
+const [clientTags, setClientTags] = useState([]);
   const [emailFilter, setEmailFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -979,7 +980,7 @@ export default function AccountantDashboard() {
                     className={`border-slate-200 ${!hasProperDest ? "bg-red-500/5 border-red-500/30" : "bg-white"}`}
                   >
                     <CardContent className="p-4">
-                      <div className="grid grid-cols-[140px_80px_120px_90px_120px_150px_140px_auto] items-center gap-3">
+                      <div className="grid grid-cols-[140px_80px_120px_90px_120px_150px_100px_100px_auto] items-center gap-3">
                         {/* Reference + CRM Ref */}
                         <div className="min-w-0">
                           <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">
