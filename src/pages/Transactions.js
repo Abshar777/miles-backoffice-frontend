@@ -278,6 +278,9 @@ export default function Transactions() {
     transaction_date: "",
   });
   const [fieldEditSaving, setFieldEditSaving] = useState(false);
+  const [tagEditTx, setTagEditTx] = useState(null);
+  const [tagEditTags, setTagEditTags] = useState([]);
+  const [tagEditSaving, setTagEditSaving] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkFile, setBulkFile] = useState(null);
   const [bulkValidation, setBulkValidation] = useState(null);
@@ -564,8 +567,16 @@ export default function Transactions() {
   useEffect(() => {
     setCurrentPage(1);
     fetchTransactions(1);
-     fetchClientTags();
-  }, [typeFilter, statusFilter, destinationFilter, dateFrom, dateTo, pageSize,tagFilter]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchClientTags();
+  }, [
+    typeFilter,
+    statusFilter,
+    destinationFilter,
+    dateFrom,
+    dateTo,
+    pageSize,
+    tagFilter,
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Re-fetch transactions with debounce for text inputs (search, email)
   useEffect(() => {
@@ -590,13 +601,16 @@ export default function Transactions() {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length) {
-      setProofImages(prev => [...prev, ...files]);
-      setProofPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
+      setProofImages((prev) => [...prev, ...files]);
+      setProofPreviews((prev) => [
+        ...prev,
+        ...files.map((f) => URL.createObjectURL(f)),
+      ]);
     }
   };
   const removeProofImage = (idx) => {
-    setProofImages(prev => prev.filter((_, i) => i !== idx));
-    setProofPreviews(prev => prev.filter((_, i) => i !== idx));
+    setProofImages((prev) => prev.filter((_, i) => i !== idx));
+    setProofPreviews((prev) => prev.filter((_, i) => i !== idx));
   };
 
   // Show captcha before actual submission
@@ -745,7 +759,7 @@ export default function Transactions() {
             formData.collecting_person_number,
           );
       }
-      proofImages.forEach(img => formDataToSend.append("proof_images", img));
+      proofImages.forEach((img) => formDataToSend.append("proof_images", img));
 
       const response = await fetch(`${API_URL}/api/transactions`, {
         method: "POST",
@@ -763,12 +777,13 @@ export default function Transactions() {
         let errorMsg = `Server error (${response.status})`;
         try {
           const errorData = await response.json();
-            if (Array.isArray(errorData.detail)) {
-            errorMsg = errorData.detail.map(e => e.msg || e.message || JSON.stringify(e)).join(', ');
+          if (Array.isArray(errorData.detail)) {
+            errorMsg = errorData.detail
+              .map((e) => e.msg || e.message || JSON.stringify(e))
+              .join(", ");
           } else {
             errorMsg = errorData.detail || errorMsg;
           }
-        
         } catch {
           const text = await response.text();
           if (text) errorMsg = text.substring(0, 200);
@@ -983,6 +998,38 @@ export default function Transactions() {
       toast.error("Failed to update");
     } finally {
       setFieldEditSaving(false);
+    }
+  };
+
+  const openTagEdit = (tx) => {
+    setTagEditTx(tx);
+    setTagEditTags(tx.client_tags || []);
+  };
+
+  const handleSaveTagEdit = async () => {
+    if (!tagEditTx) return;
+    setTagEditSaving(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/api/transactions/${tagEditTx.transaction_id}`,
+        {
+          method: "PUT",
+          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+          body: JSON.stringify({ client_tags: tagEditTags }),
+        },
+      );
+      if (response.ok) {
+        toast.success("Tags updated");
+        setTagEditTx(null);
+        fetchTransactions();
+      } else {
+        const err = await response.json();
+        toast.error(err.detail || "Failed to update tags");
+      }
+    } catch {
+      toast.error("Failed to update tags");
+    } finally {
+      setTagEditSaving(false);
     }
   };
 
@@ -2581,24 +2628,51 @@ export default function Transactions() {
                       id="proof-upload"
                       data-testid="proof-upload"
                     />
-                    <label htmlFor="proof-upload" className="cursor-pointer block">
+                    <label
+                      htmlFor="proof-upload"
+                      className="cursor-pointer block"
+                    >
                       {proofPreviews.length > 0 ? (
                         <div className="space-y-2">
                           <div className="grid grid-cols-3 gap-2">
                             {proofPreviews.map((src, i) => (
                               <div key={i} className="relative group">
-                                <img src={src} alt={`Proof ${i+1}`} className="w-full h-20 object-cover rounded border border-slate-200 cursor-pointer" onClick={(e) => { e.preventDefault(); window.open(src, "_blank"); }} />
-                                <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); removeProofImage(i); }} className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                                <img
+                                  src={src}
+                                  alt={`Proof ${i + 1}`}
+                                  className="w-full h-20 object-cover rounded border border-slate-200 cursor-pointer"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    window.open(src, "_blank");
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    removeProofImage(i);
+                                  }}
+                                  className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  ×
+                                </button>
                               </div>
                             ))}
                           </div>
-                          <p className="text-xs text-blue-600 text-center">{proofPreviews.length} image(s) — click to add more</p>
+                          <p className="text-xs text-blue-600 text-center">
+                            {proofPreviews.length} image(s) — click to add more
+                          </p>
                         </div>
                       ) : (
                         <div className="space-y-2">
                           <Upload className="w-8 h-8 mx-auto text-slate-500" />
-                          <p className="text-sm text-slate-500">Click to upload proof of payment</p>
-                          <p className="text-xs text-slate-500/60">PNG, JPG up to 5MB · multiple allowed</p>
+                          <p className="text-sm text-slate-500">
+                            Click to upload proof of payment
+                          </p>
+                          <p className="text-xs text-slate-500/60">
+                            PNG, JPG up to 5MB · multiple allowed
+                          </p>
                         </div>
                       )}
                     </label>
@@ -2857,7 +2931,8 @@ export default function Transactions() {
           {(dateFrom ||
             dateTo ||
             destinationFilter !== "all" ||
-            tagFilter !== "all" || emailFilter) && (
+            tagFilter !== "all" ||
+            emailFilter) && (
             <Button
               variant="ghost"
               size="sm"
@@ -3059,23 +3134,40 @@ export default function Transactions() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-wrap gap-0.5">
-                          {(tx.client_tags || []).map((tag) => {
-                            const tagObj = clientTags.find(
-                              (t) => t.name === tag,
-                            );
-                            return (
-                              <span
-                                key={tag}
-                                className="px-1.5 py-0.5 rounded-full text-[10px] font-medium text-white whitespace-nowrap"
-                                style={{
-                                  backgroundColor: tagObj?.color || "#64748B",
-                                }}
-                              >
-                                {tag}
-                              </span>
-                            );
-                          })}
+                        <div className="flex items-center gap-1">
+                          <div className="flex flex-wrap gap-0.5 flex-1 min-w-0">
+                            {(tx.client_tags || []).length > 0 ? (
+                              tx.client_tags.map((tag) => {
+                                const tagObj = clientTags.find(
+                                  (t) => t.name === tag,
+                                );
+                                return (
+                                  <span
+                                    key={tag}
+                                    className="px-1.5 py-0.5 rounded-full text-[10px] font-medium text-white whitespace-nowrap"
+                                    style={{
+                                      backgroundColor:
+                                        tagObj?.color || "#64748B",
+                                    }}
+                                  >
+                                    {tag}
+                                  </span>
+                                );
+                              })
+                            ) : (
+                              <span className="text-xs text-slate-400">-</span>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openTagEdit(tx)}
+                            className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 h-6 w-6 p-0 shrink-0"
+                            title="Edit Tags"
+                            data-testid={`tx-tag-edit-${tx.transaction_id}`}
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </Button>
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(tx.status)}</TableCell>
@@ -3356,7 +3448,9 @@ export default function Transactions() {
               {(() => {
                 const imgs = viewTransaction.proof_images?.length
                   ? viewTransaction.proof_images
-                  : viewTransaction.proof_image ? [viewTransaction.proof_image] : [];
+                  : viewTransaction.proof_image
+                    ? [viewTransaction.proof_image]
+                    : [];
                 if (!imgs.length) return null;
                 return (
                   <div className="pt-4 border-t border-slate-200">
@@ -3365,11 +3459,17 @@ export default function Transactions() {
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       {imgs.map((url, i) => {
-                        const src = url?.startsWith("http") ? url : `data:image/png;base64,${url}`;
+                        const src = url?.startsWith("http")
+                          ? url
+                          : `data:image/png;base64,${url}`;
                         return (
-                          <img key={i} src={src} alt={`Proof ${i+1}`}
+                          <img
+                            key={i}
+                            src={src}
+                            alt={`Proof ${i + 1}`}
                             className="w-full rounded border border-slate-200 cursor-pointer hover:opacity-80"
-                            onClick={() => window.open(src, "_blank")} />
+                            onClick={() => window.open(src, "_blank")}
+                          />
                         );
                       })}
                     </div>
@@ -4179,6 +4279,102 @@ export default function Transactions() {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tag Edit Dialog */}
+      <Dialog
+        open={!!tagEditTx}
+        onOpenChange={(open) => {
+          if (!open) setTagEditTx(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base">
+              Edit Tags - {tagEditTx?.reference || tagEditTx?.transaction_id}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-1.5">
+              {tagEditTags.map((tag) => {
+                const tagObj = clientTags.find((t) => t.name === tag);
+                return (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-white"
+                    style={{ backgroundColor: tagObj?.color || "#64748B" }}
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setTagEditTags(tagEditTags.filter((t) => t !== tag))
+                      }
+                      className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center text-[10px]"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                );
+              })}
+              {tagEditTags.length === 0 && (
+                <span className="text-sm text-slate-400">No tags assigned</span>
+              )}
+            </div>
+            <Select
+              onValueChange={(val) => {
+                if (!tagEditTags.includes(val))
+                  setTagEditTags([...tagEditTags, val]);
+              }}
+            >
+              <SelectTrigger
+                className="h-9 text-sm"
+                data-testid="tag-edit-select"
+              >
+                <SelectValue placeholder="Add a tag..." />
+              </SelectTrigger>
+              <SelectContent>
+                {clientTags
+                  .filter((t) => !tagEditTags.includes(t.name))
+                  .map((tag) => (
+                    <SelectItem key={tag.tag_id} value={tag.name}>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ backgroundColor: tag.color }}
+                        />
+                        {tag.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                {clientTags.filter((t) => !tagEditTags.includes(t.name))
+                  .length === 0 && (
+                  <SelectItem value="_none" disabled>
+                    All tags assigned
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTagEditTx(null)}
+                data-testid="tag-edit-cancel"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSaveTagEdit}
+                disabled={tagEditSaving}
+                data-testid="tag-edit-save"
+              >
+                {tagEditSaving ? "Saving..." : "Save Tags"}
+              </Button>
             </div>
           </div>
         </DialogContent>

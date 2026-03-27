@@ -236,7 +236,6 @@ export default function AccountantDashboard() {
     }
   };
 
-
   const fetchPendingTransactions = async (page = currentPage) => {
     try {
       const params = new URLSearchParams();
@@ -255,8 +254,8 @@ export default function AccountantDashboard() {
       const response = await fetch(
         `${API_URL}/api/transactions/pending?${params.toString()}`,
         {
-        headers: getAuthHeaders(),
-        credentials: "include",
+          headers: getAuthHeaders(),
+          credentials: "include",
         },
       );
       if (response.ok) {
@@ -286,6 +285,18 @@ export default function AccountantDashboard() {
     }
   };
 
+  const fetchClientTags = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/tags/clients`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (response.ok) setClientTags(await response.json());
+    } catch (error) {
+      console.error("Error fetching client tags:", error);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     const loadData = async () => {
@@ -295,6 +306,7 @@ export default function AccountantDashboard() {
         fetchPendingSettlements(),
         fetchTreasuryAccounts(),
         fetchPsps(),
+        fetchClientTags(),
       ]);
       setLoading(false);
     };
@@ -350,17 +362,18 @@ export default function AccountantDashboard() {
   const handleApprovalProofChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length) {
-      setApprovalProofs(prev => [...prev, ...files]);
-      files.forEach(file => {
+      setApprovalProofs((prev) => [...prev, ...files]);
+      files.forEach((file) => {
         const reader = new FileReader();
-        reader.onloadend = () => setApprovalProofPreviews(prev => [...prev, reader.result]);
+        reader.onloadend = () =>
+          setApprovalProofPreviews((prev) => [...prev, reader.result]);
         reader.readAsDataURL(file);
       });
     }
   };
   const removeApprovalProof = (idx) => {
-    setApprovalProofs(prev => prev.filter((_, i) => i !== idx));
-    setApprovalProofPreviews(prev => prev.filter((_, i) => i !== idx));
+    setApprovalProofs((prev) => prev.filter((_, i) => i !== idx));
+    setApprovalProofPreviews((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleTransactionApproval = () => {
@@ -404,7 +417,8 @@ export default function AccountantDashboard() {
         await executeApprove(
           captchaAction.transactionId,
           captchaAction.sourceAccount,
-          captchaAction.proofFiles || (captchaAction.proofFile ? [captchaAction.proofFile] : []),
+          captchaAction.proofFiles ||
+            (captchaAction.proofFile ? [captchaAction.proofFile] : []),
           captchaAction.bankReceiptDate,
         );
       }
@@ -434,7 +448,7 @@ export default function AccountantDashboard() {
       // Upload all proof files
       if (proofFiles && proofFiles.length) {
         const formData = new FormData();
-        proofFiles.forEach(f => formData.append("proof_images", f));
+        proofFiles.forEach((f) => formData.append("proof_images", f));
 
         const uploadResponse = await fetch(
           `${API_URL}/api/transactions/${transactionId}/upload-proof`,
@@ -779,35 +793,35 @@ export default function AccountantDashboard() {
             </Select>
 
             {/* Type filter */}
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[140px] bg-slate-50 border-slate-200 text-slate-800 h-9">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-slate-200">
-                  <SelectItem
-                    value="all"
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200">
+                <SelectItem
+                  value="all"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    All Types
-                  </SelectItem>
-                  <SelectItem
-                    value="deposit"
+                >
+                  All Types
+                </SelectItem>
+                <SelectItem
+                  value="deposit"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    Deposit
-                  </SelectItem>
-                  <SelectItem
-                    value="withdrawal"
+                >
+                  Deposit
+                </SelectItem>
+                <SelectItem
+                  value="withdrawal"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    Withdrawal
-                  </SelectItem>
-                  <SelectItem
-                    value="transfer"
+                >
+                  Withdrawal
+                </SelectItem>
+                <SelectItem
+                  value="transfer"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    Transfer
-                  </SelectItem>
+                >
+                  Transfer
+                </SelectItem>
                 <SelectItem
                   value="commission"
                   className="text-slate-800 hover:bg-slate-100"
@@ -820,53 +834,53 @@ export default function AccountantDashboard() {
                 >
                   Rebate
                 </SelectItem>
-                </SelectContent>
-              </Select>
+              </SelectContent>
+            </Select>
 
             {/* Destination filter */}
-              <Select value={destFilter} onValueChange={setDestFilter}>
+            <Select value={destFilter} onValueChange={setDestFilter}>
               <SelectTrigger className="w-[155px] bg-slate-50 border-slate-200 text-slate-800 h-9">
-                  <SelectValue placeholder="Destination" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-slate-200">
-                  <SelectItem
-                    value="all"
+                <SelectValue placeholder="Destination" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200">
+                <SelectItem
+                  value="all"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    All Destinations
-                  </SelectItem>
-                  <SelectItem
-                    value="treasury"
+                >
+                  All Destinations
+                </SelectItem>
+                <SelectItem
+                  value="treasury"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    Treasury
-                  </SelectItem>
-                  <SelectItem
-                    value="bank"
+                >
+                  Treasury
+                </SelectItem>
+                <SelectItem
+                  value="bank"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    Client Bank
-                  </SelectItem>
-                  <SelectItem
-                    value="usdt"
+                >
+                  Client Bank
+                </SelectItem>
+                <SelectItem
+                  value="usdt"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    USDT
-                  </SelectItem>
-                  <SelectItem
-                    value="psp"
+                >
+                  USDT
+                </SelectItem>
+                <SelectItem
+                  value="psp"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    PSP
-                  </SelectItem>
-                  <SelectItem
-                    value="vendor"
+                >
+                  PSP
+                </SelectItem>
+                <SelectItem
+                  value="vendor"
                   className="text-slate-800 hover:bg-slate-100"
-                  >
-                    Exchanger
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                >
+                  Exchanger
+                </SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Date range */}
             <div className="flex items-center gap-1.5">
@@ -889,30 +903,30 @@ export default function AccountantDashboard() {
             </div>
 
             {/* Clear all */}
-              {(typeFilter !== "all" ||
+            {(typeFilter !== "all" ||
               statusFilter !== "pending" ||
-                destFilter !== "all" ||
+              destFilter !== "all" ||
               clientFilter ||
               emailFilter ||
               dateFrom ||
               dateTo) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setTypeFilter("all");
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setTypeFilter("all");
                   setStatusFilter("pending");
-                    setDestFilter("all");
-                    setClientFilter("");
+                  setDestFilter("all");
+                  setClientFilter("");
                   setEmailFilter("");
                   setDateFrom("");
                   setDateTo("");
-                  }}
+                }}
                 className="text-red-500 hover:text-red-600 hover:bg-red-50 h-9"
-                >
-                  Clear Filters
-                </Button>
-              )}
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -1134,6 +1148,37 @@ export default function AccountantDashboard() {
                           <p className="text-[10px] text-[#C5C6C7]">
                             by {tx.created_by_name || "System"}
                           </p>
+                        </div>
+                        {/* Tags */}
+                        <div className="min-w-0">
+                          <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">
+                            Tags
+                          </p>
+                          <div className="flex flex-wrap gap-0.5">
+                            {(tx.client_tags || []).length > 0 ? (
+                              tx.client_tags.map((tag) => {
+                                const tagObj = clientTags.find(
+                                  (t) => t.name === tag,
+                                );
+                                return (
+                                  <span
+                                    key={tag}
+                                    className="px-1.5 py-0.5 rounded-full text-[10px] font-medium text-white whitespace-nowrap"
+                                    style={{
+                                      backgroundColor:
+                                        tagObj?.color || "#64748B",
+                                    }}
+                                  >
+                                    {tag}
+                                  </span>
+                                );
+                              })
+                            ) : (
+                              <span className="text-[10px] text-[#C5C6C7]">
+                                -
+                              </span>
+                            )}
+                          </div>
                         </div>
                         {/* Actions */}
                         <div className="flex items-center gap-1.5 justify-end">
@@ -1550,15 +1595,29 @@ export default function AccountantDashboard() {
               {(() => {
                 const imgs = viewTransaction.proof_images?.length
                   ? viewTransaction.proof_images
-                  : viewTransaction.proof_image ? [viewTransaction.proof_image] : [];
+                  : viewTransaction.proof_image
+                    ? [viewTransaction.proof_image]
+                    : [];
                 if (!imgs.length) return null;
                 return (
                   <div className="pt-4 border-t border-slate-200">
-                    <p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-2">Proof of Payment ({imgs.length})</p>
+                    <p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-2">
+                      Proof of Payment ({imgs.length})
+                    </p>
                     <div className="grid grid-cols-2 gap-2">
                       {imgs.map((url, i) => {
-                        const src = url?.startsWith("http") ? url : `data:image/png;base64,${url}`;
-                        return <img key={i} src={src} alt={`Proof ${i+1}`} className="w-full rounded border border-slate-200 cursor-pointer hover:opacity-80" onClick={() => window.open(src, "_blank")} />;
+                        const src = url?.startsWith("http")
+                          ? url
+                          : `data:image/png;base64,${url}`;
+                        return (
+                          <img
+                            key={i}
+                            src={src}
+                            alt={`Proof ${i + 1}`}
+                            className="w-full rounded border border-slate-200 cursor-pointer hover:opacity-80"
+                            onClick={() => window.open(src, "_blank")}
+                          />
+                        );
                       })}
                     </div>
                   </div>
@@ -2259,22 +2318,59 @@ export default function AccountantDashboard() {
                     <div className="grid grid-cols-3 gap-2">
                       {approvalProofPreviews.map((src, i) => (
                         <div key={i} className="relative group">
-                          <img src={src} alt={`Proof ${i+1}`} className="w-full h-20 object-cover rounded border border-white/20 cursor-pointer" onClick={() => window.open(src, "_blank")} />
-                          <button type="button" onClick={() => removeApprovalProof(i)} className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                          <img
+                            src={src}
+                            alt={`Proof ${i + 1}`}
+                            className="w-full h-20 object-cover rounded border border-white/20 cursor-pointer"
+                            onClick={() => window.open(src, "_blank")}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeApprovalProof(i)}
+                            className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            ×
+                          </button>
                         </div>
                       ))}
                     </div>
-                    <Label htmlFor="approval-proof-input" className="cursor-pointer inline-block px-3 py-1 bg-[#66FCF1]/20 text-[#66FCF1] text-xs rounded-sm hover:bg-[#66FCF1]/30">{approvalProofPreviews.length} image(s) — add more</Label>
-                    <Input type="file" accept="image/*" multiple onChange={handleApprovalProofChange} className="hidden" id="approval-proof-input" />
+                    <Label
+                      htmlFor="approval-proof-input"
+                      className="cursor-pointer inline-block px-3 py-1 bg-[#66FCF1]/20 text-[#66FCF1] text-xs rounded-sm hover:bg-[#66FCF1]/30"
+                    >
+                      {approvalProofPreviews.length} image(s) — add more
+                    </Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleApprovalProofChange}
+                      className="hidden"
+                      id="approval-proof-input"
+                    />
                   </div>
                 ) : (
                   <div className="border-2 border-dashed border-white/20 rounded-sm p-6 text-center">
                     <Upload className="w-6 h-6 text-[#C5C6C7] mx-auto mb-2" />
                     <p className="text-[#C5C6C7] text-sm mb-2">
-                      Upload {showApprovalDialog.transaction_type === "deposit" ? "deposit confirmation" : "payment confirmation"} screenshot
+                      Upload{" "}
+                      {showApprovalDialog.transaction_type === "deposit"
+                        ? "deposit confirmation"
+                        : "payment confirmation"}{" "}
+                      screenshot
                     </p>
-                    <Input type="file" accept="image/*" multiple onChange={handleApprovalProofChange} className="hidden" id="approval-proof-input" />
-                    <Label htmlFor="approval-proof-input" className="cursor-pointer inline-block px-4 py-2 bg-[#66FCF1] text-[#0B0C10] font-bold uppercase text-sm rounded-sm hover:bg-[#45A29E]">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleApprovalProofChange}
+                      className="hidden"
+                      id="approval-proof-input"
+                    />
+                    <Label
+                      htmlFor="approval-proof-input"
+                      className="cursor-pointer inline-block px-4 py-2 bg-[#66FCF1] text-[#0B0C10] font-bold uppercase text-sm rounded-sm hover:bg-[#45A29E]"
+                    >
                       Choose File(s)
                     </Label>
                   </div>
