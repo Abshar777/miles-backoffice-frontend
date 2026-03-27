@@ -1552,6 +1552,230 @@ const [clientTags, setClientTags] = useState([]);
             )}
           </div>
         </TabsContent>
+
+        {/* ===== Income/Expenses Tab ===== */}
+        <TabsContent value="ie">
+          <div className="space-y-3">
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <div className="w-8 h-8 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : pendingIE.length === 0 ? (
+              <Card className="bg-white border-slate-200">
+                <CardContent className="p-12 text-center">
+                  <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
+                  <p className="text-white text-lg">All caught up!</p>
+                  <p className="text-[#C5C6C7] mt-2">No pending income/expense entries</p>
+                </CardContent>
+              </Card>
+            ) : (
+              pendingIE.map((ie) => (
+                <Card key={ie.entry_id} className="bg-white border-slate-200">
+                  <CardContent className="p-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex-1 min-w-[120px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Description</p>
+                        <p className="text-white text-sm truncate">{ie.description || ie.category || ie.ie_category_name || "-"}</p>
+                        {ie.vendor_name && <p className="text-[10px] text-[#C5C6C7]">Exchanger: {ie.vendor_name}</p>}
+                        {ie.client_name && <p className="text-[10px] text-[#C5C6C7]">Client: {ie.client_name}</p>}
+                      </div>
+                      <div className="min-w-[80px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Type</p>
+                        {getTypeBadge(ie.entry_type)}
+                      </div>
+                      <div className="min-w-[120px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Amount</p>
+                        <p className={`font-mono text-sm font-bold ${ie.entry_type === "income" ? "text-green-400" : "text-red-400"}`}>
+                          {ie.entry_type === "income" ? "+" : "-"}{formatCurrency(ie.amount, ie.currency)}
+                        </p>
+                        {ie.base_currency && ie.base_currency !== ie.currency && ie.base_amount && (
+                          <p className="text-[10px] text-[#C5C6C7]">{ie.base_amount?.toLocaleString()} {ie.base_currency}</p>
+                        )}
+                      </div>
+                      <div className="min-w-[100px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Treasury</p>
+                        <p className="text-white text-xs truncate">{ie.treasury_account_name || "-"}</p>
+                      </div>
+                      <div className="min-w-[80px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Date</p>
+                        <p className="text-white text-xs">{ie.date || formatDate(ie.created_at)}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <Button variant="ghost" size="sm" onClick={() => setViewItem({ ...ie, _viewType: "ie" })} className="text-[#C5C6C7] hover:text-white hover:bg-white/5 h-8 w-8 p-0" data-testid={`view-ie-${ie.entry_id}`}><Eye className="w-4 h-4" /></Button>
+                        <Button size="sm" onClick={() => initiateGenericApprove("ie", ie.entry_id)} disabled={processingId === ie.entry_id} className="bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 h-8 text-xs px-3" data-testid={`approve-ie-${ie.entry_id}`}><CheckCircle className="w-3.5 h-3.5 mr-1" />Approve</Button>
+                        <Button size="sm" onClick={() => initiateGenericReject("ie", ie.entry_id)} disabled={processingId === ie.entry_id} className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 h-8 text-xs px-3" data-testid={`reject-ie-${ie.entry_id}`}><XCircle className="w-3.5 h-3.5 mr-1" />Reject</Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ===== Loan Disbursements Tab ===== */}
+        <TabsContent value="loans">
+          <div className="space-y-3">
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <div className="w-8 h-8 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : pendingLoans.length === 0 ? (
+              <Card className="bg-white border-slate-200">
+                <CardContent className="p-12 text-center">
+                  <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
+                  <p className="text-white text-lg">All caught up!</p>
+                  <p className="text-[#C5C6C7] mt-2">No pending loan disbursements</p>
+                </CardContent>
+              </Card>
+            ) : (
+              pendingLoans.map((loan) => (
+                <Card key={loan.loan_id} className="bg-white border-slate-200">
+                  <CardContent className="p-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex-1 min-w-[120px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Borrower</p>
+                        <p className="text-white text-sm font-medium">{loan.borrower_name}</p>
+                        {loan.vendor_name && <p className="text-[10px] text-[#C5C6C7]">Exchanger: {loan.vendor_name}</p>}
+                      </div>
+                      <div className="min-w-[120px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Amount</p>
+                        <p className="font-mono text-sm font-bold text-red-400">-{formatCurrency(loan.amount, loan.currency)}</p>
+                      </div>
+                      <div className="min-w-[80px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Interest</p>
+                        <p className="text-white text-xs">{loan.interest_rate}%</p>
+                      </div>
+                      <div className="min-w-[100px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Source</p>
+                        <p className="text-white text-xs truncate">{loan.source_vendor_name || "Treasury"}</p>
+                      </div>
+                      <div className="min-w-[80px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Due Date</p>
+                        <p className="text-white text-xs">{loan.due_date?.split("T")[0]}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <Button variant="ghost" size="sm" onClick={() => setViewItem({ ...loan, _viewType: "loan" })} className="text-[#C5C6C7] hover:text-white hover:bg-white/5 h-8 w-8 p-0" data-testid={`view-loan-${loan.loan_id}`}><Eye className="w-4 h-4" /></Button>
+                        <Button size="sm" onClick={() => initiateGenericApprove("loan", loan.loan_id)} disabled={processingId === loan.loan_id} className="bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 h-8 text-xs px-3" data-testid={`approve-loan-${loan.loan_id}`}><CheckCircle className="w-3.5 h-3.5 mr-1" />Approve</Button>
+                        <Button size="sm" onClick={() => initiateGenericReject("loan", loan.loan_id)} disabled={processingId === loan.loan_id} className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 h-8 text-xs px-3" data-testid={`reject-loan-${loan.loan_id}`}><XCircle className="w-3.5 h-3.5 mr-1" />Reject</Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ===== Loan Repayments Tab ===== */}
+        <TabsContent value="repayments">
+          <div className="space-y-3">
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <div className="w-8 h-8 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : pendingRepayments.length === 0 ? (
+              <Card className="bg-white border-slate-200">
+                <CardContent className="p-12 text-center">
+                  <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
+                  <p className="text-white text-lg">All caught up!</p>
+                  <p className="text-[#C5C6C7] mt-2">No pending loan repayments</p>
+                </CardContent>
+              </Card>
+            ) : (
+              pendingRepayments.map((rep) => (
+                <Card key={rep.repayment_id} className="bg-white border-slate-200">
+                  <CardContent className="p-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex-1 min-w-[120px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Borrower</p>
+                        <p className="text-white text-sm font-medium">{rep.borrower_name || "-"}</p>
+                        <p className="text-[10px] text-[#C5C6C7] font-mono">{rep.loan_id}</p>
+                      </div>
+                      <div className="min-w-[120px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Amount</p>
+                        <p className="font-mono text-sm font-bold text-green-400">+{formatCurrency(rep.amount, rep.currency)}</p>
+                        {rep.currency !== rep.loan_currency && (
+                          <p className="text-[10px] text-[#C5C6C7]">{formatCurrency(rep.amount_in_loan_currency, rep.loan_currency)}</p>
+                        )}
+                      </div>
+                      <div className="min-w-[80px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Payment Date</p>
+                        <p className="text-white text-xs">{rep.payment_date}</p>
+                      </div>
+                      <div className="min-w-[80px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Reference</p>
+                        <p className="text-white text-xs truncate">{rep.reference || "-"}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <Button variant="ghost" size="sm" onClick={() => setViewItem({ ...rep, _viewType: "repayment" })} className="text-[#C5C6C7] hover:text-white hover:bg-white/5 h-8 w-8 p-0" data-testid={`view-rep-${rep.repayment_id}`}><Eye className="w-4 h-4" /></Button>
+                        <Button size="sm" onClick={() => initiateGenericApprove("repayment", rep.repayment_id)} disabled={processingId === rep.repayment_id} className="bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 h-8 text-xs px-3" data-testid={`approve-rep-${rep.repayment_id}`}><CheckCircle className="w-3.5 h-3.5 mr-1" />Approve</Button>
+                        <Button size="sm" onClick={() => initiateGenericReject("repayment", rep.repayment_id)} disabled={processingId === rep.repayment_id} className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 h-8 text-xs px-3" data-testid={`reject-rep-${rep.repayment_id}`}><XCircle className="w-3.5 h-3.5 mr-1" />Reject</Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ===== PSP Settlements Tab ===== */}
+        <TabsContent value="psp_settlements">
+          <div className="space-y-3">
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <div className="w-8 h-8 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : pendingPSPSettlements.length === 0 ? (
+              <Card className="bg-white border-slate-200">
+                <CardContent className="p-12 text-center">
+                  <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
+                  <p className="text-white text-lg">All caught up!</p>
+                  <p className="text-[#C5C6C7] mt-2">No pending PSP settlements</p>
+                </CardContent>
+              </Card>
+            ) : (
+              pendingPSPSettlements.map((stl) => (
+                <Card key={stl.settlement_id} className="bg-white border-slate-200">
+                  <CardContent className="p-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex-1 min-w-[120px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">PSP</p>
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="w-4 h-4 text-purple-400" />
+                          <p className="text-white text-sm">{stl.psp_name}</p>
+                        </div>
+                        <Badge className="mt-1 bg-slate-100 text-[#C5C6C7] text-[10px]">{stl.settlement_type || "standard"}</Badge>
+                      </div>
+                      <div className="min-w-[100px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Gross</p>
+                        <p className="font-mono text-sm text-white">${stl.gross_amount?.toLocaleString()}</p>
+                      </div>
+                      <div className="min-w-[100px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Net Amount</p>
+                        <p className="font-mono text-sm font-bold text-green-400">${stl.net_amount?.toLocaleString()}</p>
+                      </div>
+                      <div className="min-w-[80px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Txns</p>
+                        <p className="text-white text-sm">{stl.transaction_count}</p>
+                      </div>
+                      <div className="min-w-[120px]">
+                        <p className="text-[10px] text-[#C5C6C7] uppercase tracking-wider mb-0.5">Destination</p>
+                        <p className="text-white text-xs truncate">{stl.settlement_destination_name || "-"}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <Button variant="ghost" size="sm" onClick={() => setViewItem({ ...stl, _viewType: "psp_settlement" })} className="text-[#C5C6C7] hover:text-white hover:bg-white/5 h-8 w-8 p-0" data-testid={`view-psp-${stl.settlement_id}`}><Eye className="w-4 h-4" /></Button>
+                        <Button size="sm" onClick={() => initiateGenericApprove("psp_settlement", stl.settlement_id)} disabled={processingId === stl.settlement_id} className="bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30 h-8 text-xs px-3" data-testid={`approve-psp-${stl.settlement_id}`}><CheckCircle className="w-3.5 h-3.5 mr-1" />Approve</Button>
+                        <Button size="sm" onClick={() => initiateGenericReject("psp_settlement", stl.settlement_id)} disabled={processingId === stl.settlement_id} className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 h-8 text-xs px-3" data-testid={`reject-psp-${stl.settlement_id}`}><XCircle className="w-3.5 h-3.5 mr-1" />Reject</Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* View Transaction Dialog */}
@@ -2548,6 +2772,203 @@ const [clientTags, setClientTags] = useState([]);
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Generic View Item Dialog (IE / Loan / Repayment / PSP Settlement) */}
+      <Dialog open={!!viewItem} onOpenChange={() => setViewItem(null)}>
+        <DialogContent className="bg-white border-slate-200 text-white max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle
+              className="text-2xl font-bold uppercase tracking-tight"
+              style={{ fontFamily: "Barlow Condensed" }}
+            >
+              {viewItem?._viewType === "ie"
+                ? "Income/Expense Details"
+                : viewItem?._viewType === "loan"
+                  ? "Loan Details"
+                  : viewItem?._viewType === "repayment"
+                    ? "Repayment Details"
+                    : "PSP Settlement Details"}
+            </DialogTitle>
+          </DialogHeader>
+          {viewItem && (
+            <div className="space-y-4">
+              <GenericDetailView
+                item={viewItem}
+                formatCurrency={formatCurrency}
+                formatDate={formatDate}
+                getTypeBadge={getTypeBadge}
+              />
+              <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={() => {
+                    const type = viewItem._viewType;
+                    const id =
+                      type === "ie"
+                        ? viewItem.entry_id
+                        : type === "loan"
+                          ? viewItem.loan_id
+                          : type === "repayment"
+                            ? viewItem.repayment_id
+                            : viewItem.settlement_id;
+                    setViewItem(null);
+                    initiateGenericApprove(type, id);
+                  }}
+                  className="flex-1 bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />Approve
+                </Button>
+                <Button
+                  onClick={() => {
+                    const type = viewItem._viewType;
+                    const id =
+                      type === "ie"
+                        ? viewItem.entry_id
+                        : type === "loan"
+                          ? viewItem.loan_id
+                          : type === "repayment"
+                            ? viewItem.repayment_id
+                            : viewItem.settlement_id;
+                    setViewItem(null);
+                    initiateGenericReject(type, id);
+                  }}
+                  className="flex-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30"
+                >
+                  <XCircle className="w-4 h-4 mr-2" />Reject
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Generic Reject Reason Dialog (IE / Loans / Repayments / PSP Settlements) */}
+      <Dialog
+        open={!!showGenericRejectDialog}
+        onOpenChange={() => {
+          setShowGenericRejectDialog(null);
+          setRejectReason("");
+        }}
+      >
+        <DialogContent className="bg-white border-slate-200 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle
+              className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2"
+              style={{ fontFamily: "Barlow Condensed" }}
+            >
+              <AlertCircle className="w-6 h-6 text-red-400" />Reject Item
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-[#C5C6C7]">Please provide a reason for rejection:</p>
+            <Textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Enter rejection reason..."
+              className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1]"
+              rows={3}
+              data-testid="generic-reject-reason"
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowGenericRejectDialog(null);
+                  setRejectReason("");
+                }}
+                className="flex-1 border-slate-200 text-[#C5C6C7] hover:bg-white/5"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleGenericRejectWithCaptcha}
+                className="flex-1 bg-red-500 text-white hover:bg-red-600"
+                data-testid="continue-generic-reject-btn"
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+// ---- Helper Components ----
+
+function GenericDetailView({ item, formatCurrency, formatDate, getTypeBadge }) {
+  if (item._viewType === "ie")
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Badge className={item.entry_type === "income" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}>{item.entry_type}</Badge>
+          <Badge className="bg-yellow-500/20 text-yellow-400 text-xs uppercase">Pending</Badge>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Description</p><p className="text-white">{item.description || item.category || item.ie_category_name || "-"}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Amount</p><p className={`font-mono text-xl ${item.entry_type === "income" ? "text-green-400" : "text-red-400"}`}>{formatCurrency(item.amount, item.currency)}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Treasury</p><p className="text-white">{item.treasury_account_name || "-"}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Date</p><p className="text-white">{item.date || formatDate(item.created_at)}</p></div>
+          {item.vendor_name && <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Exchanger</p><p className="text-white">{item.vendor_name}</p></div>}
+          {item.client_name && <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Client</p><p className="text-white">{item.client_name}</p></div>}
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Created By</p><p className="text-white">{item.created_by_name}</p></div>
+          {item.reference && <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Reference</p><p className="text-white font-mono text-sm">{item.reference}</p></div>}
+        </div>
+      </div>
+    );
+  if (item._viewType === "loan")
+    return (
+      <div className="space-y-4">
+        <Badge className="bg-yellow-500/20 text-yellow-400 text-xs uppercase">Pending Approval</Badge>
+        <div className="grid grid-cols-2 gap-4">
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Borrower</p><p className="text-white text-lg">{item.borrower_name}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Amount</p><p className="font-mono text-xl text-red-400">-{formatCurrency(item.amount, item.currency)}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Interest Rate</p><p className="text-white">{item.interest_rate}%</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Loan Type</p><p className="text-white capitalize">{item.loan_type?.replace("_", " ")}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Loan Date</p><p className="text-white">{item.loan_date?.split("T")[0]}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Due Date</p><p className="text-white">{item.due_date?.split("T")[0]}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Source</p><p className="text-white">{item.source_vendor_name || "Treasury"}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Created By</p><p className="text-white">{item.created_by_name}</p></div>
+        </div>
+        {item.notes && <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Notes</p><p className="text-white">{item.notes}</p></div>}
+      </div>
+    );
+  if (item._viewType === "repayment")
+    return (
+      <div className="space-y-4">
+        <Badge className="bg-yellow-500/20 text-yellow-400 text-xs uppercase">Pending Approval</Badge>
+        <div className="grid grid-cols-2 gap-4">
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Borrower</p><p className="text-white text-lg">{item.borrower_name}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Repayment Amount</p><p className="font-mono text-xl text-green-400">+{formatCurrency(item.amount, item.currency)}</p></div>
+          {item.currency !== item.loan_currency && (
+            <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">In Loan Currency</p><p className="text-white font-mono">{formatCurrency(item.amount_in_loan_currency, item.loan_currency)}</p></div>
+          )}
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Payment Date</p><p className="text-white">{item.payment_date}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Loan ID</p><p className="text-white font-mono text-xs">{item.loan_id}</p></div>
+          {item.reference && <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Reference</p><p className="text-white">{item.reference}</p></div>}
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Created By</p><p className="text-white">{item.created_by_name}</p></div>
+        </div>
+        {item.notes && <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Notes</p><p className="text-white">{item.notes}</p></div>}
+      </div>
+    );
+  if (item._viewType === "psp_settlement")
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2"><CreditCard className="w-5 h-5 text-purple-400" /><span className="text-white text-lg">{item.psp_name}</span></div>
+          <Badge className="bg-yellow-500/20 text-yellow-400 text-xs uppercase">Pending</Badge>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Type</p><Badge className="bg-purple-500/20 text-purple-400">{item.settlement_type || "standard"}</Badge></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Transactions</p><p className="text-white font-mono">{item.transaction_count}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Gross Amount</p><p className="text-white font-mono text-xl">${item.gross_amount?.toLocaleString()}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Net Amount</p><p className="text-green-400 font-mono text-xl">${item.net_amount?.toLocaleString()}</p></div>
+          {item.commission_amount > 0 && <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Commission</p><p className="text-red-400 font-mono">-${item.commission_amount?.toLocaleString()}</p></div>}
+          {item.reserve_fund_amount > 0 && <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Reserve Fund</p><p className="text-red-400 font-mono">-${item.reserve_fund_amount?.toLocaleString()}</p></div>}
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Destination</p><p className="text-white">{item.settlement_destination_name}</p></div>
+          <div><p className="text-xs text-[#C5C6C7] uppercase tracking-wider mb-1">Created By</p><p className="text-white">{item.created_by_name}</p><p className="text-xs text-[#C5C6C7]">{formatDate(item.created_at)}</p></div>
+        </div>
+      </div>
+    );
+  return null;
 }
