@@ -1909,7 +1909,7 @@ export default function TransactionRequests() {
                       className="bg-white"
                     />
                     <Input
-                      placeholder="SWIFT / IBAN"
+                      placeholder="IFSC / IBAN"
                       value={form.client_bank_swift_iban}
                       onChange={(e) =>
                         setForm({
