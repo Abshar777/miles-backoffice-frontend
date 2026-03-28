@@ -213,6 +213,7 @@ function EditableRequestCard({
   onSaved,
   onDelete,
   onProcess,
+  clientTags,
 }) {
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -377,6 +378,18 @@ function EditableRequestCard({
               {req.transaction_status}
             </Badge>
           )}
+          {(req.client_tags || []).map((tag) => {
+            const tagObj = clientTags.find((t) => t.name === tag);
+            return (
+              <span
+                key={tag}
+                className="px-1.5 py-0.5 rounded-full text-[10px] font-medium text-white whitespace-nowrap"
+                style={{ backgroundColor: tagObj?.color || "#64748B" }}
+              >
+                {tag}
+              </span>
+            );
+          })}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs text-slate-400">
@@ -1112,8 +1125,8 @@ export default function TransactionRequests() {
         setCreateOpen(false);
         setForm({ ...defaultForm });
         setFormTags([]);
-        setProofImage(null);
-        setProofPreview(null);
+        setProofImages([]);
+        setProofPreviews([]);
         fetchRequests();
       } else {
         const e = await res.json();
@@ -1565,6 +1578,7 @@ export default function TransactionRequests() {
               onSaved={() => fetchRequests()}
               onDelete={handleDelete}
               onProcess={openProcess}
+              clientTags={clientTags}
             />
           ))
         )}
