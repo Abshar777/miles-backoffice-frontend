@@ -2129,7 +2129,7 @@ export default function TransactionRequests() {
             </Button>
             {showCreateReqCaptcha && (
               <div
-                className="p-3 bg-amber-50/5border border-amber-200 rounded-sm space-y-2 mt-2"
+                className="p-3 bg-amber-50/5 border border-amber-200 rounded-sm space-y-2 mt-2"
                 data-testid="create-req-captcha"
               >
                 <p className="text-sm text-amber-800 font-medium">
@@ -2235,7 +2235,7 @@ export default function TransactionRequests() {
                   </div>
                 );
               })()}
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
+              <div className="p-4 bg-yellow-50/5 border border-yellow-200 rounded">
                 <p className="text-sm font-medium text-yellow-800 mb-2">
                   Verify: What is {captcha.a} + {captcha.b}?
                 </p>
