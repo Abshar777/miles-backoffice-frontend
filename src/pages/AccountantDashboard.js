@@ -57,6 +57,7 @@ import {
   HandCoins,
   ReceiptText,
   Landmark,
+  FileText,
 } from "lucide-react";
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
@@ -2011,6 +2012,14 @@ const [clientTags, setClientTags] = useState([]);
                         const src = url?.startsWith("http")
                           ? url
                           : `data:image/png;base64,${url}`;
+                        if (url?.toLowerCase().includes('.pdf')) {
+                          return (
+                            <a key={i} href={src} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-4 rounded border border-red-200 bg-red-50 hover:bg-red-100 cursor-pointer">
+                              <FileText className="w-8 h-8 text-red-500 mb-1" />
+                              <span className="text-xs text-red-600">PDF {i + 1}</span>
+                            </a>
+                          );
+                        }
                         return (
                           <img
                             key={i}
@@ -2486,11 +2495,19 @@ const [clientTags, setClientTags] = useState([]);
 
               {proofPreview ? (
                 <div className="relative">
-                  <img
-                    src={proofPreview}
-                    alt="Proof preview"
-                    className="w-full h-48 object-contain bg-slate-50 rounded-sm"
-                  />
+                  {proofPreview.startsWith('data:application/pdf') || proofPreview.startsWith('data:application/octet') ? (
+                    <div className="w-full h-48 flex flex-col items-center justify-center bg-red-50 border border-red-200 rounded-sm">
+                      <FileText className="w-12 h-12 text-red-500 mb-2" />
+                      <p className="text-sm text-red-600">PDF uploaded</p>
+                      <a href={proofPreview} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline mt-1">View PDF</a>
+                    </div>
+                  ) : (
+                    <img
+                      src={proofPreview}
+                      alt="Proof preview"
+                      className="w-full h-48 object-contain bg-slate-50 rounded-sm"
+                    />
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -2504,11 +2521,11 @@ const [clientTags, setClientTags] = useState([]);
                 <div className="border-2 border-dashed border-white/20 rounded-sm p-8 text-center">
                   <Upload className="w-8 h-8 text-[#C5C6C7] mx-auto mb-2" />
                   <p className="text-[#C5C6C7] mb-2">
-                    Upload screenshot of completed payment
+                    Upload screenshot or PDF of completed payment
                   </p>
                   <Input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,application/pdf,.pdf"
                     onChange={handleProofUpload}
                     className="hidden"
                     id="proof-upload-input"
@@ -2791,12 +2808,19 @@ const [clientTags, setClientTags] = useState([]);
                     <div className="grid grid-cols-3 gap-2">
                       {approvalProofPreviews.map((src, i) => (
                         <div key={i} className="relative group">
-                          <img
-                            src={src}
-                            alt={`Proof ${i + 1}`}
-                            className="w-full h-20 object-cover rounded border border-white/20 cursor-pointer"
-                            onClick={() => window.open(src, "_blank")}
-                          />
+                          {src.startsWith('data:application/pdf') || src.startsWith('data:application/octet') ? (
+                            <div className="w-full h-20 flex flex-col items-center justify-center rounded border border-red-200 bg-red-50 cursor-pointer" onClick={() => window.open(src, "_blank")}>
+                              <FileText className="w-6 h-6 text-red-500 mb-1" />
+                              <span className="text-xs text-red-600">PDF {i + 1}</span>
+                            </div>
+                          ) : (
+                            <img
+                              src={src}
+                              alt={`Proof ${i + 1}`}
+                              className="w-full h-20 object-cover rounded border border-white/20 cursor-pointer"
+                              onClick={() => window.open(src, "_blank")}
+                            />
+                          )}
                           <button
                             type="button"
                             onClick={() => removeApprovalProof(i)}
@@ -2811,11 +2835,11 @@ const [clientTags, setClientTags] = useState([]);
                       htmlFor="approval-proof-input"
                       className="cursor-pointer inline-block px-3 py-1 bg-[#66FCF1]/20 text-[#66FCF1] text-xs rounded-sm hover:bg-[#66FCF1]/30"
                     >
-                      {approvalProofPreviews.length} image(s) — add more
+                      {approvalProofPreviews.length} file(s) — add more
                     </Label>
                     <Input
                       type="file"
-                      accept="image/*"
+                      accept="image/*,application/pdf,.pdf"
                       multiple
                       onChange={handleApprovalProofChange}
                       className="hidden"
@@ -2830,11 +2854,11 @@ const [clientTags, setClientTags] = useState([]);
                       {showApprovalDialog.transaction_type === "deposit"
                         ? "deposit confirmation"
                         : "payment confirmation"}{" "}
-                      screenshot
+                      (screenshot or PDF)
                     </p>
                     <Input
                       type="file"
-                      accept="image/*"
+                      accept="image/*,application/pdf,.pdf"
                       multiple
                       onChange={handleApprovalProofChange}
                       className="hidden"
