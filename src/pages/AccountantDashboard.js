@@ -2720,6 +2720,19 @@ const [clientTags, setClientTags] = useState([]);
                   <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
                     Source Account (Where funds come from) *
                   </Label>
+                  {(() => {
+                    const txCurrency =
+                      showApprovalDialog.base_currency &&
+                      showApprovalDialog.base_currency !== "USD"
+                        ? showApprovalDialog.base_currency
+                        : showApprovalDialog.currency || "USD";
+                    const filteredTreasury = treasuryAccounts.filter(
+                      (a) => a.currency === txCurrency
+                    );
+                    const filteredPsps = psps.filter(
+                      (p) => p.status === "active" && p.currency === txCurrency
+                    );
+                    return (
                   <Select
                     value={approvalSourceAccount}
                     onValueChange={setApprovalSourceAccount}
@@ -2731,12 +2744,12 @@ const [clientTags, setClientTags] = useState([]);
                       <SelectValue placeholder="Select treasury, USDT or PSP account" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200 max-h-[250px]">
-                      {treasuryAccounts.length > 0 && (
+                      {filteredTreasury.length > 0 && (
                         <div className="px-2 py-1 text-[10px] text-slate-400 uppercase tracking-wider font-bold border-b border-slate-100">
                           Treasury / USDT
                         </div>
                       )}
-                      {treasuryAccounts.map((account) => (
+                      {filteredTreasury.map((account) => (
                         <SelectItem
                           key={account.account_id}
                           value={account.account_id}
@@ -2758,14 +2771,12 @@ const [clientTags, setClientTags] = useState([]);
                           </div>
                         </SelectItem>
                       ))}
-                      {psps.length > 0 && (
+                      {filteredPsps.length > 0 && (
                         <div className="px-2 py-1 text-[10px] text-slate-400 uppercase tracking-wider font-bold border-b border-slate-100 mt-1">
                           PSP
                         </div>
                       )}
-                      {psps
-                        .filter((p) => p.status === "active")
-                        .map((psp) => (
+                      {filteredPsps.map((psp) => (
                           <SelectItem
                             key={`psp_${psp.psp_id}`}
                             value={`psp_${psp.psp_id}`}
@@ -2785,6 +2796,8 @@ const [clientTags, setClientTags] = useState([]);
                         ))}
                     </SelectContent>
                   </Select>
+                    );
+                  })()}
                 </div>
               )}
 
