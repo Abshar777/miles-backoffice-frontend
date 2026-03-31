@@ -456,6 +456,17 @@ export default function ExchangerDashboard() {
       minute: '2-digit',
     });
   };
+  const formatDateV2 = (dateStr) => {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   const pendingCount = transactions.filter(t => t.status === 'pending').length;
   const pendingIeCount = ieEntries.filter(e => e.status === 'pending_vendor').length;
@@ -1208,7 +1219,7 @@ export default function ExchangerDashboard() {
                         )}
                       </TableCell>
                       <TableCell>{getStatusBadge(tx.status)}</TableCell>
-                      <TableCell className="text-slate-500 text-sm">{formatDate(tx.transaction_date || tx.created_at)}</TableCell>
+                      <TableCell className="text-slate-500 text-sm">{formatDateV2(tx.transaction_date || tx.created_at)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button 

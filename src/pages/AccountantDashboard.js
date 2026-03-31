@@ -820,6 +820,18 @@ const [clientTags, setClientTags] = useState([]);
     });
   };
 
+  const formatDateForTXDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    
+    });
+  };
+
+
   const formatCurrency = (amount, currency = "USD") => {
     if (amount == null) return "-";
     return `${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
