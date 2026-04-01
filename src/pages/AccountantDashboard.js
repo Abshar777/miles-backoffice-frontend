@@ -2840,7 +2840,16 @@ const [clientTags, setClientTags] = useState([]);
                             </div>
                           ) : (
                             <img
-                              src={src}
+                             onClick={() => {
+                            if (src.startsWith("data:")) {
+                              fetch(src).then(r => r.blob()).then(blob => {
+                                const url = URL.createObjectURL(blob);
+                                window.open(url, "_blank");
+                              });
+                            } else {
+                              window.open(src, "_blank");
+                            }
+                          }} 
                               alt={`Proof ${i + 1}`}
                               className="w-full h-20 object-cover rounded border border-white/20 cursor-pointer"
                               onClick={() => window.open(src, "_blank")}
