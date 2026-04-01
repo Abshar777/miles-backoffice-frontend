@@ -41,6 +41,7 @@ import {
   AlertTriangle,
   MessageSquare,
   FileInput,
+  RotateCcw,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -152,13 +153,15 @@ export default function Layout() {
     { to: '/reports', icon: BarChart3, label: 'Reports', module: 'reports' },
     { to: '/accountant', icon: ClipboardCheck, label: 'Approvals', module: 'approvals' },
     { to: '/roles', icon: Shield, label: 'Roles & Permissions', module: 'roles' },
+    { to: '/reinstate', icon: RotateCcw, label: 'Reinstate Center', module: null, adminOnly: true },
     { to: '/settings', icon: Settings, label: 'Settings', module: null },
   ];
 
   // Filter navigation items based on permissions (show all while loading)
-  const filteredNavItems = allNavItems.filter(item => 
-    !item.module || permissionsLoading || canView(item.module)
-  );
+  const filteredNavItems = allNavItems.filter(item => {
+    if (item.adminOnly && user?.role !== 'admin') return false;
+    return !item.module || permissionsLoading || canView(item.module);
+  });
 
   // Select nav items based on role
   const navItems = isExchanger ? vendorNavItems : filteredNavItems;
