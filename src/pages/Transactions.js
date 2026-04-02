@@ -3508,7 +3508,7 @@ export default function Transactions() {
                       }
                       alt="Accountant approval proof"
                       className="w-full max-h-48 object-contain rounded border border-[#66FCF1]/30 bg-slate-50 cursor-pointer hover:border-[#66FCF1]"
-                      onClick={() =>
+                       onClick={() =>
                         window.open(
                           viewTransaction.accountant_proof_image?.startsWith(
                             "http",
@@ -3520,11 +3520,7 @@ export default function Transactions() {
                       }
                       data-testid="accountant-proof-thumbnail"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded">
-                      <span className="text-slate-800 text-sm">
-                        Click to view full size
-                      </span>
-                    </div>
+                    
                   </div>
                   )}
                   {viewTransaction.proof_uploaded_at && (
