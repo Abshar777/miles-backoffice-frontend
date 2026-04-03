@@ -677,8 +677,9 @@ export default function ReinstateCenter() {
   if (!user || user.role !== "admin") return null;
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="flex flex-col h-full overflow-hidden p-6 gap-6">
+      {/* Header */}
+      <div className="flex items-center gap-3 shrink-0">
         <RotateCcw className="w-6 h-6 text-orange-400" />
         <div>
           <h1 className="text-2xl font-bold text-white">Reinstate Center</h1>
@@ -691,7 +692,7 @@ export default function ReinstateCenter() {
         </Badge>
       </div>
 
-      <div className="bg-orange-500/10 border border-orange-500/30 rounded-sm p-3 flex items-start gap-2">
+      <div className="bg-orange-500/10 border border-orange-500/30 rounded-sm p-3 flex items-start gap-2 shrink-0">
         <AlertTriangle className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
         <p className="text-orange-300 text-sm">
           Reinstating a record reverses all treasury balance changes, resets statuses, and removes
@@ -699,8 +700,8 @@ export default function ReinstateCenter() {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-[#1F2833] border border-[#45A29E]/20 flex-wrap h-auto gap-1 p-1">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
+        <TabsList className="bg-[#1F2833] border border-[#45A29E]/20 flex-wrap h-auto gap-1 p-1 shrink-0">
           {tabConfig.map((tab) => (
             <TabsTrigger
               key={tab.key}
@@ -714,7 +715,11 @@ export default function ReinstateCenter() {
         </TabsList>
 
         {tabConfig.map((tab) => (
-          <TabsContent key={tab.key} value={tab.key} className="mt-4">
+          <TabsContent
+            key={tab.key}
+            value={tab.key}
+            className="flex-1 min-h-0 overflow-y-auto mt-4 pr-1"
+          >
             <ReinstateTab tabCfg={tab} />
           </TabsContent>
         ))}
