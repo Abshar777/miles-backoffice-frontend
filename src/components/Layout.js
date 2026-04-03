@@ -153,7 +153,7 @@ export default function Layout() {
     { to: '/reports', icon: BarChart3, label: 'Reports', module: 'reports' },
     { to: '/accountant', icon: ClipboardCheck, label: 'Approvals', module: 'approvals' },
     { to: '/roles', icon: Shield, label: 'Roles & Permissions', module: 'roles' },
-    { to: '/reinstate', icon: RotateCcw, label: 'Reinstate Center', module: null, adminOnly: true },
+    { to: '/reinstate', icon: RotateCcw, label: 'Reinstate Center', module: 'reinstate', adminOnly: true },
     { to: '/settings', icon: Settings, label: 'Settings', module: null },
   ];
 
