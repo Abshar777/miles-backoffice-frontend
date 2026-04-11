@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -98,6 +99,8 @@ const installmentFrequencies = [
 
 export default function Loans() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [loans, setLoans] = useState([]);
   const [treasuryAccounts, setTreasuryAccounts] = useState([]);
   const [vendors, setExchangers] = useState([]);
@@ -117,6 +120,9 @@ export default function Loans() {
   const [isSwapDialogOpen, setIsSwapDialogOpen] = useState(false);
   const [isBorrowerDialogOpen, setIsBorrowerDialogOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState(null);
+  const [selectedBorrower, setSelectedBorrower] = useState(null);
+  const [borrowerLoans, setBorrowerLoans] = useState([]);
+  const [borrowerLoansLoading, setBorrowerLoansLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [summary, setSummary] = useState(null);
   const [vendorSearch, setExchangerSearch] = useState("");
@@ -306,6 +312,12 @@ export default function Loans() {
       toast.error("Failed to load loan details");
     }
   };
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      setMainTab(location.state.tab);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     fetchLoans();
@@ -820,6 +832,92 @@ export default function Loans() {
     }
   };
 
+  const handleSelectBorrower = async (vendor) => {
+    setSelectedBorrower(vendor);
+    setBorrowerLoansLoading(true);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(
+        `${API_URL}/api/loans?vendor_id=${vendor.vendor_id}&page_size=200`,
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, credentials: "include" }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setBorrowerLoans(Array.isArray(data) ? data : data.items || []);
+      }
+    } catch {
+      toast.error("Failed to load borrower loans");
+    } finally {
+      setBorrowerLoansLoading(false);
+    }
+  };
+
+  const handleExportBorrowerExcel = async () => {
+    if (!selectedBorrower) return;
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(
+        `${API_URL}/api/loans/export/excel?vendor_id=${selectedBorrower.vendor_id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${selectedBorrower.name}_loans_${new Date().toISOString().split("T")[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success("Exported to Excel");
+      } else {
+        toast.error("Excel export failed");
+      }
+    } catch {
+      toast.error("Excel export failed");
+    }
+  };
+
+  const handleExportBorrowerPDF = async () => {
+    if (!selectedBorrower) return;
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(
+        `${API_URL}/api/loans/export/pdf?vendor_id=${selectedBorrower.vendor_id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${selectedBorrower.name}_loans_${new Date().toISOString().split("T")[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success("Exported to PDF");
+      } else {
+        toast.error("PDF export failed");
+      }
+    } catch {
+      toast.error("PDF export failed");
+    }
+  };
+
+  const getBorrowerStats = () => {
+    const total = borrowerLoans.length;
+    const totalDisbursed = borrowerLoans.reduce((s, l) => s + (l.amount_usd || l.amount || 0), 0);
+    const outstanding = borrowerLoans.reduce((s, l) => s + (l.outstanding_balance || 0), 0);
+    const active = borrowerLoans.filter((l) => l.status === "active").length;
+    const overdue = borrowerLoans.filter((l) => l.is_overdue || (l.status === "active" && l.due_date && new Date(l.due_date) < new Date())).length;
+    const fullyPaid = borrowerLoans.filter((l) => l.status === "fully_paid").length;
+    const pending = borrowerLoans.filter((l) => l.status === "pending_approval").length;
+    const totalRepaid = borrowerLoans.reduce((s, l) => s + (l.total_repaid || 0), 0);
+    return { total, totalDisbursed, outstanding, active, overdue, fullyPaid, pending, totalRepaid };
+  };
+
   const handleExportPDF = async () => {
     try {
       const token = localStorage.getItem("auth_token");
@@ -1167,92 +1265,81 @@ export default function Loans() {
               </Button>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[500px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-slate-200 hover:bg-transparent">
-                      <TableHead className="text-slate-500 text-xs">
-                        Company
-                      </TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">
-                        Total Loans
-                      </TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">
-                        Disbursed
-                      </TableHead>
-                      <TableHead className="text-slate-500 text-xs text-right">
-                        Outstanding
-                      </TableHead>
-                      <TableHead className="text-slate-500 text-xs text-center">
-                        Active
-                      </TableHead>
-                      <TableHead className="text-slate-500 text-xs">
-                        Status
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {vendors.map((v) => (
-                      <TableRow
-                        key={v.vendor_id}
-                        className="border-slate-200 hover:bg-slate-100"
-                      >
-                        <TableCell>
-                          <div className="text-slate-800 font-medium">
-                            {v.name}
-                          </div>
-                          <div className="text-[10px] text-slate-400">
-                            {v.email}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-slate-800 font-mono text-right">
-                          {v.loan_stats.total_loans}
-                        </TableCell>
-                        <TableCell className="text-slate-800 font-mono text-right">
-                          ${v.loan_stats.total_disbursed_usd?.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-blue-600 font-mono text-right font-semibold">
-                          $
-                          {v.loan_stats.total_outstanding_usd?.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            className={
-                              v.loan_stats.active_loans > 0
-                                ? "bg-blue-500/20 text-blue-400"
-                                : "bg-gray-500/20 text-gray-400"
-                            }
-                          >
-                            {v.loan_stats.active_loans}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            className={
-                              v.status === "active"
-                                ? "bg-green-500/20 text-green-400"
-                                : "bg-red-500/20 text-red-400"
-                            }
-                          >
-                            {v.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {vendors.length === 0 && (
-                      <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="text-center text-slate-400 py-8"
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-slate-200 hover:bg-transparent">
+                    <TableHead className="text-slate-500 text-xs">Company</TableHead>
+                    <TableHead className="text-slate-500 text-xs text-right">Total Loans</TableHead>
+                    <TableHead className="text-slate-500 text-xs text-right">Disbursed</TableHead>
+                    <TableHead className="text-slate-500 text-xs text-right">Outstanding</TableHead>
+                    <TableHead className="text-slate-500 text-xs text-center">Active</TableHead>
+                    <TableHead className="text-slate-500 text-xs">Status</TableHead>
+                    <TableHead className="text-slate-500 text-xs text-center">Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {vendors.map((v) => (
+                    <TableRow
+                      key={v.vendor_id}
+                      className="border-slate-200 hover:bg-slate-50 cursor-pointer"
+                      onClick={() => navigate(`/loans/borrower/${v.vendor_id}`)}
+                    >
+                      <TableCell>
+                        <div className="text-slate-800 font-medium">{v.name}</div>
+                        <div className="text-[10px] text-slate-400">{v.email}</div>
+                      </TableCell>
+                      <TableCell className="text-slate-800 font-mono text-right">
+                        {v.loan_stats.total_loans}
+                      </TableCell>
+                      <TableCell className="text-slate-800 font-mono text-right">
+                        ${v.loan_stats.total_disbursed_usd?.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-blue-600 font-mono text-right font-semibold">
+                        ${v.loan_stats.total_outstanding_usd?.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge
+                          className={
+                            v.loan_stats.active_loans > 0
+                              ? "bg-blue-500/20 text-blue-400"
+                              : "bg-gray-500/20 text-gray-400"
+                          }
                         >
-                          No exchangers found. Add exchangers in the Exchangers
-                          module.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
+                          {v.loan_stats.active_loans}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            v.status === "active"
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-red-500/20 text-red-400"
+                          }
+                        >
+                          {v.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-blue-600 hover:bg-blue-50 text-xs"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/loans/borrower/${v.vendor_id}`); }}
+                        >
+                          <Eye className="w-3.5 h-3.5 mr-1" /> View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {vendors.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center text-slate-400 py-8">
+                        No exchangers found. Add exchangers in the Exchangers module.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
@@ -1894,17 +1981,19 @@ export default function Loans() {
         </TabsContent>
       </Tabs>
 
-      <PaginationControls
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={totalItems}
-        pageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={(s) => {
-          setPageSize(s);
-          setCurrentPage(1);
-        }}
-      />
+      {mainTab === "loans" && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(s) => {
+            setPageSize(s);
+            setCurrentPage(1);
+          }}
+        />
+      )}
 
       {/* Create Loan Dialog */}
       <Dialog
