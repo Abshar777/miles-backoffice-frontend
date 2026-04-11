@@ -17,6 +17,7 @@ import AccountantDashboard from "./pages/AccountantDashboard";
 import TransactionRequests from "./pages/TransactionRequests";
 import IncomeExpenses from "./pages/IncomeExpenses";
 import Loans from "./pages/Loans";
+import BorrowerDetail from "./pages/BorrowerDetail";
 import Debts from "./pages/Debts";
 import Reconciliation from "./pages/Reconciliation";
 import Messages from "./pages/Messages";
@@ -137,13 +138,21 @@ function AppRouter() {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/loans" 
+        <Route
+          path="/loans"
           element={
             <ProtectedRoute requiredModule="loans">
               <Loans />
             </ProtectedRoute>
-          } 
+          }
+        />
+        <Route
+          path="/loans/borrower/:vendorId"
+          element={
+            <ProtectedRoute requiredModule="loans">
+              <BorrowerDetail />
+            </ProtectedRoute>
+          }
         />
         <Route 
           path="/debts" 
