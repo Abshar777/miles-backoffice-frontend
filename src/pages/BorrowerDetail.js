@@ -332,7 +332,7 @@ export default function BorrowerDetail() {
                           <div>
                             <div>{loan.currency} {outstanding.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
                             {loan.currency !== "USD" && (
-                              <div className="text-[10px] text-slate-400 font-normal">${(loan.outstanding_balance || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD</div>
+                              <div className="text-[10px] text-slate-400 font-normal">${(loan.outstanding_balance_usd || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD</div>
                             )}
                           </div>
                         );
