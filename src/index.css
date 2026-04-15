@@ -105,13 +105,18 @@
 @layer base {
     * {
         @apply border-border;
+        /* Remove iOS tap delay on all interactive elements */
+        touch-action: manipulation;
     }
     body {
         background-color: var(--bg-primary);
         color: var(--text-primary);
         font-family: 'Manrope', sans-serif;
         @apply antialiased;
-        transition: background-color 0.3s ease, color 0.3s ease;
+        /* Limit transition to theme-specific elements only, not entire body */
+        -webkit-tap-highlight-color: transparent;
+        /* Prevent overscroll bounce lag on iOS */
+        overscroll-behavior: none;
     }
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Barlow Condensed', sans-serif;
@@ -119,6 +124,11 @@
     code, .font-mono {
         font-family: 'JetBrains Mono', monospace;
     }
+}
+
+/* iOS momentum scrolling for all scrollable containers */
+* {
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Custom scrollbar */
@@ -178,13 +188,14 @@
 [data-theme="dark"] .status-rejected { @apply bg-red-500/20 text-red-400 border-red-500/30; }
 [data-theme="dark"] .status-suspended { @apply bg-gray-500/20 text-gray-400 border-gray-500/30; }
 
-/* Animation */
+/* Animation — GPU-accelerated for smooth iOS rendering */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in {
     animation: fadeIn 0.3s ease-out forwards;
+    will-change: transform, opacity;
 }
 
 /* Card hover effect */

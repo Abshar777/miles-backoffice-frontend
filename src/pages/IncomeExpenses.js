@@ -229,7 +229,7 @@ export default function IncomeExpenses() {
             setEntries(data.items);
             setTotalPages(data.total_pages || 1);
             setTotalItems(data.total || 0);
-            setCurrentPage(data.page || 1);
+            // Do NOT call setCurrentPage here — it creates a feedback loop
           } else {
             // Fallback for non-paginated response
             setEntries(Array.isArray(data) ? data : []);
@@ -243,7 +243,7 @@ export default function IncomeExpenses() {
         setLoading(false);
       }
     },
-    [activeTab, filters],
+    [activeTab, filters, pageSize],
   );
 
   const fetchTreasuryAccounts = async () => {
@@ -339,7 +339,6 @@ export default function IncomeExpenses() {
   };
 
   useEffect(() => {
-    fetchEntries(1);
     fetchTreasuryAccounts();
     fetchExchangers();
     fetchVendorSuppliers();
@@ -349,6 +348,11 @@ export default function IncomeExpenses() {
     fetchSummary();
     fetchMonthlyData();
   }, []);
+
+  // Reset to page 1 whenever filters change (tab change already resets via onValueChange)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   useEffect(() => {
     fetchEntries(currentPage);
