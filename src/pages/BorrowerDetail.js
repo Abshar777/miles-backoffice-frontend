@@ -10,6 +10,12 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -126,6 +132,9 @@ export default function BorrowerDetail() {
   const [loansLoading, setLoansLoading] = useState(true);
   const [totalLoans, setTotalLoans] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Loan detail modal
+  const [selectedLoan, setSelectedLoan] = useState(null);
 
   // Filters / pagination controls
   const [searchQuery, setSearchQuery] = useState("");
@@ -677,7 +686,7 @@ export default function BorrowerDetail() {
                           size="icon"
                           variant="ghost"
                           className="w-7 h-7 hover:text-blue-600"
-                          onClick={() => navigate(`/loans/${loan.loan_id}`)}
+                          onClick={() => setSelectedLoan(loan)}
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </Button>
@@ -784,6 +793,49 @@ export default function BorrowerDetail() {
           )}
         </CardContent>
       </Card>
+
+      {/* Loan Detail Modal */}
+      <Dialog open={!!selectedLoan} onOpenChange={() => setSelectedLoan(null)}>
+        <DialogContent className="bg-white border-slate-200 max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-slate-800 text-lg font-bold flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-blue-600" />
+              Loan Details
+              <span className="text-xs font-mono text-slate-400 ml-1">#{selectedLoan?.loan_id?.slice(0,8)}</span>
+            </DialogTitle>
+          </DialogHeader>
+          {selectedLoan && (() => {
+            const outstanding = Math.max(0, (selectedLoan.amount || 0) + (selectedLoan.total_interest || 0) - (selectedLoan.total_repaid || 0));
+            const rows = [
+              { label: "Borrower", value: selectedLoan.borrower_name },
+              { label: "Loan Type", value: selectedLoan.loan_type?.replace(/_/g, " ") },
+              { label: "Status", value: getStatusBadge(selectedLoan), isNode: true },
+              { label: "Source Treasury", value: selectedLoan.source_treasury_name || "—" },
+              { label: "Amount", value: `${selectedLoan.currency} ${(selectedLoan.amount || 0).toLocaleString()}` },
+              { label: "Interest Rate", value: `${selectedLoan.interest_rate || 0}%` },
+              { label: "Total Interest", value: `${selectedLoan.currency} ${(selectedLoan.total_interest || 0).toLocaleString()}` },
+              { label: "Outstanding", value: `${selectedLoan.currency} ${outstanding.toLocaleString(undefined, { maximumFractionDigits: 2 })}` },
+              { label: "Total Repaid", value: `${selectedLoan.currency} ${(selectedLoan.total_repaid || 0).toLocaleString()}` },
+              { label: "Loan Date", value: formatDate(selectedLoan.loan_date) },
+              { label: "Due Date", value: formatDate(selectedLoan.due_date) },
+              { label: "Repayment Count", value: selectedLoan.repayment_count || 0 },
+              { label: "Description", value: selectedLoan.description || "—" },
+            ];
+            return (
+              <div className="space-y-1 mt-2">
+                {rows.map(({ label, value, isNode }) => (
+                  <div key={label} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                    <span className="text-xs text-slate-400 uppercase tracking-wider">{label}</span>
+                    {isNode ? value : (
+                      <span className="text-sm font-medium text-slate-800 text-right capitalize">{value}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
