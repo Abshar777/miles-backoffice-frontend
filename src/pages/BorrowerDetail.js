@@ -161,46 +161,45 @@ export default function BorrowerDetail() {
     loadVendor();
   }, [vendorId]);
 
-  // Load summary stats once (fetch up to 500, no filter)
+  // Load summary stats (fetch all pages up to 200 per page)
   useEffect(() => {
     const loadSummary = async () => {
       try {
+        // First page to get total count
         const res = await fetch(
-          `${API_URL}/api/loans?vendor_id=${vendorId}&page_size=500`,
+          `${API_URL}/api/loans?vendor_id=${vendorId}&page_size=200&page=1`,
           { headers: getAuthHeaders(), credentials: "include" }
         );
-        if (res.ok) {
-          const data = await res.json();
-          const allLoans = Array.isArray(data) ? data : data.items || [];
-          setSummaryStats({
-            total: data.total ?? allLoans.length,
-            totalDisbursed: allLoans.reduce(
-              (s, l) => s + (l.amount_usd || l.amount || 0),
-              0
-            ),
-            outstanding: allLoans.reduce(
-              (s, l) =>
-                s + (l.outstanding_balance_usd || l.outstanding_balance || 0),
-              0
-            ),
-            totalRepaid: allLoans.reduce(
-              (s, l) => s + (l.total_repaid || 0),
-              0
-            ),
-            active: allLoans.filter((l) => l.status === "active").length,
-            overdue: allLoans.filter(
-              (l) =>
-                l.is_overdue ||
-                (l.status === "active" &&
-                  l.due_date &&
-                  new Date(l.due_date) < new Date())
-            ).length,
-            fullyPaid: allLoans.filter((l) => l.status === "fully_paid")
-              .length,
-            pending: allLoans.filter((l) => l.status === "pending_approval")
-              .length,
-          });
+        if (!res.ok) return;
+        const data = await res.json();
+        let allLoans = Array.isArray(data) ? data : data.items || [];
+        const totalCount = data.total ?? allLoans.length;
+        const totalPages = data.total_pages ?? 1;
+
+        // Fetch remaining pages if needed
+        if (totalPages > 1) {
+          const extraFetches = [];
+          for (let p = 2; p <= totalPages; p++) {
+            extraFetches.push(
+              fetch(`${API_URL}/api/loans?vendor_id=${vendorId}&page_size=200&page=${p}`, {
+                headers: getAuthHeaders(), credentials: "include"
+              }).then(r => r.ok ? r.json() : null)
+            );
+          }
+          const extras = await Promise.all(extraFetches);
+          extras.forEach(d => { if (d) allLoans = allLoans.concat(Array.isArray(d) ? d : d.items || []); });
         }
+
+        setSummaryStats({
+          total: totalCount,
+          totalDisbursed: allLoans.reduce((s, l) => s + (l.amount_usd || l.amount || 0), 0),
+          outstanding: allLoans.reduce((s, l) => s + (l.outstanding_balance_usd || l.outstanding_balance || 0), 0),
+          totalRepaid: allLoans.reduce((s, l) => s + (l.total_repaid_usd || l.total_repaid || 0), 0),
+          active: allLoans.filter((l) => l.status === "active").length,
+          overdue: allLoans.filter((l) => l.is_overdue || (l.status === "active" && l.due_date && new Date(l.due_date) < new Date())).length,
+          fullyPaid: allLoans.filter((l) => l.status === "fully_paid").length,
+          pending: allLoans.filter((l) => l.status === "pending_approval").length,
+        });
       } catch {
         // non-critical
       }
