@@ -633,7 +633,18 @@ export default function BorrowerDetail() {
                         })()}
                       </TableCell>
                       <TableCell className="text-green-600 text-sm font-mono text-right">
-                        ${(loan.total_repaid || 0).toLocaleString()}
+                        {(() => {
+                          const repaid = loan.total_repaid || 0;
+                          const repaidUsd = loan.total_repaid_usd || repaid;
+                          return (
+                            <div>
+                              <div>{loan.currency} {repaid.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                              {loan.currency !== "USD" && (
+                                <div className="text-[10px] text-slate-400 font-normal">${repaidUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })} USD</div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="text-slate-500 text-sm text-right">
                         {loan.interest_rate}%
