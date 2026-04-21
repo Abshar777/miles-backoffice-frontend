@@ -190,11 +190,22 @@ export default function BorrowerDetail() {
           extras.forEach(d => { if (d) allLoans = allLoans.concat(Array.isArray(d) ? d : d.items || []); });
         }
 
+        // Build per-currency breakdown
+        const byCurrency = {};
+        allLoans.forEach(l => {
+          const cur = l.currency || "USD";
+          if (!byCurrency[cur]) byCurrency[cur] = { disbursed: 0, outstanding: 0, repaid: 0 };
+          byCurrency[cur].disbursed += l.amount || 0;
+          byCurrency[cur].outstanding += Math.max(0, (l.amount || 0) + (l.total_interest || 0) - (l.total_repaid || 0));
+          byCurrency[cur].repaid += l.total_repaid || 0;
+        });
+
         setSummaryStats({
           total: totalCount,
           totalDisbursed: allLoans.reduce((s, l) => s + (l.amount_usd || l.amount || 0), 0),
           outstanding: allLoans.reduce((s, l) => s + (l.outstanding_balance_usd || l.outstanding_balance || 0), 0),
           totalRepaid: allLoans.reduce((s, l) => s + (l.total_repaid_usd || l.total_repaid || 0), 0),
+          byCurrency,
           active: allLoans.filter((l) => l.status === "active").length,
           overdue: allLoans.filter((l) => l.is_overdue || (l.status === "active" && l.due_date && new Date(l.due_date) < new Date())).length,
           fullyPaid: allLoans.filter((l) => l.status === "fully_paid").length,
@@ -383,28 +394,25 @@ export default function BorrowerDetail() {
           },
           {
             label: "Total Disbursed",
-            value: `$${stats.totalDisbursed.toLocaleString(undefined, {
-              maximumFractionDigits: 0,
-            })}`,
+            value: `$${stats.totalDisbursed.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
             icon: <Banknote className="w-5 h-5 text-blue-500" />,
             mono: true,
+            currencies: stats.byCurrency ? Object.entries(stats.byCurrency).map(([cur, v]) => ({ cur, amount: v.disbursed })) : [],
           },
           {
             label: "Outstanding",
-            value: `$${stats.outstanding.toLocaleString(undefined, {
-              maximumFractionDigits: 0,
-            })}`,
+            value: `$${stats.outstanding.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
             icon: <PiggyBank className="w-5 h-5 text-cyan-500" />,
             mono: true,
             highlight: true,
+            currencies: stats.byCurrency ? Object.entries(stats.byCurrency).map(([cur, v]) => ({ cur, amount: v.outstanding })) : [],
           },
           {
             label: "Total Repaid",
-            value: `$${stats.totalRepaid.toLocaleString(undefined, {
-              maximumFractionDigits: 0,
-            })}`,
+            value: `$${stats.totalRepaid.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
             icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
             mono: true,
+            currencies: stats.byCurrency ? Object.entries(stats.byCurrency).map(([cur, v]) => ({ cur, amount: v.repaid })) : [],
           },
           {
             label: "Active",
@@ -447,6 +455,15 @@ export default function BorrowerDetail() {
               >
                 {item.value}
               </div>
+              {item.currencies && item.currencies.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {item.currencies.map(({ cur, amount }) => (
+                    <span key={cur} className="text-[10px] bg-slate-100 text-slate-500 rounded px-1.5 py-0.5 font-mono">
+                      {cur} {amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    </span>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
