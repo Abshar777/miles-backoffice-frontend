@@ -949,8 +949,7 @@ export default function Loans() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1
-            className="text-4xl font-bold uppercase tracking-tight text-slate-800"
-            style={{ fontFamily: "Barlow Condensed" }}
+            className="text-3xl font-bold tracking-tight text-slate-900"
           >
             Loan Management
           </h1>
@@ -2014,8 +2013,7 @@ export default function Loans() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900 flex items-center gap-2"
             >
               <Banknote className="w-6 h-6 text-blue-600" />
               New Loan
@@ -2566,8 +2564,7 @@ export default function Loans() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900 flex items-center gap-2"
             >
               <CreditCard className="w-6 h-6 text-green-400" />
               Record Repayment
@@ -2870,8 +2867,7 @@ export default function Loans() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
             >
               Loan Details
             </DialogTitle>
@@ -3133,8 +3129,7 @@ export default function Loans() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900 flex items-center gap-2"
             >
               <ArrowRightLeft className="w-6 h-6 text-purple-400" />
               Swap / Transfer Loan
@@ -3327,8 +3322,7 @@ export default function Loans() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900 flex items-center gap-2"
             >
               <Building2 className="w-6 h-6 text-blue-600" />
               Add Borrower Company

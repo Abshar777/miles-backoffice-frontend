@@ -344,7 +344,7 @@ export default function RolesPermissions() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Roles & Permissions
           </h1>
           <p className="text-slate-500">Manage user roles and granular access control</p>
@@ -503,7 +503,7 @@ export default function RolesPermissions() {
       <Dialog open={isAddRoleOpen} onOpenChange={setIsAddRoleOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Create New Role
             </DialogTitle>
           </DialogHeader>
@@ -569,7 +569,7 @@ export default function RolesPermissions() {
       <Dialog open={isEditRoleOpen} onOpenChange={setIsEditRoleOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Edit Role: {selectedRole?.display_name}
               {selectedRole?.is_system_role && (
                 <Badge className="ml-2 bg-blue-100 text-blue-600">System Role</Badge>

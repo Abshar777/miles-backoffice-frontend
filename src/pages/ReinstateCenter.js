@@ -63,30 +63,30 @@ const MathCaptcha = ({ onVerified, onCancel }) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[#66FCF1]">
+      <div className="flex items-center gap-2 text-indigo-600">
         <Calculator className="w-5 h-5" />
         <span className="text-sm uppercase tracking-wider">Security Verification</span>
       </div>
-      <div className="p-4 bg-slate-800 rounded-sm border border-slate-600">
-        <p className="text-[#C5C6C7] text-sm mb-3">
+      <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <p className="text-slate-600 text-sm mb-3">
           Solve this math problem to confirm reinstatement:
         </p>
-        <div className="flex items-center justify-center gap-4 text-3xl font-mono text-white">
+        <div className="flex items-center justify-center gap-4 text-3xl font-mono text-slate-900">
           <span>{num1}</span>
-          <span className="text-[#66FCF1]">+</span>
+          <span className="text-indigo-600">+</span>
           <span>{num2}</span>
-          <span className="text-[#C5C6C7]">=</span>
-          <span className="text-[#66FCF1]">?</span>
+          <span className="text-slate-500">=</span>
+          <span className="text-indigo-600">?</span>
         </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">Your Answer</Label>
+          <Label className="text-slate-600 text-xs uppercase tracking-wider">Your Answer</Label>
           <Input
             type="number"
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            className="bg-slate-800 border-slate-600 text-white focus:border-[#66FCF1] font-mono text-xl text-center"
+            className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500 font-mono text-xl text-center"
             placeholder="Enter the sum"
             autoFocus
           />
@@ -97,7 +97,7 @@ const MathCaptcha = ({ onVerified, onCancel }) => {
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="flex-1 border-slate-600 text-[#C5C6C7] hover:bg-white/5"
+            className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50"
           >
             Cancel
           </Button>
@@ -121,16 +121,16 @@ function BalanceRow({ label, before, after, currency }) {
   const isPositive = change > 0;
   const isNegative = change < 0;
   return (
-    <div className="grid grid-cols-3 gap-2 items-center py-2 border-b border-slate-700/50 last:border-0">
-      <span className="text-[#C5C6C7] text-xs">{label}</span>
+    <div className="grid grid-cols-3 gap-2 items-center py-2 border-b border-slate-100 last:border-0">
+      <span className="text-slate-600 text-xs">{label}</span>
       <div className="text-right">
-        <span className="text-white text-xs font-mono">{fmt(before, currency)}</span>
-        <p className="text-[#C5C6C7] text-[10px]">Before</p>
+        <span className="text-slate-900 text-xs font-mono">{fmt(before, currency)}</span>
+        <p className="text-slate-600 text-[10px]">Before</p>
       </div>
       <div className="text-right">
         <span
           className={`text-xs font-mono font-semibold ${
-            isPositive ? "text-green-400" : isNegative ? "text-red-400" : "text-white"
+            isPositive ? "text-green-400" : isNegative ? "text-red-400" : "text-slate-900"
           }`}
         >
           {fmt(after, currency)}
@@ -164,8 +164,8 @@ function PreviewSummary({ preview }) {
   return (
     <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-1">
       {/* Item info */}
-      <div className="bg-slate-800/60 rounded-sm border border-slate-700 p-3">
-        <p className="text-[#66FCF1] text-xs uppercase tracking-wider mb-2">Record Being Reinstated</p>
+      <div className="bg-slate-50 rounded-lg border border-slate-100 p-3">
+        <p className="text-indigo-600 text-xs uppercase tracking-wider mb-2">Record Being Reinstated</p>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           {(() => {
             const FIELDS = ["transaction_id", "settlement_id", "entry_id", "loan_id", "repayment_id",
@@ -180,8 +180,8 @@ function PreviewSummary({ preview }) {
             }
             return entries.map(([k, v]) => (
               <div key={k}>
-                <p className="text-[#C5C6C7] text-[10px] uppercase tracking-wider">{k.replace(/_/g, " ")}</p>
-                <p className="text-white text-xs font-mono truncate">{String(v ?? "-")}</p>
+                <p className="text-slate-600 text-[10px] uppercase tracking-wider">{k.replace(/_/g, " ")}</p>
+                <p className="text-slate-900 text-xs font-mono truncate">{String(v ?? "-")}</p>
               </div>
             ));
           })()}
@@ -190,12 +190,12 @@ function PreviewSummary({ preview }) {
 
       {/* Balance changes */}
       {balance_changes.length > 0 && (
-        <div className="bg-slate-800/60 rounded-sm border border-slate-700 p-3">
-          <p className="text-[#66FCF1] text-xs uppercase tracking-wider mb-3">Balance Changes</p>
+        <div className="bg-slate-50 rounded-lg border border-slate-100 p-3">
+          <p className="text-indigo-600 text-xs uppercase tracking-wider mb-3">Balance Changes</p>
           <div className="grid grid-cols-3 gap-2 mb-1">
             <span />
-            <span className="text-[#C5C6C7] text-[10px] text-right uppercase">Before</span>
-            <span className="text-[#C5C6C7] text-[10px] text-right uppercase">After</span>
+            <span className="text-slate-600 text-[10px] text-right uppercase">Before</span>
+            <span className="text-slate-600 text-[10px] text-right uppercase">After</span>
           </div>
           {balance_changes.map((bc, i) => (
             <div key={i}>
@@ -209,7 +209,7 @@ function PreviewSummary({ preview }) {
                 >
                   {bc.type === "psp" ? "PSP" : "Treasury"}
                 </Badge>
-                <span className="text-white text-xs font-semibold">{bc.account_name}</span>
+                <span className="text-slate-900 text-xs font-semibold">{bc.account_name}</span>
               </div>
               <BalanceRow
                 label={bc.description}
@@ -224,8 +224,8 @@ function PreviewSummary({ preview }) {
 
       {/* Vendor stats */}
       {vendor_stats && (
-        <div className="bg-slate-800/60 rounded-sm border border-slate-700 p-3">
-          <p className="text-[#66FCF1] text-xs uppercase tracking-wider mb-2">
+        <div className="bg-slate-50 rounded-lg border border-slate-100 p-3">
+          <p className="text-indigo-600 text-xs uppercase tracking-wider mb-2">
             Exchanger Stats — {vendor_stats.vendor_name}
           </p>
           <BalanceRow
@@ -245,8 +245,8 @@ function PreviewSummary({ preview }) {
 
       {/* PSP changes */}
       {psp_changes && (
-        <div className="bg-slate-800/60 rounded-sm border border-slate-700 p-3">
-          <p className="text-[#66FCF1] text-xs uppercase tracking-wider mb-2">
+        <div className="bg-slate-50 rounded-lg border border-slate-100 p-3">
+          <p className="text-indigo-600 text-xs uppercase tracking-wider mb-2">
             PSP Stats — {psp_changes.psp_name}
           </p>
           <BalanceRow
@@ -266,8 +266,8 @@ function PreviewSummary({ preview }) {
 
       {/* Loan changes */}
       {loan_changes && (
-        <div className="bg-slate-800/60 rounded-sm border border-slate-700 p-3">
-          <p className="text-[#66FCF1] text-xs uppercase tracking-wider mb-2">
+        <div className="bg-slate-50 rounded-lg border border-slate-100 p-3">
+          <p className="text-indigo-600 text-xs uppercase tracking-wider mb-2">
             Loan Impact — {loan_changes.loan_id}
           </p>
           <BalanceRow
@@ -283,8 +283,8 @@ function PreviewSummary({ preview }) {
             currency={loan_changes.currency}
           />
           <div className="grid grid-cols-3 gap-2 items-center py-2">
-            <span className="text-[#C5C6C7] text-xs">Repayment Count</span>
-            <span className="text-white text-xs font-mono text-right">{loan_changes.repayment_count_before}</span>
+            <span className="text-slate-600 text-xs">Repayment Count</span>
+            <span className="text-slate-900 text-xs font-mono text-right">{loan_changes.repayment_count_before}</span>
             <span className="text-red-400 text-xs font-mono font-semibold text-right">
               {loan_changes.repayment_count_after}
               <span className="text-red-400 ml-1 text-[10px]">(-1)</span>
@@ -302,7 +302,7 @@ function PreviewSummary({ preview }) {
               className={`flex items-start gap-2 p-2.5 rounded-sm border text-xs ${
                 rec.type === "warning"
                   ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-300"
-                  : "bg-slate-800/60 border-slate-700 text-[#C5C6C7]"
+                  : "bg-slate-50 border-slate-200 text-slate-600"
               }`}
             >
               {rec.type === "warning" && (
@@ -315,7 +315,7 @@ function PreviewSummary({ preview }) {
       )}
 
       {balance_changes.length === 0 && !vendor_stats && !psp_changes && !loan_changes && (
-        <div className="text-center py-4 text-[#C5C6C7] text-sm">
+        <div className="text-center py-4 text-slate-600 text-sm">
           No balance changes found — treasury transactions may have already been cleared.
         </div>
       )}
@@ -525,18 +525,18 @@ function ReinstateTab({ tabCfg }) {
     <>
       {/* Search bar */}
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C5C6C7]" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
         <input
           type="text"
           value={searchInput}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder={tabCfg.searchPlaceholder || `Search by ID, reference, name...`}
-          className="w-full pl-9 pr-9 py-2 bg-[#1F2833] border border-[#45A29E]/30 rounded-sm text-white text-sm placeholder-[#C5C6C7]/50 focus:outline-none focus:border-[#66FCF1]"
+          className="w-full pl-9 pr-9 py-2 bg-white border border-slate-200 rounded-md text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500"
         />
         {searchInput && (
           <button
             onClick={() => handleSearchChange("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C5C6C7] hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
           >
             <X className="w-4 h-4" />
           </button>
@@ -544,12 +544,12 @@ function ReinstateTab({ tabCfg }) {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-[#C5C6C7]">
+        <div className="flex items-center justify-center py-20 text-slate-600">
           <RefreshCw className="w-5 h-5 animate-spin mr-2" />
           Loading...
         </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-[#C5C6C7] gap-3">
+        <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
           <tabCfg.icon className="w-10 h-10 opacity-30" />
           <p className="text-sm">
             {search ? `No results for "${search}"` : "No items available for reinstatement"}
@@ -564,13 +564,13 @@ function ReinstateTab({ tabCfg }) {
             return (
               <div
                 key={id}
-                className="bg-[#1F2833] border border-[#45A29E]/20 rounded-sm p-4 flex items-start justify-between gap-4"
+                className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-start justify-between gap-4"
               >
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-1 flex-1">
                   {fields.map((f) => (
                     <div key={f.label}>
-                      <p className="text-[#C5C6C7] text-xs uppercase tracking-wider">{f.label}</p>
-                      <p className="text-white text-sm font-mono truncate">{f.value}</p>
+                      <p className="text-slate-600 text-xs uppercase tracking-wider">{f.label}</p>
+                      <p className="text-slate-900 text-sm font-mono truncate">{f.value}</p>
                     </div>
                   ))}
                 </div>
@@ -606,7 +606,7 @@ function ReinstateTab({ tabCfg }) {
 
       {/* Confirm Dialog with Preview Summary */}
       <Dialog open={!!confirmData && !showCaptcha} onOpenChange={(open) => { if (!open) closeConfirm(); }}>
-        <DialogContent className="bg-[#1F2833] border-[#45A29E]/30 text-white max-w-xl">
+        <DialogContent className="bg-white border-slate-200 text-slate-900 max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-orange-400">
               <AlertTriangle className="w-5 h-5" />
@@ -614,17 +614,17 @@ function ReinstateTab({ tabCfg }) {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="bg-orange-500/10 border border-orange-500/30 rounded-sm p-2.5 flex items-start gap-2 text-xs text-orange-300">
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-2.5 flex items-start gap-2 text-xs text-orange-700">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
             All financial effects will be reversed and status reset to pending. This cannot be undone automatically.
           </div>
 
           {confirmData && <PreviewSummary preview={confirmData.preview} />}
 
-          <div className="flex gap-3 pt-2 border-t border-slate-700">
+          <div className="flex gap-3 pt-2 border-t border-slate-100">
             <Button
               variant="outline"
-              className="flex-1 border-slate-600 text-[#C5C6C7] hover:bg-white/5"
+              className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-100"
               onClick={closeConfirm}
             >
               Cancel
@@ -641,7 +641,7 @@ function ReinstateTab({ tabCfg }) {
 
       {/* Captcha Dialog */}
       <Dialog open={showCaptcha} onOpenChange={(open) => { if (!open) closeConfirm(); }}>
-        <DialogContent className="bg-[#1F2833] border-[#45A29E]/30 text-white max-w-md">
+        <DialogContent className="bg-white border-slate-200 text-slate-900 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-orange-400">Verify to Reinstate</DialogTitle>
           </DialogHeader>
@@ -668,7 +668,7 @@ export default function ReinstateCenter() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] text-[#C5C6C7]">
+      <div className="flex items-center justify-center min-h-[60vh] text-slate-600">
         <RefreshCw className="w-5 h-5 animate-spin mr-2" />
         Loading...
       </div>
@@ -683,31 +683,31 @@ export default function ReinstateCenter() {
       <div className="flex items-center gap-3 shrink-0">
         <RotateCcw className="w-6 h-6 text-orange-400" />
         <div>
-          <h1 className="text-2xl font-bold text-white">Reinstate Center</h1>
-          <p className="text-[#C5C6C7] text-sm">
+          <h1 className="text-3xl font-bold text-slate-900">Reinstate Center</h1>
+          <p className="text-slate-500 text-sm">
             Reverse approved records back to pending status. Admin only.
           </p>
         </div>
-        <Badge className="ml-auto bg-orange-500/20 text-orange-400 border-orange-500/30">
+        <Badge className="ml-auto bg-orange-100 text-orange-700 border-orange-200">
           Admin Only
         </Badge>
       </div>
 
-      <div className="bg-orange-500/10 border border-orange-500/30 rounded-sm p-3 flex items-start gap-2 shrink-0">
-        <AlertTriangle className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
-        <p className="text-orange-300 text-sm">
+      <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-start gap-2 shrink-0">
+        <AlertTriangle className="w-4 h-4 text-orange-500 mt-0.5 shrink-0" />
+        <p className="text-orange-700 text-sm">
           Reinstating a record reverses all treasury balance changes, resets statuses, and removes
           approval data. A full before/after summary is shown before confirmation.
         </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
-        <TabsList className="bg-[#1F2833] border border-[#45A29E]/20 flex-wrap h-auto gap-1 p-1 shrink-0">
+        <TabsList className="bg-slate-100 border border-slate-200 flex-wrap h-auto gap-1 p-1 shrink-0">
           {tabConfig.map((tab) => (
             <TabsTrigger
               key={tab.key}
               value={tab.key}
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-[#C5C6C7] flex items-center gap-1.5"
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-600 flex items-center gap-1.5"
             >
               <tab.icon className="w-3.5 h-3.5" />
               {tab.label}

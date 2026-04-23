@@ -552,7 +552,7 @@ export default function Exchangers() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <Store className="w-6 h-6 text-blue-600" />
-          <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             {viewExchanger?.vendor_name}
           </h1>
           {detailLoading && <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />}
@@ -1003,7 +1003,7 @@ export default function Exchangers() {
     <div className="space-y-6 animate-fade-in" data-testid="vendors-page">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Exchangers
           </h1>
           <p className="text-slate-500">Manage exchangers, commissions, and settlements</p>
@@ -1021,7 +1021,7 @@ export default function Exchangers() {
             </DialogTrigger>
             <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+                <DialogTitle className="text-lg font-bold text-slate-900">
                   {selectedExchanger ? 'Edit Exchanger' : 'Add New Exchanger'}
                 </DialogTitle>
               </DialogHeader>
@@ -1379,7 +1379,7 @@ export default function Exchangers() {
       <Dialog open={settleDialogOpen} onOpenChange={() => resetSettleDialog()}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Settle Exchanger Balance
             </DialogTitle>
           </DialogHeader>

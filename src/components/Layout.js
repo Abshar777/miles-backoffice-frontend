@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../context/usePermissions';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -33,8 +32,6 @@ import {
   Receipt,
   ArrowUpDown,
   ShieldCheck,
-  Sun,
-  Moon,
   ScrollText,
   Shield,
   ArrowLeft,
@@ -44,9 +41,32 @@ import {
   RotateCcw,
 } from 'lucide-react';
 
+// ── Theme styles — Modern Banking White (only theme) ─────────────────────────
+const S = {
+  pageBg:        'bg-[#f8fafc]',
+  sidebarBg:     'bg-[#0f172a] border-r border-[#1e293b]',
+  sidebarBorder: 'border-[#1e293b]',
+  headerBg:      'bg-white border-b border-[#e2e8f0]',
+  logoBg:        'bg-gradient-to-br from-[#6366f1] to-[#8b5cf6]',
+  logoIcon:      '!text-white',
+  logoText:      '!text-white',
+  navActive:     'bg-[#6366f1]/15 !text-[#a5b4fc] border-l-2 border-[#6366f1]',
+  navInactive:   '!text-[#64748b] hover:!text-[#e2e8f0] hover:bg-white/8 border-l-2 border-transparent',
+  navSection:    '!text-[#475569]',
+  userText:      '!text-white',
+  userSubText:   '!text-[#94a3b8]',
+  avatarBg:      'bg-[#6366f1]/20 !text-[#a5b4fc]',
+  avatarBorder:  'border-[#6366f1]/30',
+  dropdownBg:    'bg-white border-[#e2e8f0] text-slate-800',
+  dropdownHover: 'hover:bg-slate-100 focus:bg-slate-100',
+  dropdownBorder:'bg-[#e2e8f0]',
+  headerBtn:     'text-slate-500 hover:bg-slate-100',
+  userMenuBtn:   'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+  mainBg:        'bg-[#f8fafc]',
+};
+
 export default function Layout() {
   const { user, logout, impersonating, adminName, stopImpersonation } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { canView, loading: permissionsLoading } = usePermissions();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -56,7 +76,7 @@ export default function Layout() {
     txRequests: 0
   });
 
-  const isDark = theme === 'dark';
+  const s = S;
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
   // Fetch notification counts
@@ -176,29 +196,22 @@ export default function Layout() {
 
   const NavItem = ({ to, icon: Icon, label }) => {
     const badgeCount = getBadgeCount(label);
-    
     return (
       <NavLink
         to={to}
         onClick={() => setSidebarOpen(false)}
         className={({ isActive }) =>
-          `flex items-center gap-3 px-4 py-3 text-sm font-medium uppercase tracking-wider transition-all duration-200 ${
-            isActive
-              ? isDark 
-                ? 'bg-[#66FCF1]/10 text-[#66FCF1] border-l-2 border-[#66FCF1]'
-                : 'bg-blue-50 text-blue-600 border-l-2 border-blue-600'
-              : isDark
-                ? 'text-[#C5C6C7] hover:text-white hover:bg-white/5 border-l-2 border-transparent'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-l-2 border-transparent'
+          `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all duration-150 tracking-normal ${
+            isActive ? s.navActive : s.navInactive
           }`
         }
         data-testid={`nav-${label.toLowerCase().replace(' ', '-')}`}
       >
-        <Icon className="w-5 h-5" />
-        <span className="flex-1">{label}</span>
+        <Icon className="w-4 h-4 shrink-0" />
+        <span className="flex-1 truncate">{label}</span>
         {badgeCount > 0 && (
-          <Badge 
-            variant="destructive" 
+          <Badge
+            variant="destructive"
             className="ml-auto h-5 min-w-[20px] flex items-center justify-center text-xs font-bold px-1.5 rounded-full"
             data-testid={`badge-${label.toLowerCase().replace(' ', '-')}`}
           >
@@ -210,82 +223,70 @@ export default function Layout() {
   };
 
   return (
-    <div className={`min-h-screen flex theme-transition ${isDark ? 'bg-[#0B0C10]' : 'bg-[#F8FAFC]'}`}>
+    <div className={`min-h-screen flex theme-transition ${s.pageBg}`}>
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
+      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <aside
         className={`fixed lg:static inset-y-0 left-0 z-50 w-64 shadow-sm transform transition-transform duration-200 theme-transition ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } ${isDark ? 'bg-[#1F2833] border-r border-[#2D3748]' : 'bg-white border-r border-slate-200'}`}
+        } ${s.sidebarBg}`}
       >
         <div className="flex flex-col h-full">
-          <div className={`flex items-center justify-between h-16 px-4 border-b ${isDark ? 'border-[#2D3748]' : 'border-slate-200'}`}>
-            <div className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-[#66FCF1]' : 'bg-blue-600'}`}>
-                <TrendingUp className={`w-5 h-5 ${isDark ? 'text-[#0B0C10]' : 'text-white'}`} />
+
+          {/* Logo row */}
+          <div className={`flex items-center justify-between h-16 px-4 border-b ${s.sidebarBorder}`}>
+            <div className="flex items-center gap-2.5">
+              <div className={`w-8 h-8 rounded-[6px] flex items-center justify-center ${s.logoBg}`}>
+                <TrendingUp className={`w-4 h-4 ${s.logoIcon}`} />
               </div>
-              <span className={`text-xl font-bold uppercase tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`} style={{ fontFamily: 'Barlow Condensed' }}>
+              <span className={`text-[15px] font-semibold tracking-tight ${s.logoText}`}>
                 Miles Capitals
               </span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className={`lg:hidden ${isDark ? 'text-[#C5C6C7] hover:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`lg:hidden opacity-60 hover:opacity-100 transition-opacity ${s.logoText}`}
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          <nav className="flex-1 py-4 overflow-y-auto">
+          {/* Nav items */}
+          <nav className="flex-1 py-3 overflow-y-auto">
             {navItems.map((item) => (
               <NavItem key={item.to} {...item} />
             ))}
           </nav>
 
-          {/* Theme Toggle */}
-          <div className={`px-4 py-3 border-t ${isDark ? 'border-[#2D3748]' : 'border-slate-200'}`}>
-            <button
-              onClick={toggleTheme}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 ${
-                isDark 
-                  ? 'bg-[#0B0C10] hover:bg-[#151922] text-[#C5C6C7]' 
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
-              }`}
-              data-testid="theme-toggle-btn"
-            >
-              <div className="flex items-center gap-2">
-                {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                <span className="text-sm font-medium">{isDark ? 'Dark Mode' : 'Light Mode'}</span>
-              </div>
-              <div className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-200 ${isDark ? 'bg-[#66FCF1]' : 'bg-slate-300'}`}>
-                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${isDark ? 'translate-x-5' : 'translate-x-0'}`} />
-              </div>
-            </button>
-          </div>
 
-          <div className={`p-4 border-t ${isDark ? 'border-[#2D3748]' : 'border-slate-200'}`}>
-            <div className="flex items-center gap-3">
-              <Avatar className={`w-10 h-10 border ${isDark ? 'border-[#66FCF1]/30' : 'border-blue-200'}`}>
+          {/* User profile */}
+          <div className={`p-3 border-t ${s.sidebarBorder}`}>
+            <div className="flex items-center gap-3 px-1">
+              <Avatar className={`w-9 h-9 border ${s.avatarBorder}`}>
                 <AvatarImage src={user?.picture} />
-                <AvatarFallback className={isDark ? 'bg-[#66FCF1]/20 text-[#66FCF1]' : 'bg-blue-100 text-blue-600'}>
+                <AvatarFallback className={`text-xs font-semibold ${s.avatarBg}`}>
                   {user?.name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{user?.name}</p>
-                <p className={`text-xs truncate capitalize ${isDark ? 'text-[#C5C6C7]' : 'text-slate-500'}`}>{user?.role?.replace('_', ' ')}</p>
+                <p className={`text-sm font-medium truncate ${s.userText}`}>{user?.name}</p>
+                <p className={`text-xs truncate capitalize ${s.userSubText}`}>{user?.role?.replace('_', ' ')}</p>
               </div>
             </div>
           </div>
+
         </div>
       </aside>
 
+      {/* ── Main content ────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-h-screen">
+
         {/* Impersonation Banner */}
         {impersonating && (
           <div
@@ -299,7 +300,7 @@ export default function Layout() {
             </div>
             <button
               onClick={handleStopImpersonation}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-red-600 rounded font-bold text-xs uppercase tracking-wider hover:bg-red-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-red-600 rounded-[4px] font-bold text-xs uppercase tracking-wider hover:bg-red-50 transition-colors"
               data-testid="stop-impersonation-btn"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -308,74 +309,57 @@ export default function Layout() {
           </div>
         )}
 
-        <header className={`sticky ${impersonating ? 'top-[42px]' : 'top-0'} z-30 h-16 backdrop-blur-md border-b theme-transition ${
-          isDark ? 'bg-[#1F2833]/80 border-[#2D3748]' : 'bg-white/80 border-slate-200'
-        }`}>
+        {/* Header */}
+        <header className={`sticky ${impersonating ? 'top-[42px]' : 'top-0'} z-30 h-14 border-b theme-transition ${s.headerBg}`}>
           <div className="flex items-center justify-between h-full px-4 md:px-6">
             <button
               onClick={() => setSidebarOpen(true)}
-              className={`lg:hidden ${isDark ? 'text-[#C5C6C7] hover:text-white' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`lg:hidden p-1.5 rounded-[6px] transition-colors ${s.headerBtn}`}
               data-testid="mobile-menu-btn"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5" />
             </button>
 
             <div className="flex-1" />
 
-            {/* Theme Toggle - Mobile/Header */}
-            <button
-              onClick={toggleTheme}
-              className={`mr-3 p-2 rounded-lg transition-colors ${
-                isDark 
-                  ? 'text-[#66FCF1] hover:bg-white/10' 
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-              data-testid="theme-toggle-header"
-            >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-
+            {/* User dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className={`flex items-center gap-2 ${
-                    isDark 
-                      ? 'text-[#C5C6C7] hover:text-white hover:bg-white/10' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
+                  className={`flex items-center gap-2 h-9 px-2 rounded-[6px] ${s.userMenuBtn}`}
                   data-testid="user-menu-btn"
                 >
-                  <Avatar className={`w-8 h-8 border ${isDark ? 'border-[#66FCF1]/30' : 'border-blue-200'}`}>
+                  <Avatar className={`w-7 h-7 border ${s.avatarBorder}`}>
                     <AvatarImage src={user?.picture} />
-                    <AvatarFallback className={`text-xs ${isDark ? 'bg-[#66FCF1]/20 text-[#66FCF1]' : 'bg-blue-100 text-blue-600'}`}>
+                    <AvatarFallback className={`text-xs font-semibold ${s.avatarBg}`}>
                       {user?.name?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <span className={`hidden md:inline text-sm ${isDark ? 'text-[#C5C6C7]' : ''}`}>{user?.name}</span>
-                  <ChevronDown className="w-4 h-4" />
+                  <span className="hidden md:inline text-sm font-medium">{user?.name}</span>
+                  <ChevronDown className="w-3.5 h-3.5 opacity-60" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className={`w-56 ${isDark ? 'bg-[#1F2833] border-[#2D3748] text-white' : 'bg-white border-slate-200 text-slate-800'}`}
+                className={`w-56 rounded-[8px] ${s.dropdownBg}`}
               >
-                <div className="px-3 py-2">
-                  <p className="text-sm font-medium">{user?.name}</p>
-                  <p className={`text-xs ${isDark ? 'text-[#C5C6C7]' : 'text-slate-500'}`}>{user?.email}</p>
+                <div className="px-3 py-2.5">
+                  <p className="text-sm font-semibold">{user?.name}</p>
+                  <p className={`text-xs mt-0.5 ${s.userSubText}`}>{user?.email}</p>
                 </div>
-                <DropdownMenuSeparator className={isDark ? 'bg-[#2D3748]' : 'bg-slate-200'} />
+                <DropdownMenuSeparator className={s.dropdownBorder} />
                 <DropdownMenuItem
                   onClick={() => navigate('/settings')}
-                  className={`cursor-pointer ${isDark ? 'hover:bg-white/10 focus:bg-white/10' : 'hover:bg-slate-100 focus:bg-slate-100'}`}
+                  className={`cursor-pointer rounded-[4px] ${s.dropdownHover}`}
                 >
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className={isDark ? 'bg-[#2D3748]' : 'bg-slate-200'} />
+                <DropdownMenuSeparator className={s.dropdownBorder} />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className={`cursor-pointer text-red-500 ${isDark ? 'hover:bg-white/10 focus:bg-white/10' : 'hover:bg-slate-100 focus:bg-slate-100'}`}
+                  className={`cursor-pointer text-red-500 rounded-[4px] ${s.dropdownHover}`}
                   data-testid="logout-btn"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
@@ -386,7 +370,7 @@ export default function Layout() {
           </div>
         </header>
 
-        <main className="flex-1  p-4 md:p-6 lg:p-8">
+        <main className={`flex-1 p-4 md:p-6 lg:p-8 ${s.mainBg}`}>
           <Outlet />
         </main>
       </div>

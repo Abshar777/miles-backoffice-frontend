@@ -352,7 +352,7 @@ export default function Clients() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Clients
           </h1>
           <p className="text-slate-500">Manage client accounts and KYC status</p>
@@ -384,7 +384,7 @@ export default function Clients() {
           </DialogTrigger>
           <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+              <DialogTitle className="text-lg font-bold text-slate-900">
                 {selectedClient ? 'Edit Client' : 'Add New Client'}
               </DialogTitle>
             </DialogHeader>
@@ -809,7 +809,7 @@ export default function Clients() {
       <Dialog open={!!viewClient} onOpenChange={() => setViewClient(null)}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Client Details
             </DialogTitle>
           </DialogHeader>

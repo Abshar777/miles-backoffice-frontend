@@ -612,7 +612,7 @@ export default function Treasury() {
     <div className="space-y-6 animate-fade-in" data-testid="treasury-page">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Treasury
           </h1>
           <p className="text-slate-500">Manage bank accounts and treasury</p>
@@ -642,7 +642,7 @@ export default function Treasury() {
             </DialogTrigger>
             <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+                <DialogTitle className="text-lg font-bold text-slate-900">
                   {selectedAccount ? 'Edit Account' : 'Add Treasury Account'}
                 </DialogTitle>
               </DialogHeader>
@@ -1021,7 +1021,7 @@ export default function Treasury() {
       <Dialog open={!!viewAccount} onOpenChange={() => setViewAccount(null)}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Account Details
             </DialogTitle>
           </DialogHeader>
@@ -1091,7 +1091,7 @@ export default function Treasury() {
       }}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <History className="w-6 h-6 text-blue-600" />
               Transaction History
             </DialogTitle>
@@ -1403,7 +1403,7 @@ export default function Treasury() {
       }}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <ArrowLeftRight className="w-6 h-6 text-blue-600" />
               Inter-Treasury Transfer
             </DialogTitle>

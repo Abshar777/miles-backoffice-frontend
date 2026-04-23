@@ -926,8 +926,7 @@ export default function IncomeExpenses() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1
-            className="text-4xl font-bold uppercase tracking-tight text-slate-800"
-            style={{ fontFamily: "Barlow Condensed" }}
+            className="text-3xl font-bold tracking-tight text-slate-900"
           >
             Income & Expenses
           </h1>
@@ -1784,8 +1783,7 @@ export default function IncomeExpenses() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
             >
               Add {formData.entry_type === "income" ? "Income" : "Expense"}
             </DialogTitle>

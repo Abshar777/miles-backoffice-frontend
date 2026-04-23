@@ -131,7 +131,7 @@ export default function Dashboard() {
     <div className="space-y-6 animate-fade-in" data-testid="dashboard">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
           Dashboard
         </h1>
         <p className="text-slate-500">Overview of your FX brokerage operations</p>

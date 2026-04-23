@@ -768,7 +768,7 @@ export default function PSPs() {
     <div className="space-y-6 h-[100vh] animate-fade-in" data-testid="psp-page">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Payment Service Providers
           </h1>
           <p className="text-slate-500">Manage PSPs, commissions, and settlements</p>
@@ -786,7 +786,7 @@ export default function PSPs() {
             </DialogTrigger>
             <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+                <DialogTitle className="text-lg font-bold text-slate-900">
                   {selectedPsp ? 'Edit PSP' : 'Add Payment Service Provider'}
                 </DialogTitle>
               </DialogHeader>
@@ -1179,7 +1179,7 @@ export default function PSPs() {
               </Button>
               <div className="flex items-center gap-3">
                 <CreditCard className="w-7 h-7 text-blue-600" />
-                <h1 className="text-3xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>{viewPsp.psp_name}</h1>
+                <h1 className="text-xl font-bold tracking-tight text-slate-900">{viewPsp.psp_name}</h1>
               </div>
             </div>
           </div>
@@ -1982,7 +1982,7 @@ export default function PSPs() {
       <Dialog open={settleDialogOpen} onOpenChange={() => { setSettleDialogOpen(false); setSelectedTransaction(null); setSettlementDestination(''); }}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Confirm Settlement
             </DialogTitle>
           </DialogHeader>
@@ -2057,7 +2057,7 @@ export default function PSPs() {
       <Dialog open={chargesDialogOpen} onOpenChange={(open) => { if (!open) { setChargesDialogOpen(false); setSelectedTransaction(null); } }}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Record Charges
             </DialogTitle>
           </DialogHeader>
@@ -2185,7 +2185,7 @@ export default function PSPs() {
       <Dialog open={recordPaymentDialogOpen} onOpenChange={(open) => { if (!open) { setRecordPaymentDialogOpen(false); setSelectedTransaction(null); } }}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold uppercase tracking-tight flex items-center gap-2" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Wallet className="w-5 h-5 text-green-400" />
               Record Payment Received
             </DialogTitle>

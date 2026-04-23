@@ -1358,8 +1358,7 @@ export default function Transactions() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1
-            className="text-4xl font-bold uppercase tracking-tight text-slate-800"
-            style={{ fontFamily: "Barlow Condensed" }}
+            className="text-3xl font-bold tracking-tight text-slate-900"
           >
             Transactions Summary
           </h1>
@@ -1440,8 +1439,7 @@ export default function Transactions() {
             <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle
-                  className="text-2xl font-bold uppercase tracking-tight"
-                  style={{ fontFamily: "Barlow Condensed" }}
+                  className="text-lg font-bold text-slate-900"
                 >
                   Create Transaction
                 </DialogTitle>
@@ -3261,8 +3259,7 @@ export default function Transactions() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
             >
               Transaction Details
             </DialogTitle>
@@ -3630,8 +3627,8 @@ export default function Transactions() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle
-              className="text-xl font-bold uppercase"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
+              
             >
               Edit Destination
             </DialogTitle>
@@ -3816,8 +3813,8 @@ export default function Transactions() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle
-              className="text-xl font-bold uppercase"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
+              
             >
               Edit Transaction
             </DialogTitle>
@@ -4045,8 +4042,7 @@ export default function Transactions() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
             >
               Bulk Upload Transactions
             </DialogTitle>

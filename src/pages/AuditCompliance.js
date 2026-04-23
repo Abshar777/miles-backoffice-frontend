@@ -16,9 +16,9 @@ import { toast } from 'sonner';
 const API = process.env.REACT_APP_BACKEND_URL;
 
 const SEVERITY_CONFIG = {
-  critical: { color: 'bg-red-500/10 text-red-400 border-red-500/30', icon: ShieldAlert, label: 'Critical' },
-  warning: { color: 'bg-amber-500/10 text-amber-400 border-amber-500/30', icon: AlertTriangle, label: 'Warning' },
-  info: { color: 'bg-blue-500/10 text-blue-400 border-blue-500/30', icon: Info, label: 'Info' },
+  critical: { color: 'bg-red-50 text-red-700 border-red-200', icon: ShieldAlert, label: 'Critical' },
+  warning: { color: 'bg-amber-50 text-amber-700 border-amber-200', icon: AlertTriangle, label: 'Warning' },
+  info: { color: 'bg-blue-50 text-blue-700 border-blue-200', icon: Info, label: 'Info' },
 };
 
 const CATEGORY_LABELS = {
@@ -36,14 +36,14 @@ function HealthScoreRing({ score }) {
   return (
     <div className="relative w-36 h-36 mx-auto" data-testid="health-score-ring">
       <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-        <circle cx="60" cy="60" r={r} fill="none" stroke="#1F2833" strokeWidth="8" />
+        <circle cx="60" cy="60" r={r} fill="none" stroke="#e2e8f0" strokeWidth="8" />
         <circle cx="60" cy="60" r={r} fill="none" stroke={color} strokeWidth="8"
           strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
           style={{ transition: 'stroke-dashoffset 1s ease' }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-3xl font-bold" style={{ color }}>{score}</span>
-        <span className="text-xs text-[#8B8D91] uppercase tracking-wider">Score</span>
+        <span className="text-xs text-slate-400 uppercase tracking-wider">Score</span>
       </div>
     </div>
   );
@@ -62,11 +62,11 @@ function FindingCard({ finding }) {
         {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
       </div>
       {open && (
-        <div className="mt-2 pl-6 text-xs text-[#8B8D91] space-y-1">
+        <div className="mt-2 pl-6 text-xs text-slate-500 space-y-1">
           <p>{finding.description}</p>
-          {finding.transaction_id && <p className="text-[#66FCF1]/70">Transaction: {finding.transaction_id}</p>}
-          {finding.reference && <p className="text-[#66FCF1]/70">Reference: {finding.reference}</p>}
-          {finding.account_id && <p className="text-[#66FCF1]/70">Account: {finding.account_id}</p>}
+          {finding.transaction_id && <p className="text-indigo-600/70">Transaction: {finding.transaction_id}</p>}
+          {finding.reference && <p className="text-indigo-600/70">Reference: {finding.reference}</p>}
+          {finding.account_id && <p className="text-indigo-600/70">Account: {finding.account_id}</p>}
           {finding.deviation_percent && <p>Rate Deviation: {finding.deviation_percent}%</p>}
           {finding.difference !== undefined && <p>Balance Difference: {finding.difference}</p>}
         </div>
@@ -146,82 +146,82 @@ export default function AuditCompliance() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#C5C6C7]">Audit & Compliance</h1>
-          <p className="text-sm text-[#8B8D91]">Monitor transaction integrity, FX rates, and financial anomalies</p>
+          <h1 className="text-3xl font-bold text-slate-900">Audit & Compliance</h1>
+          <p className="text-sm text-slate-500">Monitor transaction integrity, FX rates, and financial anomalies</p>
         </div>
         <Button onClick={runScan} disabled={scanning} data-testid="run-scan-btn"
-          className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-semibold">
+          className="bg-indigo-600 text-white hover:bg-indigo-700 font-semibold">
           {scanning ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
           {scanning ? 'Scanning...' : 'Run Audit Scan'}
         </Button>
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-white border border-[#2A3A4A]">
-          <TabsTrigger value="dashboard" className="data-[state=active]:bg-[#66FCF1]/10 data-[state=active]:text-[#66FCF1]">Dashboard</TabsTrigger>
-          <TabsTrigger value="findings" className="data-[state=active]:bg-[#66FCF1]/10 data-[state=active]:text-[#66FCF1]">
+        <TabsList className="bg-slate-100 border border-slate-200">
+          <TabsTrigger value="dashboard" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">Dashboard</TabsTrigger>
+          <TabsTrigger value="findings" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             Findings {findings.length > 0 && <Badge variant="outline" className="ml-1 text-[10px]">{findings.length}</Badge>}
           </TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-[#66FCF1]/10 data-[state=active]:text-[#66FCF1]">History</TabsTrigger>
-          <TabsTrigger value="settings" className="data-[state=active]:bg-[#66FCF1]/10 data-[state=active]:text-[#66FCF1]">Settings</TabsTrigger>
+          <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">History</TabsTrigger>
+          <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">Settings</TabsTrigger>
         </TabsList>
 
         {/* DASHBOARD TAB */}
         <TabsContent value="dashboard" className="space-y-6 mt-4">
           {!scan?.scan_id ? (
-            <Card className="bg-white border-[#2A3A4A]">
+            <Card className="bg-white border-slate-200">
               <CardContent className="py-12 text-center">
-                <ShieldCheck className="w-12 h-12 text-[#8B8D91] mx-auto mb-3" />
-                <p className="text-[#8B8D91]">No audit scan found. Click "Run Audit Scan" to start.</p>
+                <ShieldCheck className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                <p className="text-slate-500">No audit scan found. Click "Run Audit Scan" to start.</p>
               </CardContent>
             </Card>
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Health Score */}
-                <Card className="bg-white border-[#2A3A4A]">
+                <Card className="bg-white border-slate-200">
                   <CardContent className="pt-6 pb-4">
                     <HealthScoreRing score={scan.health_score} />
-                    <p className="text-center text-xs text-[#8B8D91] mt-2">
+                    <p className="text-center text-xs text-slate-500 mt-2">
                       Last scan: {new Date(scan.scanned_at).toLocaleString()}
                     </p>
                   </CardContent>
                 </Card>
 
                 {/* Stats Cards */}
-                <Card className="bg-white border-[#2A3A4A]">
-                  <CardHeader className="pb-2"><CardTitle className="text-sm text-[#8B8D91]">Issue Breakdown</CardTitle></CardHeader>
+                <Card className="bg-white border-slate-200">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Issue Breakdown</CardTitle></CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-red-400" /><span className="text-sm text-[#C5C6C7]">Critical</span></div>
+                      <div className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-red-400" /><span className="text-sm text-slate-700">Critical</span></div>
                       <span className="text-lg font-bold text-red-400" data-testid="critical-count">{stats.critical || 0}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-amber-400" /><span className="text-sm text-[#C5C6C7]">Warnings</span></div>
+                      <div className="flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-amber-400" /><span className="text-sm text-slate-700">Warnings</span></div>
                       <span className="text-lg font-bold text-amber-400" data-testid="warning-count">{stats.warning || 0}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2"><Info className="w-4 h-4 text-blue-400" /><span className="text-sm text-[#C5C6C7]">Info</span></div>
+                      <div className="flex items-center gap-2"><Info className="w-4 h-4 text-blue-400" /><span className="text-sm text-slate-700">Info</span></div>
                       <span className="text-lg font-bold text-blue-400" data-testid="info-count">{stats.info || 0}</span>
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Summary */}
-                <Card className="bg-white border-[#2A3A4A]">
-                  <CardHeader className="pb-2"><CardTitle className="text-sm text-[#8B8D91]">Scan Summary</CardTitle></CardHeader>
+                <Card className="bg-white border-slate-200">
+                  <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Scan Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-3 text-sm">
-                    <div className="flex justify-between"><span className="text-[#8B8D91]">Transactions Scanned</span><span className="text-[#C5C6C7] font-medium">{scan.summary?.total_transactions || 0}</span></div>
-                    <div className="flex justify-between"><span className="text-[#8B8D91]">PSP Transactions</span><span className="text-[#C5C6C7] font-medium">{scan.summary?.psp_transactions || 0}</span></div>
-                    <div className="flex justify-between"><span className="text-[#8B8D91]">Treasury Accounts</span><span className="text-[#C5C6C7] font-medium">{scan.summary?.treasury_accounts || 0}</span></div>
-                    <div className="flex justify-between"><span className="text-[#8B8D91]">Categories Checked</span><span className="text-[#C5C6C7] font-medium">{scan.summary?.categories_checked || 0}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Transactions Scanned</span><span className="text-slate-700 font-medium">{scan.summary?.total_transactions || 0}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">PSP Transactions</span><span className="text-slate-700 font-medium">{scan.summary?.psp_transactions || 0}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Treasury Accounts</span><span className="text-slate-700 font-medium">{scan.summary?.treasury_accounts || 0}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Categories Checked</span><span className="text-slate-700 font-medium">{scan.summary?.categories_checked || 0}</span></div>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Category Breakdown */}
-              <Card className="bg-white border-[#2A3A4A]">
-                <CardHeader><CardTitle className="text-sm text-[#8B8D91]">Findings by Category</CardTitle></CardHeader>
+              <Card className="bg-white border-slate-200">
+                <CardHeader><CardTitle className="text-sm text-slate-500">Findings by Category</CardTitle></CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                     {Object.entries(CATEGORY_LABELS).map(([key, label]) => {
@@ -231,10 +231,10 @@ export default function AuditCompliance() {
                       const infoCount = catFindings.filter(f => f.severity === 'info').length;
                       const hasIssues = catFindings.length > 0;
                       return (
-                        <div key={key} className={`p-3 rounded-lg border cursor-pointer transition-all hover:border-[#66FCF1]/50 ${hasIssues ? 'border-amber-500/30 bg-amber-500/5' : 'border-green-500/30 bg-green-500/5'}`}
+                        <div key={key} className={`p-3 rounded-lg border cursor-pointer transition-all hover:border-indigo-300 ${hasIssues ? 'border-amber-200 bg-amber-50' : 'border-green-200 bg-green-50'}`}
                           onClick={() => { setFilterCat(key); setFilterSev('all'); setTab('findings'); }}
                           data-testid={`category-${key}`}>
-                          <p className="text-xs text-[#8B8D91] font-medium mb-2">{label}</p>
+                          <p className="text-xs text-slate-500 font-medium mb-2">{label}</p>
                           {hasIssues ? (
                             <div className="flex gap-2 text-xs">
                               {critCount > 0 && <span className="text-red-400">{critCount} critical</span>}
@@ -257,28 +257,28 @@ export default function AuditCompliance() {
         {/* FINDINGS TAB */}
         <TabsContent value="findings" className="space-y-4 mt-4">
           <div className="flex flex-wrap gap-2 items-center" data-testid="findings-filters">
-            <span className="text-xs text-[#8B8D91] mr-1"><Filter className="w-3 h-3 inline mr-1" />Severity:</span>
+            <span className="text-xs text-slate-500 mr-1"><Filter className="w-3 h-3 inline mr-1" />Severity:</span>
             {['all', 'critical', 'warning', 'info'].map(s => (
               <Button key={s} size="sm" variant={filterSev === s ? 'default' : 'outline'}
-                className={filterSev === s ? 'bg-[#66FCF1] text-[#0B0C10] h-7 text-xs' : 'border-[#2A3A4A] text-[#8B8D91] h-7 text-xs'}
+                className={filterSev === s ? 'bg-indigo-600 text-white h-7 text-xs' : 'border-slate-200 text-slate-600 h-7 text-xs'}
                 onClick={() => setFilterSev(s)} data-testid={`filter-sev-${s}`}>
                 {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
               </Button>
             ))}
-            <span className="text-xs text-[#8B8D91] ml-3 mr-1">Category:</span>
+            <span className="text-xs text-slate-500 ml-3 mr-1">Category:</span>
             <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
-              className="bg-white border border-[#2A3A4A] text-[#C5C6C7] text-xs rounded px-2 py-1"
+              className="bg-white border border-slate-200 text-slate-700 text-xs rounded-md px-2 py-1 focus:outline-none focus:border-indigo-400"
               data-testid="filter-category-select">
               <option value="all">All Categories</option>
               {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
 
-          <p className="text-xs text-[#8B8D91]">{filtered.length} finding{filtered.length !== 1 ? 's' : ''} shown</p>
+          <p className="text-xs text-slate-500">{filtered.length} finding{filtered.length !== 1 ? 's' : ''} shown</p>
 
           <div className="max-h-[65vh] overflow-y-auto space-y-1 pr-1" data-testid="findings-list">
             {filtered.length === 0 ? (
-              <div className="text-center py-8 text-[#8B8D91]">
+              <div className="text-center py-8 text-slate-500">
                 <ShieldCheck className="w-8 h-8 mx-auto mb-2 text-green-400" />
                 <p className="text-sm">No findings match your filters</p>
               </div>
@@ -290,15 +290,15 @@ export default function AuditCompliance() {
 
         {/* HISTORY TAB */}
         <TabsContent value="history" className="mt-4">
-          <Card className="bg-white border-[#2A3A4A]">
+          <Card className="bg-white border-slate-200">
             <CardContent className="pt-4">
               {history.length === 0 ? (
-                <p className="text-center py-8 text-[#8B8D91] text-sm">No audit history yet.</p>
+                <p className="text-center py-8 text-slate-500 text-sm">No audit history yet.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm" data-testid="audit-history-table">
                     <thead>
-                      <tr className="text-[#8B8D91] text-xs border-b border-[#2A3A4A]">
+                      <tr className="text-slate-500 text-xs border-b border-slate-200">
                         <th className="text-left py-2 px-3">Date</th>
                         <th className="text-center py-2 px-3">Score</th>
                         <th className="text-center py-2 px-3">Critical</th>
@@ -311,13 +311,13 @@ export default function AuditCompliance() {
                       {history.map((h, i) => {
                         const scoreColor = h.health_score >= 80 ? 'text-green-400' : h.health_score >= 50 ? 'text-amber-400' : 'text-red-400';
                         return (
-                          <tr key={h.scan_id || i} className="border-b border-[#2A3A4A]/50 hover:bg-[#2A3A4A]/20">
-                            <td className="py-2 px-3 text-[#C5C6C7]">{new Date(h.scanned_at).toLocaleString()}</td>
+                          <tr key={h.scan_id || i} className="border-b border-slate-200/50 hover:bg-slate-50">
+                            <td className="py-2 px-3 text-slate-700">{new Date(h.scanned_at).toLocaleString()}</td>
                             <td className={`py-2 px-3 text-center font-bold ${scoreColor}`}>{h.health_score}</td>
                             <td className="py-2 px-3 text-center text-red-400">{h.stats?.critical || 0}</td>
                             <td className="py-2 px-3 text-center text-amber-400">{h.stats?.warning || 0}</td>
                             <td className="py-2 px-3 text-center text-blue-400">{h.stats?.info || 0}</td>
-                            <td className="py-2 px-3 text-center text-[#8B8D91]">{h.summary?.total_transactions || '-'}</td>
+                            <td className="py-2 px-3 text-center text-slate-500">{h.summary?.total_transactions || '-'}</td>
                           </tr>
                         );
                       })}
@@ -332,58 +332,58 @@ export default function AuditCompliance() {
         {/* SETTINGS TAB */}
         <TabsContent value="settings" className="mt-4">
           {settings && (
-            <Card className="bg-white border-[#2A3A4A]">
-              <CardHeader><CardTitle className="text-sm text-[#C5C6C7] flex items-center gap-2"><Settings2 className="w-4 h-4" /> Audit Configuration</CardTitle></CardHeader>
+            <Card className="bg-white border-slate-200">
+              <CardHeader><CardTitle className="text-sm text-slate-700 flex items-center gap-2"><Settings2 className="w-4 h-4" /> Audit Configuration</CardTitle></CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-[#8B8D91] text-xs">Large Transaction Threshold (USD)</Label>
+                    <Label className="text-slate-500 text-xs">Large Transaction Threshold (USD)</Label>
                     <Input type="number" value={settings.large_transaction_threshold || 50000}
                       onChange={e => setSettings({ ...settings, large_transaction_threshold: Number(e.target.value) })}
-                      className="bg-slate-50 border-[#2A3A4A] text-[#C5C6C7]"
+                      className="bg-slate-50 border-slate-200 text-slate-900"
                       data-testid="threshold-input" />
-                    <p className="text-[10px] text-[#8B8D91]">Transactions above this amount will be flagged as info</p>
+                    <p className="text-[10px] text-slate-500">Transactions above this amount will be flagged as info</p>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#8B8D91] text-xs">FX Rate Deviation Threshold (%)</Label>
+                    <Label className="text-slate-500 text-xs">FX Rate Deviation Threshold (%)</Label>
                     <Input type="number" value={settings.fx_deviation_threshold || 5}
                       onChange={e => setSettings({ ...settings, fx_deviation_threshold: Number(e.target.value) })}
-                      className="bg-slate-50 border-[#2A3A4A] text-[#C5C6C7]"
+                      className="bg-slate-50 border-slate-200 text-slate-900"
                       data-testid="fx-deviation-input" />
-                    <p className="text-[10px] text-[#8B8D91]">FX rate deviations above this % are flagged</p>
+                    <p className="text-[10px] text-slate-500">FX rate deviations above this % are flagged</p>
                   </div>
                 </div>
 
-                <div className="border-t border-[#2A3A4A] pt-4 space-y-4">
-                  <h3 className="text-sm font-medium text-[#C5C6C7]">Automated Daily Scan</h3>
+                <div className="border-t border-slate-200 pt-4 space-y-4">
+                  <h3 className="text-sm font-medium text-slate-700">Automated Daily Scan</h3>
                   <div className="flex items-center gap-3">
                     <Switch checked={settings.auto_scan_enabled || false}
                       onCheckedChange={v => setSettings({ ...settings, auto_scan_enabled: v })}
                       data-testid="auto-scan-toggle" />
-                    <span className="text-sm text-[#8B8D91]">Enable daily automated audit scan</span>
+                    <span className="text-sm text-slate-500">Enable daily automated audit scan</span>
                   </div>
                   {settings.auto_scan_enabled && (
                     <div className="space-y-2 pl-8">
-                      <Label className="text-[#8B8D91] text-xs">Scan Time (UTC)</Label>
+                      <Label className="text-slate-500 text-xs">Scan Time (UTC)</Label>
                       <Input type="time" value={settings.auto_scan_time || '02:00'}
                         onChange={e => setSettings({ ...settings, auto_scan_time: e.target.value })}
-                        className="bg-slate-50 border-[#2A3A4A] text-[#C5C6C7] w-40"
+                        className="bg-slate-50 border-slate-200 text-slate-700 w-40"
                         data-testid="scan-time-input" />
                     </div>
                   )}
                 </div>
 
-                <div className="border-t border-[#2A3A4A] pt-4 space-y-4">
-                  <h3 className="text-sm font-medium text-[#C5C6C7]">Alert Email Recipients</h3>
-                  <p className="text-[10px] text-[#8B8D91]">Comma-separated emails to receive audit alerts when issues are found</p>
+                <div className="border-t border-slate-200 pt-4 space-y-4">
+                  <h3 className="text-sm font-medium text-slate-700">Alert Email Recipients</h3>
+                  <p className="text-[10px] text-slate-500">Comma-separated emails to receive audit alerts when issues are found</p>
                   <Input value={(settings.alert_emails || []).join(', ')}
                     onChange={e => setSettings({ ...settings, alert_emails: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
                     placeholder="admin@company.com, cfo@company.com"
-                    className="bg-slate-50 border-[#2A3A4A] text-[#C5C6C7]"
+                    className="bg-slate-50 border-slate-200 text-slate-900"
                     data-testid="alert-emails-input" />
                 </div>
 
-                <Button onClick={saveSettings} className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-semibold"
+                <Button onClick={saveSettings} className="bg-indigo-600 text-white hover:bg-indigo-700 font-semibold"
                   data-testid="save-audit-settings-btn">
                   Save Settings
                 </Button>

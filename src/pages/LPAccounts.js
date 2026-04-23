@@ -548,7 +548,7 @@ export default function LPAccounts() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             LP Management
           </h1>
           <p className="text-slate-500">Manage Liquidity Provider accounts and transactions</p>
@@ -1092,7 +1092,7 @@ export default function LPAccounts() {
       <Dialog open={isDealingFormOpen} onOpenChange={setIsDealingFormOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight text-green-600" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-green-600">
               <Calculator className="w-6 h-6 inline mr-2" />
               Add Daily Dealing P&L
             </DialogTitle>
@@ -1242,7 +1242,7 @@ export default function LPAccounts() {
       <Dialog open={isAddLPOpen} onOpenChange={setIsAddLPOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Add Liquidity Provider
             </DialogTitle>
           </DialogHeader>
@@ -1352,7 +1352,7 @@ export default function LPAccounts() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Edit LP: {selectedLP?.lp_name}
             </DialogTitle>
           </DialogHeader>
@@ -1454,7 +1454,7 @@ export default function LPAccounts() {
       <Dialog open={isDepositOpen} onOpenChange={setIsDepositOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               <span className="text-green-500">Deposit</span> to {selectedLP?.lp_name}
             </DialogTitle>
           </DialogHeader>
@@ -1539,7 +1539,7 @@ export default function LPAccounts() {
       <Dialog open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               <span className="text-red-400">Withdraw</span> from {selectedLP?.lp_name}
             </DialogTitle>
           </DialogHeader>
@@ -1627,7 +1627,7 @@ export default function LPAccounts() {
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               {selectedLP?.lp_name}
             </DialogTitle>
           </DialogHeader>

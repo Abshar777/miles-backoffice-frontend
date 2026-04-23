@@ -205,7 +205,7 @@ export default function TradingAccounts() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold uppercase tracking-tight text-white" style={{ fontFamily: 'Barlow Condensed' }}>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Trading Accounts
           </h1>
           <p className="text-[#C5C6C7]">Manage MT4/MT5 trading accounts</p>
@@ -222,7 +222,7 @@ export default function TradingAccounts() {
           </DialogTrigger>
           <DialogContent className="bg-white border-slate-200 text-white max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+              <DialogTitle className="text-lg font-bold text-slate-900">
                 {selectedAccount ? 'Edit Account' : 'Create Trading Account'}
               </DialogTitle>
             </DialogHeader>
@@ -459,7 +459,7 @@ export default function TradingAccounts() {
       <Dialog open={!!viewAccount} onOpenChange={() => setViewAccount(null)}>
         <DialogContent className="bg-white border-slate-200 text-white max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase tracking-tight" style={{ fontFamily: 'Barlow Condensed' }}>
+            <DialogTitle className="text-lg font-bold text-slate-900">
               Account Details
             </DialogTitle>
           </DialogHeader>

@@ -569,12 +569,11 @@ export default function Settings() {
       {/* Header */}
       <div>
         <h1
-          className="text-4xl font-bold uppercase tracking-tight text-white"
-          style={{ fontFamily: "Barlow Condensed" }}
+          className="text-3xl font-bold text-slate-900"
         >
           Settings
         </h1>
-        <p className="text-[#C5C6C7]">
+        <p className="text-slate-600">
           System settings, user management, and email reports
         </p>
       </div>
@@ -582,14 +581,14 @@ export default function Settings() {
       {/* Current User Info */}
       <Card className="bg-white border-slate-200">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-            <UserCog className="w-5 h-5 text-[#66FCF1]" />
+          <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+            <UserCog className="w-5 h-5 text-indigo-600" />
             Your Account
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-[#66FCF1]/10 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center">
               {user?.picture ? (
                 <img
                   src={user.picture}
@@ -597,14 +596,14 @@ export default function Settings() {
                   className="w-16 h-16 rounded-full"
                 />
               ) : (
-                <span className="text-[#66FCF1] font-bold text-xl">
+                <span className="text-indigo-600 font-bold text-xl">
                   {user?.name?.charAt(0) || "U"}
                 </span>
               )}
             </div>
             <div>
-              <p className="text-xl text-white font-medium">{user?.name}</p>
-              <p className="text-[#C5C6C7] font-mono">{user?.email}</p>
+              <p className="text-xl text-slate-900 font-medium">{user?.name}</p>
+              <p className="text-slate-600 font-mono">{user?.email}</p>
               <div className="mt-2">
                 {getRoleBadge(user?.role, user?.role_id)}
               </div>
@@ -619,14 +618,14 @@ export default function Settings() {
           <TabsList className="bg-slate-50 border border-slate-200 mb-4">
             <TabsTrigger
               value="users"
-              className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]"
+              className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
             >
               <Users className="w-4 h-4 mr-2" />
               Users
             </TabsTrigger>
             <TabsTrigger
               value="email"
-              className="data-[state=active]:bg-[#66FCF1] data-[state=active]:text-[#0B0C10]"
+              className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
             >
               <Mail className="w-4 h-4 mr-2" />
               Email Reports
@@ -638,8 +637,8 @@ export default function Settings() {
             <Card className="bg-white border-slate-200">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                    <Users className="w-5 h-5 text-[#66FCF1]" />
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-indigo-600" />
                     User Management
                   </CardTitle>
                   <Dialog
@@ -651,25 +650,24 @@ export default function Settings() {
                   >
                     <DialogTrigger asChild>
                       <Button
-                        className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase tracking-wider rounded-sm text-sm"
+                        className="bg-indigo-600 text-white hover:bg-indigo-700 font-bold uppercase tracking-wider rounded-lg text-sm"
                         data-testid="add-user-btn"
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Add User
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-white border-slate-200 text-white max-w-lg">
+                    <DialogContent className="bg-white border-slate-200 text-slate-900 max-w-lg">
                       <DialogHeader>
                         <DialogTitle
-                          className="text-2xl font-bold uppercase tracking-tight"
-                          style={{ fontFamily: "Barlow Condensed" }}
+                          className="text-lg font-bold text-slate-900"
                         >
                           {selectedUser ? "Edit User" : "Add New User"}
                         </DialogTitle>
                       </DialogHeader>
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                          <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                          <Label className="text-slate-600 text-xs uppercase tracking-wider">
                             Name
                           </Label>
                           <Input
@@ -677,7 +675,7 @@ export default function Settings() {
                             onChange={(e) =>
                               setFormData({ ...formData, name: e.target.value })
                             }
-                            className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1]"
+                            className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500"
                             data-testid="user-name-input"
                             required
                           />
@@ -685,7 +683,7 @@ export default function Settings() {
                         {!selectedUser && (
                           <>
                             <div className="space-y-2">
-                              <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                              <Label className="text-slate-600 text-xs uppercase tracking-wider">
                                 Email
                               </Label>
                               <Input
@@ -697,13 +695,13 @@ export default function Settings() {
                                     email: e.target.value,
                                   })
                                 }
-                                className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
+                                className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500 font-mono"
                                 data-testid="user-email-input"
                                 required
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                              <Label className="text-slate-600 text-xs uppercase tracking-wider">
                                 Password
                               </Label>
                               <Input
@@ -715,7 +713,7 @@ export default function Settings() {
                                     password: e.target.value,
                                   })
                                 }
-                                className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1]"
+                                className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500"
                                 data-testid="user-password-input"
                                 required
                               />
@@ -817,7 +815,7 @@ export default function Settings() {
                           )}
                         {selectedUser && (
                           <div className="flex items-center justify-between p-3 bg-slate-50 rounded-sm border border-slate-200">
-                            <Label className="text-[#C5C6C7]">Active</Label>
+                            <Label className="text-slate-600">Active</Label>
                             <Switch
                               checked={formData.is_active}
                               onCheckedChange={(checked) =>
@@ -835,13 +833,13 @@ export default function Settings() {
                               setIsDialogOpen(false);
                               resetForm();
                             }}
-                            className="border-slate-200 text-[#C5C6C7] hover:bg-white/5"
+                            className="border-slate-200 text-slate-600 hover:bg-slate-50"
                           >
                             Cancel
                           </Button>
                           <Button
                             type="submit"
-                            className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase tracking-wider"
+                            className="bg-indigo-600 text-white hover:bg-indigo-700 font-bold uppercase tracking-wider"
                             data-testid="save-user-btn"
                           >
                             {selectedUser ? "Update" : "Create"}
@@ -857,19 +855,19 @@ export default function Settings() {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-slate-200 hover:bg-transparent">
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">
+                        <TableHead className="text-slate-600 font-bold uppercase tracking-wider text-xs">
                           User
                         </TableHead>
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">
+                        <TableHead className="text-slate-600 font-bold uppercase tracking-wider text-xs">
                           Email
                         </TableHead>
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">
+                        <TableHead className="text-slate-600 font-bold uppercase tracking-wider text-xs">
                           Role
                         </TableHead>
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs">
+                        <TableHead className="text-slate-600 font-bold uppercase tracking-wider text-xs">
                           Status
                         </TableHead>
-                        <TableHead className="text-[#C5C6C7] font-bold uppercase tracking-wider text-xs text-right">
+                        <TableHead className="text-slate-600 font-bold uppercase tracking-wider text-xs text-right">
                           Actions
                         </TableHead>
                       </TableRow>
@@ -878,14 +876,14 @@ export default function Settings() {
                       {loading ? (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center py-8">
-                            <div className="w-6 h-6 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin mx-auto" />
+                            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
                           </TableCell>
                         </TableRow>
                       ) : users.length === 0 ? (
                         <TableRow>
                           <TableCell
                             colSpan={5}
-                            className="text-center py-8 text-[#C5C6C7]"
+                            className="text-center py-8 text-slate-600"
                           >
                             No users found
                           </TableCell>
@@ -894,11 +892,11 @@ export default function Settings() {
                         users.map((userItem) => (
                           <TableRow
                             key={userItem.user_id}
-                            className="border-slate-200 hover:bg-white/5"
+                            className="border-slate-200 hover:bg-slate-50"
                           >
                             <TableCell>
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-[#66FCF1]/10 rounded-full flex items-center justify-center">
+                                <div className="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center">
                                   {userItem.picture ? (
                                     <img
                                       src={userItem.picture}
@@ -906,22 +904,22 @@ export default function Settings() {
                                       className="w-10 h-10 rounded-full"
                                     />
                                   ) : (
-                                    <span className="text-[#66FCF1] font-bold text-sm">
+                                    <span className="text-indigo-600 font-bold text-sm">
                                       {userItem.name?.charAt(0) || "U"}
                                     </span>
                                   )}
                                 </div>
                                 <div>
-                                  <p className="text-white font-medium">
+                                  <p className="text-slate-900 font-medium">
                                     {userItem.name}
                                   </p>
-                                  <p className="text-xs text-[#C5C6C7] font-mono">
+                                  <p className="text-xs text-slate-600 font-mono">
                                     {userItem.user_id}
                                   </p>
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="text-white font-mono">
+                            <TableCell className="text-slate-900 font-mono">
                               {userItem.email}
                             </TableCell>
                             <TableCell>
@@ -942,7 +940,7 @@ export default function Settings() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-[#C5C6C7] hover:text-white hover:bg-white/5"
+                                    className="text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                                     data-testid={`user-actions-${userItem.user_id}`}
                                   >
                                     <MoreVertical className="w-4 h-4" />
@@ -954,7 +952,7 @@ export default function Settings() {
                                 >
                                   <DropdownMenuItem
                                     onClick={() => handleEdit(userItem)}
-                                    className="text-white hover:bg-white/5 cursor-pointer"
+                                    className="text-slate-900 hover:bg-slate-50 cursor-pointer"
                                   >
                                     <Edit className="w-4 h-4 mr-2" /> Edit
                                   </DropdownMenuItem>
@@ -964,7 +962,7 @@ export default function Settings() {
                                         onClick={() =>
                                           handleImpersonate(userItem)
                                         }
-                                        className="text-amber-500 hover:bg-white/5 cursor-pointer"
+                                        className="text-amber-500 hover:bg-slate-50 cursor-pointer"
                                         data-testid={`impersonate-${userItem.user_id}`}
                                       >
                                         <LogIn className="w-4 h-4 mr-2" /> Login
@@ -976,7 +974,7 @@ export default function Settings() {
                                       onClick={() =>
                                         handleDelete(userItem.user_id)
                                       }
-                                      className="text-red-500 hover:bg-white/5 cursor-pointer"
+                                      className="text-red-500 hover:bg-slate-50 cursor-pointer"
                                       data-testid={`delete-user-${userItem.user_id}`}
                                     >
                                       <Trash2 className="w-4 h-4 mr-2" /> Delete
@@ -1001,15 +999,15 @@ export default function Settings() {
               {/* SMTP Settings Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                    <Mail className="w-5 h-5 text-[#66FCF1]" />
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-indigo-600" />
                     SMTP Settings
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                      <Label className="text-slate-600 text-xs uppercase tracking-wider">
                         SMTP Host
                       </Label>
                       <Input
@@ -1021,13 +1019,13 @@ export default function Settings() {
                             smtp_host: e.target.value,
                           }))
                         }
-                        className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono text-sm"
+                        className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500 font-mono text-sm"
                         placeholder="smtp.gmail.com"
                         data-testid="smtp-host"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                      <Label className="text-slate-600 text-xs uppercase tracking-wider">
                         Port
                       </Label>
                       <Input
@@ -1039,14 +1037,14 @@ export default function Settings() {
                             smtp_port: e.target.value,
                           }))
                         }
-                        className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono text-sm"
+                        className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500 font-mono text-sm"
                         placeholder="587"
                         data-testid="smtp-port"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                    <Label className="text-slate-600 text-xs uppercase tracking-wider">
                       Username (Email)
                     </Label>
                     <Input
@@ -1058,13 +1056,13 @@ export default function Settings() {
                           smtp_email: e.target.value,
                         }))
                       }
-                      className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
+                      className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500 font-mono"
                       placeholder="no-reply@milescapitals.com"
                       data-testid="smtp-email"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                    <Label className="text-slate-600 text-xs uppercase tracking-wider">
                       Password{" "}
                       {emailSettings.smtp_password_set && (
                         <span className="text-green-400">(Set)</span>
@@ -1079,7 +1077,7 @@ export default function Settings() {
                           smtp_password: e.target.value,
                         }))
                       }
-                      className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
+                      className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500 font-mono"
                       placeholder={
                         emailSettings.smtp_password_set
                           ? "••••••••••••••••"
@@ -1089,7 +1087,7 @@ export default function Settings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                    <Label className="text-slate-600 text-xs uppercase tracking-wider">
                       Send From Email
                     </Label>
                     <Input
@@ -1101,7 +1099,7 @@ export default function Settings() {
                           smtp_from_email: e.target.value,
                         }))
                       }
-                      className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
+                      className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500 font-mono"
                       placeholder="no-reply@milescapitals.com"
                       data-testid="smtp-from-email"
                     />
@@ -1115,11 +1113,11 @@ export default function Settings() {
                         !emailSettings.smtp_password_set)
                     }
                     variant="outline"
-                    className="w-full border-[#66FCF1]/30 text-[#66FCF1] hover:bg-[#66FCF1]/10"
+                    className="w-full border-indigo-600/30 text-indigo-600 hover:bg-indigo-50"
                     data-testid="test-email-btn"
                   >
                     {sendingTest ? (
-                      <div className="w-4 h-4 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin mr-2" />
+                      <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mr-2" />
                     ) : (
                       <Send className="w-4 h-4 mr-2" />
                     )}
@@ -1131,8 +1129,8 @@ export default function Settings() {
               {/* Director Emails Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                    <Users className="w-5 h-5 text-[#66FCF1]" />
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-indigo-600" />
                     Director Emails
                   </CardTitle>
                 </CardHeader>
@@ -1142,7 +1140,7 @@ export default function Settings() {
                       type="email"
                       value={newDirectorEmail}
                       onChange={(e) => setNewDirectorEmail(e.target.value)}
-                      className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1] font-mono"
+                      className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500 font-mono"
                       placeholder="director@company.com"
                       onKeyPress={(e) =>
                         e.key === "Enter" &&
@@ -1152,7 +1150,7 @@ export default function Settings() {
                     />
                     <Button
                       onClick={addDirectorEmail}
-                      className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E]"
+                      className="bg-indigo-600 text-white hover:bg-indigo-700"
                       data-testid="add-director-btn"
                     >
                       <Plus className="w-4 h-4" />
@@ -1160,7 +1158,7 @@ export default function Settings() {
                   </div>
                   <div className="space-y-2 max-h-[200px] overflow-y-auto">
                     {emailSettings.director_emails.length === 0 ? (
-                      <p className="text-[#C5C6C7] text-sm text-center py-4">
+                      <p className="text-slate-600 text-sm text-center py-4">
                         No directors added yet
                       </p>
                     ) : (
@@ -1169,7 +1167,7 @@ export default function Settings() {
                           key={index}
                           className="flex items-center justify-between p-2 bg-slate-50 rounded-sm border border-slate-200"
                         >
-                          <span className="text-white font-mono text-sm">
+                          <span className="text-slate-900 font-mono text-sm">
                             {email}
                           </span>
                           <Button
@@ -1190,16 +1188,16 @@ export default function Settings() {
               {/* Schedule Settings Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-[#66FCF1]" />
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-indigo-600" />
                     Daily Report Schedule
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-3 bg-slate-50 rounded-sm border border-slate-200">
                     <div>
-                      <Label className="text-white">Enable Daily Reports</Label>
-                      <p className="text-xs text-[#C5C6C7]">
+                      <Label className="text-slate-700">Enable Daily Reports</Label>
+                      <p className="text-xs text-slate-600">
                         Auto-send reports to directors
                       </p>
                     </div>
@@ -1240,7 +1238,7 @@ export default function Settings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                    <Label className="text-slate-600 text-xs uppercase tracking-wider">
                       Report Time (UTC)
                     </Label>
                     <Input
@@ -1252,10 +1250,10 @@ export default function Settings() {
                           report_time: e.target.value,
                         }))
                       }
-                      className="bg-slate-50 border-slate-200 text-white focus:border-[#66FCF1]"
+                      className="bg-slate-50 border-slate-200 text-slate-900 focus:border-indigo-500"
                       data-testid="report-time"
                     />
-                    <p className="text-xs text-[#C5C6C7]">
+                    <p className="text-xs text-slate-600">
                       Currently set to: {emailSettings.report_time} UTC
                     </p>
                   </div>
@@ -1263,11 +1261,11 @@ export default function Settings() {
                     <Button
                       onClick={handleSaveEmailSettings}
                       disabled={savingEmail}
-                      className="flex-1 bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase"
+                      className="flex-1 bg-indigo-600 text-white hover:bg-indigo-700 font-bold uppercase"
                       data-testid="save-email-settings-btn"
                     >
                       {savingEmail ? (
-                        <div className="w-4 h-4 border-2 border-[#0B0C10] border-t-transparent rounded-full animate-spin mr-2" />
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                       ) : (
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                       )}
@@ -1280,11 +1278,11 @@ export default function Settings() {
                         emailSettings.director_emails.length === 0
                       }
                       variant="outline"
-                      className="border-[#66FCF1]/30 text-[#66FCF1] hover:bg-[#66FCF1]/10"
+                      className="border-indigo-600/30 text-indigo-600 hover:bg-indigo-50"
                       data-testid="send-report-now-btn"
                     >
                       {sendingReport ? (
-                        <div className="w-4 h-4 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin mr-2" />
+                        <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mr-2" />
                       ) : (
                         <FileText className="w-4 h-4 mr-2" />
                       )}
@@ -1297,7 +1295,7 @@ export default function Settings() {
               {/* Monthly Reports Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-purple-400" />
                     Monthly Reports
                   </CardTitle>
@@ -1305,10 +1303,10 @@ export default function Settings() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-3 bg-slate-50 rounded-sm border border-slate-200">
                     <div>
-                      <Label className="text-white">
+                      <Label className="text-slate-700">
                         Enable Monthly Reports
                       </Label>
-                      <p className="text-xs text-[#C5C6C7]">
+                      <p className="text-xs text-slate-600">
                         Auto-send on the last day of each month
                       </p>
                     </div>
@@ -1349,7 +1347,7 @@ export default function Settings() {
                       data-testid="monthly-report-enabled-switch"
                     />
                   </div>
-                  <p className="text-xs text-[#C5C6C7]">
+                  <p className="text-xs text-slate-600">
                     Includes: Transaction Summary, Treasury Balances, I&E,
                     Loans, Exchanger Settlements, PSP Summary, Outstanding
                     Accounts
@@ -1393,7 +1391,7 @@ export default function Settings() {
               {/* Security Settings Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                     <AlertCircle className="w-5 h-5 text-red-400" />
                     Security
                   </CardTitle>
@@ -1401,10 +1399,10 @@ export default function Settings() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-3 bg-slate-50 rounded-sm border border-slate-200">
                     <div>
-                      <Label className="text-white">
+                      <Label className="text-slate-700">
                         Enable 2FA (Email OTP)
                       </Label>
-                      <p className="text-xs text-[#C5C6C7]">
+                      <p className="text-xs text-slate-600">
                         Require email verification code on every login
                       </p>
                     </div>
@@ -1432,8 +1430,8 @@ export default function Settings() {
                     />
                   </div>
                   <div className="p-3 bg-slate-50 rounded-sm border border-slate-200">
-                    <Label className="text-white">Session Timeout</Label>
-                    <p className="text-xs text-[#C5C6C7] mb-2">
+                    <Label className="text-slate-700">Session Timeout</Label>
+                    <p className="text-xs text-slate-600 mb-2">
                       Auto-logout after inactivity (current: {sessionTimeout}h)
                     </p>
                     <div className="flex items-center gap-2">
@@ -1457,7 +1455,7 @@ export default function Settings() {
                             toast.error("Failed to update");
                           }
                         }}
-                        className="bg-slate-50 border-slate-200 text-white px-3 py-1.5 rounded-md text-sm"
+                        className="bg-slate-50 border-slate-200 text-slate-900 px-3 py-1.5 rounded-md text-sm"
                       >
                         <option value="1">1 hour</option>
                         <option value="2">2 hours</option>
@@ -1469,10 +1467,10 @@ export default function Settings() {
                   <div className="p-3 bg-slate-50 rounded-sm border border-slate-200">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-white">
+                        <Label className="text-slate-700">
                           My Approval Notifications
                         </Label>
-                        <p className="text-xs text-[#C5C6C7]">
+                        <p className="text-xs text-slate-600">
                           Receive email when transactions need approval
                         </p>
                       </div>
@@ -1511,13 +1509,13 @@ export default function Settings() {
               {/* Manual FX Rates Card */}
               <Card className="bg-white border-slate-200 md:col-span-2">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                     <DollarSign className="w-5 h-5 text-green-400" />
                     Manual FX Rates (1 unit = X USD)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-xs text-[#C5C6C7]">
+                  <p className="text-xs text-slate-600">
                     Set exchange rates for currency conversion in Treasury and
                     Dashboard. These replace live FX rates.
                   </p>
@@ -1534,7 +1532,7 @@ export default function Settings() {
                             <span className="text-sm font-mono text-slate-800 w-16 font-bold">
                               {currency}
                             </span>
-                            <span className="text-xs text-[#C5C6C7]">
+                            <span className="text-xs text-slate-600">
                               1 {currency} =
                             </span>
                             <Input
@@ -1547,9 +1545,9 @@ export default function Settings() {
                                   [currency]: parseFloat(e.target.value) || 0,
                                 }))
                               }
-                              className="w-32 bg-slate-50 border-slate-200 text-white text-sm"
+                              className="w-32 bg-slate-50 border-slate-200 text-slate-900 text-sm"
                             />
-                            <span className="text-xs text-[#C5C6C7]">USD</span>
+                            <span className="text-xs text-slate-600">USD</span>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1566,7 +1564,7 @@ export default function Settings() {
                         ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-[#C5C6C7]">
+                    <p className="text-sm text-slate-600">
                       No manual rates set. USD equivalents won't be shown for
                       non-USD accounts.
                     </p>
@@ -1579,7 +1577,7 @@ export default function Settings() {
                       onChange={(e) =>
                         setNewFxCurrency(e.target.value.toUpperCase())
                       }
-                      className="w-40 bg-slate-50 border-slate-200 text-white text-sm"
+                      className="w-40 bg-slate-50 border-slate-200 text-slate-900 text-sm"
                       data-testid="new-fx-currency"
                     />
                     <Button
@@ -1602,7 +1600,7 @@ export default function Settings() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="text-xs text-[#C5C6C7]">
+                    <div className="text-xs text-slate-600">
                       {fxRatesUpdatedAt && (
                         <span>
                           Last updated:{" "}
@@ -1614,11 +1612,11 @@ export default function Settings() {
                     <Button
                       onClick={handleSaveFxRates}
                       disabled={savingFxRates}
-                      className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold"
+                      className="bg-indigo-600 text-white hover:bg-indigo-700 font-bold"
                       data-testid="save-fx-rates-btn"
                     >
                       {savingFxRates ? (
-                        <div className="w-4 h-4 border-2 border-[#0B0C10] border-t-transparent rounded-full animate-spin mr-2" />
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                       ) : (
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                       )}
@@ -1631,15 +1629,15 @@ export default function Settings() {
               {/* Email Logs Card */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-[#66FCF1]" />
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-indigo-600" />
                     Email History
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[250px]">
                     {emailLogs.length === 0 ? (
-                      <p className="text-[#C5C6C7] text-sm text-center py-8">
+                      <p className="text-slate-600 text-sm text-center py-8">
                         No emails sent yet
                       </p>
                     ) : (
@@ -1650,7 +1648,7 @@ export default function Settings() {
                             className="p-3 bg-slate-50 rounded-sm border border-slate-200"
                           >
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs text-[#C5C6C7] uppercase">
+                              <span className="text-xs text-slate-600 uppercase">
                                 {log.type}
                               </span>
                               {log.status === "sent" ? (
@@ -1663,12 +1661,12 @@ export default function Settings() {
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-white text-sm">
+                            <p className="text-slate-900 text-sm">
                               {log.recipients?.length > 0
                                 ? `To: ${log.recipients.join(", ")}`
                                 : "No recipients"}
                             </p>
-                            <p className="text-xs text-[#C5C6C7] mt-1">
+                            <p className="text-xs text-slate-600 mt-1">
                               {new Date(
                                 log.sent_at || log.attempted_at,
                               ).toLocaleString()}
@@ -1694,50 +1692,50 @@ export default function Settings() {
           {/* Change Password */}
           <Card className="bg-white border-slate-200">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                <Lock className="w-5 h-5 text-[#66FCF1]" />
+              <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <Lock className="w-5 h-5 text-indigo-600" />
                 Change Password
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                <Label className="text-slate-600 text-xs uppercase tracking-wider">
                   Current Password
                 </Label>
                 <Input
                   type="password"
                   id="current-password"
                   placeholder="Enter current password"
-                  className="bg-slate-50 border-slate-200 text-white"
+                  className="bg-slate-50 border-slate-200 text-slate-900"
                   data-testid="current-password"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                <Label className="text-slate-600 text-xs uppercase tracking-wider">
                   New Password
                 </Label>
                 <Input
                   type="password"
                   id="new-password"
                   placeholder="Enter new password (min 6 chars)"
-                  className="bg-slate-50 border-slate-200 text-white"
+                  className="bg-slate-50 border-slate-200 text-slate-900"
                   data-testid="new-password"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[#C5C6C7] text-xs uppercase tracking-wider">
+                <Label className="text-slate-600 text-xs uppercase tracking-wider">
                   Confirm New Password
                 </Label>
                 <Input
                   type="password"
                   id="confirm-password"
                   placeholder="Confirm new password"
-                  className="bg-slate-50 border-slate-200 text-white"
+                  className="bg-slate-50 border-slate-200 text-slate-900"
                   data-testid="confirm-password"
                 />
               </div>
               <Button
-                className="w-full bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase"
+                className="w-full bg-indigo-600 text-white hover:bg-indigo-700 font-bold uppercase"
                 data-testid="change-password-btn"
                 onClick={async () => {
                   const curPw =
@@ -1792,8 +1790,8 @@ export default function Settings() {
           {/* Security Info */}
           <Card className="bg-white border-slate-200">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                <Shield className="w-5 h-5 text-[#66FCF1]" />
+              <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-indigo-600" />
                 Security
               </CardTitle>
             </CardHeader>
@@ -1801,8 +1799,8 @@ export default function Settings() {
               <div className="p-3 bg-slate-50 rounded-sm border border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-white font-medium">2FA (Email OTP)</p>
-                    <p className="text-xs text-[#C5C6C7]">
+                    <p className="text-slate-900 font-medium">2FA (Email OTP)</p>
+                    <p className="text-xs text-slate-600">
                       Email verification on every login
                     </p>
                   </div>
@@ -1820,8 +1818,8 @@ export default function Settings() {
               <div className="p-3 bg-slate-50 rounded-sm border border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-white font-medium">Session Timeout</p>
-                    <p className="text-xs text-[#C5C6C7]">
+                    <p className="text-slate-900 font-medium">Session Timeout</p>
+                    <p className="text-xs text-slate-600">
                       Auto-logout after inactivity
                     </p>
                   </div>
@@ -1830,16 +1828,16 @@ export default function Settings() {
                   </Badge>
                 </div>
               </div>
-              <p className="text-xs text-[#C5C6C7]">
+              <p className="text-xs text-slate-600">
                 Security settings are managed by your system administrator.
               </p>
               <div className="p-3 bg-slate-50 rounded-sm border border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-white font-medium">
+                    <p className="text-slate-900 font-medium">
                       Approval Notifications
                     </p>
-                    <p className="text-xs text-[#C5C6C7]">
+                    <p className="text-xs text-slate-600">
                       Receive email when transactions need approval
                     </p>
                   </div>

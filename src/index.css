@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Manrope:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -57,49 +57,52 @@
         --scrollbar-thumb-hover: #94A3B8;
     }
 
-    /* Dark Theme */
-    [data-theme="dark"] {
-        --background: 222 47% 6%;
-        --foreground: 210 40% 98%;
-        --card: 222 47% 8%;
-        --card-foreground: 210 40% 98%;
-        --popover: 222 47% 8%;
-        --popover-foreground: 210 40% 98%;
-        --primary: 174 100% 60%;
-        --primary-foreground: 222 47% 6%;
-        --secondary: 222 47% 12%;
-        --secondary-foreground: 210 40% 98%;
-        --muted: 222 47% 12%;
-        --muted-foreground: 215 20% 65%;
-        --accent: 174 100% 60%;
-        --accent-foreground: 222 47% 6%;
+    /* Banking Theme — Modern Banking White */
+    [data-theme="banking"] {
+        --background: 210 40% 98%;
+        --foreground: 222 47% 11%;
+        --card: 0 0% 100%;
+        --card-foreground: 222 47% 11%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222 47% 11%;
+        --primary: 243 75% 59%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 210 40% 96%;
+        --secondary-foreground: 222 47% 11%;
+        --muted: 210 40% 96%;
+        --muted-foreground: 215 16% 47%;
+        --accent: 243 75% 59%;
+        --accent-foreground: 0 0% 100%;
         --destructive: 4 84% 60%;
         --destructive-foreground: 0 0% 100%;
-        --border: 222 47% 15%;
-        --input: 222 47% 12%;
-        --ring: 174 100% 60%;
-        
+        --border: 214 32% 91%;
+        --input: 214 32% 91%;
+        --ring: 243 75% 59%;
+        --radius: 0.5rem;
+
         /* Theme-specific colors */
-        --bg-primary: #0B0C10;
-        --bg-secondary: #1F2833;
-        --bg-tertiary: #151922;
-        --text-primary: #E2E8F0;
-        --text-secondary: #C5C6C7;
-        --text-muted: #94A3B8;
-        --border-color: #2D3748;
-        --border-light: #1F2833;
-        --sidebar-bg: #1F2833;
-        --sidebar-border: #2D3748;
-        --sidebar-text: #C5C6C7;
-        --sidebar-text-active: #66FCF1;
-        --sidebar-bg-active: rgba(102, 252, 241, 0.1);
-        --header-bg: rgba(31, 40, 51, 0.8);
-        --card-bg: #1F2833;
-        --input-bg: #151922;
-        --scrollbar-track: #1F2833;
-        --scrollbar-thumb: #45A29E;
-        --scrollbar-thumb-hover: #66FCF1;
+        --bg-primary: #f8fafc;
+        --bg-secondary: #ffffff;
+        --bg-tertiary: #f1f5f9;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
+        --border-light: #f8fafc;
+        --sidebar-bg: #0f172a;
+        --sidebar-border: #1e293b;
+        --sidebar-text: #64748b;
+        --sidebar-text-active: #a5b4fc;
+        --sidebar-bg-active: rgba(99, 102, 241, 0.15);
+        --header-bg: rgba(255, 255, 255, 0.9);
+        --card-bg: #ffffff;
+        --input-bg: #f8fafc;
+        --accent-color: #6366f1;
+        --scrollbar-track: #f1f5f9;
+        --scrollbar-thumb: #cbd5e1;
+        --scrollbar-thumb-hover: #94a3b8;
     }
+
 }
 
 @layer base {
@@ -111,15 +114,19 @@
     body {
         background-color: var(--bg-primary);
         color: var(--text-primary);
-        font-family: 'Manrope', sans-serif;
+        font-family: var(--app-font, 'Inter', 'Manrope', sans-serif);
         @apply antialiased;
-        /* Limit transition to theme-specific elements only, not entire body */
         -webkit-tap-highlight-color: transparent;
-        /* Prevent overscroll bounce lag on iOS */
         overscroll-behavior: none;
     }
+    /* Banking: Plus Jakarta Sans / Inter for all elements */
+    [data-theme="banking"] body,
+    [data-theme="banking"] * {
+        font-family: var(--app-font, 'Plus Jakarta Sans', 'Inter', sans-serif) !important;
+    }
     h1, h2, h3, h4, h5, h6 {
-        font-family: 'Barlow Condensed', sans-serif;
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        letter-spacing: -0.02em;
     }
     code, .font-mono {
         font-family: 'JetBrains Mono', monospace;
@@ -151,14 +158,8 @@
 .glow-cyan {
     box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
 }
-[data-theme="dark"] .glow-cyan {
-    box-shadow: 0 0 10px rgba(102, 252, 241, 0.3);
-}
 .glow-cyan-hover:hover {
     box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
-}
-[data-theme="dark"] .glow-cyan-hover:hover {
-    box-shadow: 0 0 20px rgba(102, 252, 241, 0.4);
 }
 
 /* Table styling */
@@ -181,12 +182,6 @@
 .status-pending { @apply bg-yellow-100 text-yellow-700 border border-yellow-200; }
 .status-rejected { @apply bg-red-100 text-red-700 border border-red-200; }
 .status-suspended { @apply bg-gray-100 text-gray-600 border border-gray-200; }
-
-/* Status badges - Dark theme */
-[data-theme="dark"] .status-approved { @apply bg-green-500/20 text-green-400 border-green-500/30; }
-[data-theme="dark"] .status-pending { @apply bg-yellow-500/20 text-yellow-400 border-yellow-500/30; }
-[data-theme="dark"] .status-rejected { @apply bg-red-500/20 text-red-400 border-red-500/30; }
-[data-theme="dark"] .status-suspended { @apply bg-gray-500/20 text-gray-400 border-gray-500/30; }
 
 /* Animation — GPU-accelerated for smooth iOS rendering */
 @keyframes fadeIn {
@@ -222,129 +217,15 @@
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
-/* ============= DARK MODE OVERRIDES ============= */
-/* These override hardcoded light mode colors when dark theme is active */
-
-/* Cards */
-[data-theme="dark"] .bg-white {
-    background-color: #1F2833 !important;
+/* ============= BANKING OVERRIDES ============= */
+/* Banking uses light backgrounds — same as enterprise but with indigo accent */
+[data-theme="banking"] [role="tab"][data-state="active"] {
+    background-color: #ffffff !important;
+    color: #6366f1 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
 }
-
-/* Backgrounds */
-[data-theme="dark"] .bg-\[\#F8FAFC\],
-[data-theme="dark"] .bg-slate-50,
-[data-theme="dark"] .bg-slate-100 {
-    background-color: #151922 !important;
+[data-theme="banking"] input:focus,
+[data-theme="banking"] textarea:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
 }
-
-/* Text colors */
-[data-theme="dark"] .text-slate-800,
-[data-theme="dark"] .text-slate-900,
-[data-theme="dark"] .text-\[\#1E293B\] {
-    color: #E2E8F0 !important;
-}
-
-[data-theme="dark"] .text-slate-600,
-[data-theme="dark"] .text-slate-500 {
-    color: #C5C6C7 !important;
-}
-
-[data-theme="dark"] .text-slate-400 {
-    color: #94A3B8 !important;
-}
-
-/* Borders */
-[data-theme="dark"] .border-slate-200,
-[data-theme="dark"] .border-slate-100 {
-    border-color: #2D3748 !important;
-}
-
-/* Hover states */
-[data-theme="dark"] .hover\:bg-slate-100:hover,
-[data-theme="dark"] .hover\:bg-slate-50:hover {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-/* Focus rings */
-[data-theme="dark"] .focus\:border-\[\#66FCF1\]:focus {
-    border-color: #66FCF1 !important;
-}
-
-/* Colored backgrounds - adjust for dark mode */
-[data-theme="dark"] .bg-blue-100 { background-color: rgba(37, 99, 235, 0.2) !important; }
-[data-theme="dark"] .bg-green-100 { background-color: rgba(34, 197, 94, 0.2) !important; }
-[data-theme="dark"] .bg-red-100 { background-color: rgba(239, 68, 68, 0.2) !important; }
-[data-theme="dark"] .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.2) !important; }
-[data-theme="dark"] .bg-purple-100 { background-color: rgba(168, 85, 247, 0.2) !important; }
-[data-theme="dark"] .bg-amber-100 { background-color: rgba(245, 158, 11, 0.2) !important; }
-[data-theme="dark"] .bg-blue-50 { background-color: rgba(37, 99, 235, 0.1) !important; }
-[data-theme="dark"] .bg-green-50 { background-color: rgba(34, 197, 94, 0.1) !important; }
-
-/* Input fields */
-[data-theme="dark"] input,
-[data-theme="dark"] textarea,
-[data-theme="dark"] select {
-    background-color: #151922 !important;
-    border-color: #2D3748 !important;
-    color: #E2E8F0 !important;
-}
-
-[data-theme="dark"] input::placeholder,
-[data-theme="dark"] textarea::placeholder {
-    color: #64748B !important;
-}
-
-/* Dropdown/Select content */
-[data-theme="dark"] [role="listbox"],
-[data-theme="dark"] [data-radix-popper-content-wrapper] > div {
-    background-color: #1F2833 !important;
-    border-color: #2D3748 !important;
-}
-
-[data-theme="dark"] [role="option"]:hover {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-/* Dialog/Modal */
-[data-theme="dark"] [role="dialog"] {
-    background-color: #1F2833 !important;
-    border-color: #2D3748 !important;
-}
-
-/* Tabs */
-[data-theme="dark"] [role="tablist"] {
-    background-color: #1F2833 !important;
-    border-color: #2D3748 !important;
-}
-
-[data-theme="dark"] [role="tab"][data-state="active"] {
-    background-color: rgba(102, 252, 241, 0.1) !important;
-    color: #66FCF1 !important;
-}
-
-/* Tables */
-[data-theme="dark"] table {
-    background-color: #1F2833 !important;
-}
-
-[data-theme="dark"] th {
-    background-color: #151922 !important;
-    color: #94A3B8 !important;
-    border-color: #2D3748 !important;
-}
-
-[data-theme="dark"] td {
-    border-color: #2D3748 !important;
-}
-
-[data-theme="dark"] tr:hover {
-    background-color: rgba(255, 255, 255, 0.02) !important;
-}
-
-/* Badges retain their colors but get darker backgrounds */
-[data-theme="dark"] .bg-green-500\/20 { background-color: rgba(34, 197, 94, 0.2) !important; }
-[data-theme="dark"] .bg-red-500\/20 { background-color: rgba(239, 68, 68, 0.2) !important; }
-[data-theme="dark"] .bg-yellow-500\/20 { background-color: rgba(234, 179, 8, 0.2) !important; }
-[data-theme="dark"] .bg-blue-500\/20 { background-color: rgba(37, 99, 235, 0.2) !important; }
-[data-theme="dark"] .bg-purple-500\/20 { background-color: rgba(168, 85, 247, 0.2) !important; }
-[data-theme="dark"] .bg-amber-500\/20 { background-color: rgba(245, 158, 11, 0.2) !important; }

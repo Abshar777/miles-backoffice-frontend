@@ -1024,8 +1024,7 @@ export default function ExchangerDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1
-            className="text-4xl font-bold uppercase tracking-tight text-slate-800"
-            style={{ fontFamily: "Barlow Condensed" }}
+            className="text-3xl font-bold tracking-tight text-slate-900"
           >
             Exchanger Portal
           </h1>
@@ -1399,8 +1398,8 @@ export default function ExchangerDashboard() {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle
-                  className="text-xl text-slate-800 uppercase tracking-tight"
-                  style={{ fontFamily: "Barlow Condensed" }}
+                  className="text-base font-semibold text-slate-900"
+                  
                 >
                   Assigned Transactions
                 </CardTitle>
@@ -1774,8 +1773,7 @@ export default function ExchangerDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle
-                    className="text-xl text-slate-800 uppercase tracking-tight flex items-center gap-2"
-                    style={{ fontFamily: "Barlow Condensed" }}
+                    className="text-base font-semibold text-slate-900 flex items-center gap-2"
                   >
                     <Wallet className="w-5 h-5 text-purple-600" />
                     Other Transactions
@@ -2207,8 +2205,7 @@ export default function ExchangerDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle
-                    className="text-xl text-slate-800 uppercase tracking-tight flex items-center gap-2"
-                    style={{ fontFamily: "Barlow Condensed" }}
+                    className="text-base font-semibold text-slate-900 flex items-center gap-2"
                   >
                     <Receipt className="w-5 h-5 text-blue-600" />
                     Settlement History
@@ -2396,8 +2393,7 @@ export default function ExchangerDashboard() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
             >
               Transaction Details
             </DialogTitle>
@@ -2674,8 +2670,7 @@ export default function ExchangerDashboard() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
             <DialogTitle
-              className="text-2xl font-bold uppercase tracking-tight"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
             >
               {actionType === "approve" && "Approve Transaction"}
               {actionType === "reject" && "Reject Transaction"}
@@ -3397,8 +3392,7 @@ export default function ExchangerDashboard() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
             <DialogTitle
-              className="text-xl font-bold uppercase tracking-tight"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
             >
               {ieActionDialog.type === "approve" ? "Approve" : "Reject"} Entry
             </DialogTitle>

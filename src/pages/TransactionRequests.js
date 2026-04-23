@@ -1360,8 +1360,7 @@ export default function TransactionRequests() {
       <div className="flex items-center justify-between">
         <div>
           <h1
-            className="text-4xl font-bold uppercase tracking-tight text-slate-800"
-            style={{ fontFamily: "Barlow Condensed" }}
+            className="text-3xl font-bold tracking-tight text-slate-900"
           >
             Transaction Requests
           </h1>
@@ -1607,8 +1606,8 @@ export default function TransactionRequests() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle
-              className="text-xl font-bold uppercase"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
+              
             >
               New Transaction Request
             </DialogTitle>
@@ -2179,8 +2178,8 @@ export default function TransactionRequests() {
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
           <DialogHeader>
             <DialogTitle
-              className="text-xl font-bold uppercase"
-              style={{ fontFamily: "Barlow Condensed" }}
+              className="text-lg font-bold text-slate-900"
+              
             >
               Process Request
             </DialogTitle>

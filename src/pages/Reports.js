@@ -82,8 +82,8 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#1E293B]/95 backdrop-blur-md border border-slate-200 rounded-lg p-3">
-        <p className="text-xs text-[#94A3B8] mb-1">{label}</p>
+      <div className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-lg p-3">
+        <p className="text-xs text-slate-500 mb-1">{label}</p>
         {payload.map((entry, index) => (
           <p key={index} className="text-sm font-mono" style={{ color: entry.color }}>
             {entry.name}: {typeof entry.value === 'number' ? `$${entry.value.toLocaleString()}` : entry.value}
@@ -189,7 +189,7 @@ export default function Reports() {
         body: tableData,
         startY: yPos,
         theme: 'striped',
-        headStyles: { fillColor: [11, 12, 16], textColor: [102, 252, 241] },
+        headStyles: { fillColor: [79, 70, 229], textColor: [255, 255, 255] },
         styles: { fontSize: 8 },
       });
     }
@@ -323,13 +323,13 @@ export default function Reports() {
   };
 
   const StatCard = ({ title, value, subtitle, icon: Icon, color = 'blue', trend }) => (
-    <Card className="bg-[#1E293B] border-slate-200">
+    <Card className="bg-white border-slate-200 shadow-sm">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs text-[#94A3B8] uppercase tracking-wider mb-1">{title}</p>
-            <p className="text-2xl font-bold text-slate-800 font-mono">{value}</p>
-            {subtitle && <p className="text-xs text-[#94A3B8] mt-1">{subtitle}</p>}
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{title}</p>
+            <p className="text-3xl font-bold text-slate-900 font-mono">{value}</p>
+            {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
             {trend !== undefined && (
               <div className={`flex items-center gap-1 mt-2 ${trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -345,11 +345,11 @@ export default function Reports() {
             color === 'purple' ? 'bg-purple-500/10' : 'bg-cyan-500/10'
           }`}>
             <Icon className={`w-5 h-5 ${
-              color === 'blue' ? 'text-blue-400' : 
-              color === 'green' ? 'text-emerald-400' : 
-              color === 'yellow' ? 'text-amber-400' : 
-              color === 'red' ? 'text-red-400' :
-              color === 'purple' ? 'text-purple-400' : 'text-cyan-400'
+              color === 'blue' ? 'text-blue-600' :
+              color === 'green' ? 'text-emerald-600' :
+              color === 'yellow' ? 'text-amber-600' :
+              color === 'red' ? 'text-red-600' :
+              color === 'purple' ? 'text-purple-600' : 'text-cyan-600'
             }`} />
           </div>
         </div>
@@ -370,16 +370,16 @@ export default function Reports() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold uppercase tracking-tight text-slate-800" style={{ fontFamily: 'Barlow Condensed' }}>
+          <h1 className="text-3xl font-bold text-slate-900">
             Reports & Analytics
           </h1>
-          <p className="text-[#94A3B8]">Comprehensive financial reports with base currency breakdown</p>
+          <p className="text-slate-500">Comprehensive financial reports with base currency breakdown</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             onClick={fetchReports}
             variant="outline"
-            className="border-slate-200 text-[#94A3B8] hover:text-slate-800 hover:bg-slate-100"
+            className="border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-100"
             data-testid="refresh-reports-btn"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
@@ -389,32 +389,32 @@ export default function Reports() {
       </div>
 
       {/* Date Filters */}
-      <Card className="bg-[#1E293B] border-slate-200">
+      <Card className="bg-white border-slate-200 shadow-sm">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1">
-              <Label className="text-xs text-[#94A3B8] uppercase">From Date</Label>
+              <Label className="text-xs text-slate-500 uppercase">From Date</Label>
               <Input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="w-40 bg-[#0F172A] border-slate-200 text-slate-800"
+                className="w-40 bg-slate-50 border-slate-200 text-slate-900"
                 data-testid="date-from"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs text-[#94A3B8] uppercase">To Date</Label>
+              <Label className="text-xs text-slate-500 uppercase">To Date</Label>
               <Input
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="w-40 bg-[#0F172A] border-slate-200 text-slate-800"
+                className="w-40 bg-slate-50 border-slate-200 text-slate-900"
                 data-testid="date-to"
               />
             </div>
             <Button
               onClick={fetchReports}
-              className="bg-blue-600 hover:bg-blue-700 text-slate-800"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
               data-testid="apply-filters-btn"
             >
               <Filter className="w-4 h-4 mr-2" />
@@ -424,7 +424,7 @@ export default function Reports() {
               <Button
                 onClick={() => { setDateFrom(''); setDateTo(''); }}
                 variant="ghost"
-                className="text-[#94A3B8] hover:text-slate-800"
+                className="text-slate-500 hover:text-slate-700"
               >
                 Clear
               </Button>
@@ -435,44 +435,44 @@ export default function Reports() {
 
       {/* Report Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="bg-[#1E293B] border border-slate-200 flex-wrap h-auto p-1">
-          <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+        <TabsList className="bg-slate-100 border border-slate-200 flex-wrap h-auto p-1">
+          <TabsTrigger value="transactions" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <ArrowLeftRight className="w-4 h-4 mr-2" />
             Transactions
           </TabsTrigger>
-          <TabsTrigger value="exchangers" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="exchangers" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <Store className="w-4 h-4 mr-2" />
             Exchangers
           </TabsTrigger>
-          <TabsTrigger value="commissions" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="commissions" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <Percent className="w-4 h-4 mr-2" />
             Commissions
           </TabsTrigger>
-          <TabsTrigger value="clients" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="clients" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <Users className="w-4 h-4 mr-2" />
             Clients
           </TabsTrigger>
-          <TabsTrigger value="treasury" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="treasury" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <Landmark className="w-4 h-4 mr-2" />
             Treasury
           </TabsTrigger>
-          <TabsTrigger value="psp" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="psp" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <CreditCard className="w-4 h-4 mr-2" />
             PSP
           </TabsTrigger>
-          <TabsTrigger value="financial" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="financial" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <Wallet className="w-4 h-4 mr-2" />
             Financial
           </TabsTrigger>
-          <TabsTrigger value="outstanding" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="outstanding" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <Receipt className="w-4 h-4 mr-2" />
             O/S Accounts
           </TabsTrigger>
-          <TabsTrigger value="loans" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="loans" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <Building2 className="w-4 h-4 mr-2" />
             Loans
           </TabsTrigger>
-          <TabsTrigger value="dealing" className="data-[state=active]:bg-green-600/20 data-[state=active]:text-green-400">
+          <TabsTrigger value="dealing" className="data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
             <Calculator className="w-4 h-4 mr-2" />
             Dealing P&L
           </TabsTrigger>
@@ -513,9 +513,9 @@ export default function Reports() {
               </div>
 
               {/* Chart */}
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-blue-400" />
                     Transaction Volume (Last 30 Days)
                   </CardTitle>
@@ -534,8 +534,8 @@ export default function Reports() {
                             <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <XAxis dataKey="date" stroke="#94A3B8" tick={{ fill: '#94A3B8', fontSize: 10 }} axisLine={{ stroke: 'rgba(255,255,255,0.1)' }} tickLine={false} />
-                        <YAxis stroke="#94A3B8" tick={{ fill: '#94A3B8', fontSize: 10 }} axisLine={{ stroke: 'rgba(255,255,255,0.1)' }} tickLine={false} tickFormatter={(v) => `$${v/1000}k`} />
+                        <XAxis dataKey="date" stroke="#94A3B8" tick={{ fill: '#94A3B8', fontSize: 10 }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
+                        <YAxis stroke="#94A3B8" tick={{ fill: '#94A3B8', fontSize: 10 }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} tickFormatter={(v) => `$${v/1000}k`} />
                         <Tooltip content={<CustomTooltip />} />
                         <Area type="monotone" dataKey="deposits" name="Deposits" stroke="#10B981" fillOpacity={1} fill="url(#depositGrad)" />
                         <Area type="monotone" dataKey="withdrawals" name="Withdrawals" stroke="#EF4444" fillOpacity={1} fill="url(#withdrawalGrad)" />
@@ -547,16 +547,16 @@ export default function Reports() {
 
               {/* Breakdown by Currency */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200 shadow-sm">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <ArrowDownRight className="w-5 h-5 text-emerald-400" />
                       Deposits by Currency
                     </CardTitle>
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-[#94A3B8] hover:text-slate-800"
+                      className="text-slate-400 hover:text-slate-700"
                       onClick={() => downloadCSV(transactionReport.deposits_by_currency || [], 'deposits_by_currency', [
                         { key: 'currency', label: 'Currency' },
                         { key: 'amount', label: 'Amount (Base)' },
@@ -572,19 +572,19 @@ export default function Reports() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-slate-200">
-                            <TableHead className="text-[#94A3B8] text-xs">Currency</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Amount</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">USD</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Count</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Currency</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Amount</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">USD</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Count</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {(transactionReport.deposits_by_currency || []).map((item, i) => (
                             <TableRow key={i} className="border-slate-200">
-                              <TableCell className="text-slate-800 font-mono">{item.currency}</TableCell>
+                              <TableCell className="text-slate-900 font-mono">{item.currency}</TableCell>
                               <TableCell className="text-emerald-400 font-mono text-right">{item.amount?.toLocaleString()}</TableCell>
-                              <TableCell className="text-slate-800 font-mono text-right">${item.usd_equivalent?.toLocaleString()}</TableCell>
-                              <TableCell className="text-[#94A3B8] text-right">{item.count}</TableCell>
+                              <TableCell className="text-slate-900 font-mono text-right">${item.usd_equivalent?.toLocaleString()}</TableCell>
+                              <TableCell className="text-slate-500 text-right">{item.count}</TableCell>
                             </TableRow>
                           ))}
                           {/* Total Row */}
@@ -601,7 +601,7 @@ export default function Reports() {
                             </TableRow>
                           )}
                           {(!transactionReport.deposits_by_currency || transactionReport.deposits_by_currency.length === 0) && (
-                            <TableRow><TableCell colSpan={4} className="text-center text-[#94A3B8]">No data</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={4} className="text-center text-slate-500">No data</TableCell></TableRow>
                           )}
                         </TableBody>
                       </Table>
@@ -609,16 +609,16 @@ export default function Reports() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200 shadow-sm">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <ArrowUpRight className="w-5 h-5 text-red-400" />
                       Withdrawals by Currency
                     </CardTitle>
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-[#94A3B8] hover:text-slate-800"
+                      className="text-slate-400 hover:text-slate-700"
                       onClick={() => downloadCSV(transactionReport.withdrawals_by_currency || [], 'withdrawals_by_currency', [
                         { key: 'currency', label: 'Currency' },
                         { key: 'amount', label: 'Amount (Base)' },
@@ -634,19 +634,19 @@ export default function Reports() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-slate-200">
-                            <TableHead className="text-[#94A3B8] text-xs">Currency</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Amount</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">USD</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Count</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Currency</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Amount</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">USD</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Count</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {(transactionReport.withdrawals_by_currency || []).map((item, i) => (
                             <TableRow key={i} className="border-slate-200">
-                              <TableCell className="text-slate-800 font-mono">{item.currency}</TableCell>
+                              <TableCell className="text-slate-900 font-mono">{item.currency}</TableCell>
                               <TableCell className="text-red-400 font-mono text-right">{item.amount?.toLocaleString()}</TableCell>
-                              <TableCell className="text-slate-800 font-mono text-right">${item.usd_equivalent?.toLocaleString()}</TableCell>
-                              <TableCell className="text-[#94A3B8] text-right">{item.count}</TableCell>
+                              <TableCell className="text-slate-900 font-mono text-right">${item.usd_equivalent?.toLocaleString()}</TableCell>
+                              <TableCell className="text-slate-500 text-right">{item.count}</TableCell>
                             </TableRow>
                           ))}
                           {/* Total Row */}
@@ -663,7 +663,7 @@ export default function Reports() {
                             </TableRow>
                           )}
                           {(!transactionReport.withdrawals_by_currency || transactionReport.withdrawals_by_currency.length === 0) && (
-                            <TableRow><TableCell colSpan={4} className="text-center text-[#94A3B8]">No data</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={4} className="text-center text-slate-500">No data</TableCell></TableRow>
                           )}
                         </TableBody>
                       </Table>
@@ -675,7 +675,7 @@ export default function Reports() {
               {/* Detailed Transactions Table */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-cyan-500" />
                     All Transactions (Detailed)
                   </CardTitle>
@@ -718,7 +718,7 @@ export default function Reports() {
                       <TableBody>
                         {allTransactions.map((tx, i) => (
                           <TableRow key={tx.transaction_id || i} className="border-slate-200">
-                            <TableCell className="font-mono text-xs text-slate-800">{tx.reference}</TableCell>
+                            <TableCell className="font-mono text-xs text-slate-900">{tx.reference}</TableCell>
                             <TableCell className="text-slate-600">{tx.client_name}</TableCell>
                             <TableCell>
                               <Badge className={tx.transaction_type === 'deposit' ? 'bg-green-500' : 'bg-red-500'}>
@@ -780,10 +780,10 @@ export default function Reports() {
                 ))}
               </div>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-slate-800">Exchanger Settlement Summary (Base Currency)</CardTitle>
-                  <Button size="sm" variant="ghost" className="text-[#94A3B8] hover:text-slate-800"
+                  <CardTitle className="text-lg font-semibold text-slate-900">Exchanger Settlement Summary (Base Currency)</CardTitle>
+                  <Button size="sm" variant="ghost" className="text-slate-400 hover:text-slate-700"
                     onClick={() => {
                       const rows = [];
                       (vendorReport.vendors || []).forEach(v => {
@@ -808,12 +808,12 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">Exchanger</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Currency</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Money In</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Money Out</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Commission</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Net Settlement</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Exchanger</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Currency</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Money In</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Money Out</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Commission</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Net Settlement</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -823,13 +823,13 @@ export default function Reports() {
                               {ri === 0 ? (
                                 <TableCell rowSpan={vendor.currency_rows.length}>
                                   <div>
-                                    <p className="text-slate-800 font-medium">{vendor.vendor_name}</p>
-                                    <p className="text-xs text-[#94A3B8]">In: {vendor.deposit_commission_rate}% / Out: {vendor.withdrawal_commission_rate}%</p>
+                                    <p className="text-slate-900 font-medium">{vendor.vendor_name}</p>
+                                    <p className="text-xs text-slate-500">In: {vendor.deposit_commission_rate}% / Out: {vendor.withdrawal_commission_rate}%</p>
                                   </div>
                                 </TableCell>
                               ) : null}
                               <TableCell>
-                                <Badge variant="outline" className="text-xs border-white/20 text-[#94A3B8]">{row.currency}</Badge>
+                                <Badge variant="outline" className="text-xs border-slate-200 text-slate-500">{row.currency}</Badge>
                               </TableCell>
                               <TableCell className="text-emerald-400 font-mono text-right">
                                 <div>{row.money_in?.toLocaleString()}</div>
@@ -861,7 +861,7 @@ export default function Reports() {
                           </TableRow>
                         ))}
                         {(!vendorReport.vendors || vendorReport.vendors.length === 0) && (
-                          <TableRow><TableCell colSpan={6} className="text-center text-[#94A3B8] py-8">No vendor data</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={6} className="text-center text-slate-500 py-8">No vendor data</TableCell></TableRow>
                         )}
                       </TableBody>
                     </Table>
@@ -897,13 +897,13 @@ export default function Reports() {
                 />
               </div>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-slate-800">Commission by Exchanger</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-slate-900">Commission by Exchanger</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#94A3B8] hover:text-slate-800"
+                    className="text-slate-400 hover:text-slate-700"
                     onClick={() => downloadCSV(commissionReport.vendors || [], 'vendor_commissions', [
                       { key: 'vendor_name', label: 'Exchanger' },
                       { key: 'total_commission_usd', label: 'Total Commission (USD)' },
@@ -921,25 +921,25 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">Exchanger</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Total Commission</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">From Deposits</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">From Withdrawals</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Transactions</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Exchanger</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Total Commission</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">From Deposits</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">From Withdrawals</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Transactions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {(commissionReport.vendors || []).map((v, i) => (
                           <TableRow key={i} className="border-slate-200">
-                            <TableCell className="text-slate-800 font-medium">{v.vendor_name}</TableCell>
+                            <TableCell className="text-slate-900 font-medium">{v.vendor_name}</TableCell>
                             <TableCell className="text-amber-400 font-mono text-right font-bold">${(v.total_commission_usd || 0).toLocaleString()}</TableCell>
                             <TableCell className="text-emerald-400 font-mono text-right">${(v.deposit_commissions || 0).toLocaleString()}</TableCell>
                             <TableCell className="text-red-400 font-mono text-right">${(v.withdrawal_commissions || 0).toLocaleString()}</TableCell>
-                            <TableCell className="text-[#94A3B8] text-right">{v.transaction_count}</TableCell>
+                            <TableCell className="text-slate-500 text-right">{v.transaction_count}</TableCell>
                           </TableRow>
                         ))}
                         {(!commissionReport.vendors || commissionReport.vendors.length === 0) && (
-                          <TableRow><TableCell colSpan={5} className="text-center text-[#94A3B8] py-8">No commission data</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={5} className="text-center text-slate-500 py-8">No commission data</TableCell></TableRow>
                         )}
                       </TableBody>
                     </Table>
@@ -948,13 +948,13 @@ export default function Reports() {
               </Card>
 
               {/* Commission by Currency */}
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-slate-800">Commission by Currency (All Exchangers)</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-slate-900">Commission by Currency (All Exchangers)</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {(commissionReport.vendors || []).flatMap(v => 
+                    {(commissionReport.vendors || []).flatMap(v =>
                       Object.entries(v.commission_by_currency || {}).map(([curr, data]) => ({
                         currency: curr,
                         base: data.base,
@@ -970,10 +970,10 @@ export default function Reports() {
                       }
                       return acc;
                     }, []).map((item, i) => (
-                      <div key={i} className="p-3 bg-[#0F172A] rounded-lg border border-slate-200">
-                        <p className="text-xs text-[#94A3B8] uppercase mb-1">{item.currency}</p>
+                      <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <p className="text-xs text-slate-500 uppercase mb-1">{item.currency}</p>
                         <p className="text-lg font-mono text-amber-400">{item.base?.toLocaleString()}</p>
-                        <p className="text-xs text-[#94A3B8]">≈ ${item.usd?.toLocaleString()} USD</p>
+                        <p className="text-xs text-slate-500">≈ ${item.usd?.toLocaleString()} USD</p>
                       </div>
                     ))}
                   </div>
@@ -1015,13 +1015,13 @@ export default function Reports() {
                 />
               </div>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-slate-800">Client Balance Report</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-slate-900">Client Balance Report</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#94A3B8] hover:text-slate-800"
+                    className="text-slate-400 hover:text-slate-700"
                     onClick={() => downloadCSV(clientReport.clients || [], 'client_balances', [
                       { key: 'client_id', label: 'Client ID' },
                       { key: 'name', label: 'Name' },
@@ -1042,12 +1042,12 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">Client</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Country</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Deposits</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Withdrawals</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Net Balance</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Txns</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Client</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Country</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Deposits</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Withdrawals</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Net Balance</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Txns</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1055,21 +1055,21 @@ export default function Reports() {
                           <TableRow key={i} className="border-slate-200">
                             <TableCell>
                               <div>
-                                <p className="text-slate-800 font-medium">{client.name || 'Unknown'}</p>
-                                <p className="text-xs text-[#94A3B8] font-mono">{client.email}</p>
+                                <p className="text-slate-900 font-medium">{client.name || 'Unknown'}</p>
+                                <p className="text-xs text-slate-500 font-mono">{client.email}</p>
                               </div>
                             </TableCell>
-                            <TableCell className="text-[#94A3B8]">{client.country || '-'}</TableCell>
+                            <TableCell className="text-slate-500">{client.country || '-'}</TableCell>
                             <TableCell className="text-emerald-400 font-mono text-right">${(client.total_deposits_usd || 0).toLocaleString()}</TableCell>
                             <TableCell className="text-red-400 font-mono text-right">${(client.total_withdrawals_usd || 0).toLocaleString()}</TableCell>
                             <TableCell className={`font-mono text-right font-bold ${(client.net_balance || 0) >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
                               ${(client.net_balance || 0).toLocaleString()}
                             </TableCell>
-                            <TableCell className="text-[#94A3B8] text-right">{client.transaction_count || 0}</TableCell>
+                            <TableCell className="text-slate-500 text-right">{client.transaction_count || 0}</TableCell>
                           </TableRow>
                         ))}
                         {(!clientReport.clients || clientReport.clients.length === 0) && (
-                          <TableRow><TableCell colSpan={6} className="text-center text-[#94A3B8] py-8">No client data</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={6} className="text-center text-slate-500 py-8">No client data</TableCell></TableRow>
                         )}
                       </TableBody>
                     </Table>
@@ -1106,30 +1106,30 @@ export default function Reports() {
               </div>
 
               {/* Balance by Currency */}
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold text-slate-800">Balance by Currency</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-slate-900">Balance by Currency</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {(treasuryReport.balance_by_currency || []).map((item, i) => (
-                      <div key={i} className="p-3 bg-[#0F172A] rounded-lg border border-slate-200">
-                        <p className="text-xs text-[#94A3B8] uppercase mb-1">{item.currency}</p>
-                        <p className="text-lg font-mono text-slate-800">{item.total?.toLocaleString()}</p>
-                        <p className="text-xs text-[#94A3B8]">{item.account_count} accounts</p>
+                      <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <p className="text-xs text-slate-500 uppercase mb-1">{item.currency}</p>
+                        <p className="text-lg font-mono text-slate-900">{item.total?.toLocaleString()}</p>
+                        <p className="text-xs text-slate-500">{item.account_count} accounts</p>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-slate-800">Treasury Accounts</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-slate-900">Treasury Accounts</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#94A3B8] hover:text-slate-800"
+                    className="text-slate-400 hover:text-slate-700"
                     onClick={() => downloadCSV(treasuryReport.accounts || [], 'treasury_accounts', [
                       { key: 'account_name', label: 'Account Name' },
                       { key: 'account_type', label: 'Type' },
@@ -1149,12 +1149,12 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">Account</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Type</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Currency</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Balance</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">USD Equiv.</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Status</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Account</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Type</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Currency</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Balance</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">USD Equiv.</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Status</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1162,13 +1162,13 @@ export default function Reports() {
                           <TableRow key={i} className="border-slate-200">
                             <TableCell>
                               <div>
-                                <p className="text-slate-800 font-medium">{acc.account_name}</p>
-                                <p className="text-xs text-[#94A3B8]">{acc.bank_name || '-'}</p>
+                                <p className="text-slate-900 font-medium">{acc.account_name}</p>
+                                <p className="text-xs text-slate-500">{acc.bank_name || '-'}</p>
                               </div>
                             </TableCell>
-                            <TableCell className="text-[#94A3B8] capitalize">{acc.account_type?.replace('_', ' ')}</TableCell>
-                            <TableCell className="text-slate-800 font-mono">{acc.currency}</TableCell>
-                            <TableCell className="text-slate-800 font-mono text-right">{acc.balance?.toLocaleString()}</TableCell>
+                            <TableCell className="text-slate-500 capitalize">{acc.account_type?.replace('_', ' ')}</TableCell>
+                            <TableCell className="text-slate-900 font-mono">{acc.currency}</TableCell>
+                            <TableCell className="text-slate-900 font-mono text-right">{acc.balance?.toLocaleString()}</TableCell>
                             <TableCell className="text-blue-400 font-mono text-right">${acc.balance_usd?.toLocaleString()}</TableCell>
                             <TableCell>
                               <Badge className={acc.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-400'}>
@@ -1183,7 +1183,7 @@ export default function Reports() {
                             <TableCell className="text-blue-600 font-bold">TOTAL ({treasuryReport.accounts.length} accounts)</TableCell>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
-                            <TableCell className="text-slate-800 font-mono text-right font-bold">-</TableCell>
+                            <TableCell className="text-slate-900 font-mono text-right font-bold">-</TableCell>
                             <TableCell className="text-blue-400 font-mono text-right font-bold">
                               ${treasuryReport.accounts.reduce((sum, acc) => sum + (acc.balance_usd || 0), 0).toLocaleString()}
                             </TableCell>
@@ -1230,13 +1230,13 @@ export default function Reports() {
                 />
               </div>
 
-              <Card className="bg-[#1E293B] border-slate-200">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-slate-800">PSP Summary</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-slate-900">PSP Summary</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#94A3B8] hover:text-slate-800"
+                    className="text-slate-400 hover:text-slate-700"
                     onClick={() => downloadCSV(pspReport.psps || [], 'psp_summary', [
                       { key: 'psp_name', label: 'PSP Name' },
                       { key: 'payment_currency', label: 'Payment Currency' },
@@ -1259,15 +1259,15 @@ export default function Reports() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-slate-200">
-                          <TableHead className="text-[#94A3B8] text-xs">PSP</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs">Pay Currency</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Rate</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Volume</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Commission</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Extra Charges</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Net</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Settled</TableHead>
-                          <TableHead className="text-[#94A3B8] text-xs text-right">Pending</TableHead>
+                          <TableHead className="text-slate-500 text-xs">PSP</TableHead>
+                          <TableHead className="text-slate-500 text-xs">Pay Currency</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Rate</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Volume</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Commission</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Extra Charges</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Net</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Settled</TableHead>
+                          <TableHead className="text-slate-500 text-xs text-right">Pending</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1280,11 +1280,11 @@ export default function Reports() {
                           const baseNet = rate ? psp.total_net / rate : null;
                           return (
                           <TableRow key={i} className="border-slate-200">
-                            <TableCell className="text-slate-800 font-medium">{psp.psp_name}</TableCell>
+                            <TableCell className="text-slate-900 font-medium">{psp.psp_name}</TableCell>
                             <TableCell className="text-slate-600 text-xs">{hasPay || 'USD'}</TableCell>
-                            <TableCell className="text-[#94A3B8] text-right">{psp.commission_rate}%</TableCell>
+                            <TableCell className="text-slate-500 text-right">{psp.commission_rate}%</TableCell>
                             <TableCell className="text-right">
-                              <span className="text-slate-800 font-mono">${(psp.total_volume || 0).toLocaleString()}</span>
+                              <span className="text-slate-900 font-mono">${(psp.total_volume || 0).toLocaleString()}</span>
                               {hasPay && baseVol && <p className="text-[10px] text-blue-500">{baseVol.toLocaleString()} {hasPay}</p>}
                             </TableCell>
                             <TableCell className="text-right">
@@ -1299,13 +1299,13 @@ export default function Reports() {
                               <span className="text-emerald-400 font-mono">${(psp.total_net || 0).toLocaleString()}</span>
                               {hasPay && baseNet != null && <p className="text-[10px] text-blue-500">{baseNet.toLocaleString(undefined, {maximumFractionDigits: 2})} {hasPay}</p>}
                             </TableCell>
-                            <TableCell className="text-[#94A3B8] text-right">{psp.settled_count || 0}</TableCell>
+                            <TableCell className="text-slate-500 text-right">{psp.settled_count || 0}</TableCell>
                             <TableCell className="text-amber-400 text-right">{psp.pending_count || 0}</TableCell>
                           </TableRow>
                           );
                         })}
                         {(!pspReport.psps || pspReport.psps.length === 0) && (
-                          <TableRow><TableCell colSpan={9} className="text-center text-[#94A3B8] py-8">No PSP data</TableCell></TableRow>
+                          <TableRow><TableCell colSpan={9} className="text-center text-slate-500 py-8">No PSP data</TableCell></TableRow>
                         )}
                       </TableBody>
                     </Table>
@@ -1351,9 +1351,9 @@ export default function Reports() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Income by Category */}
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200 shadow-sm">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <TrendingUp className="w-5 h-5 text-emerald-400" />
                       Income by Category
                     </CardTitle>
@@ -1379,20 +1379,20 @@ export default function Reports() {
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                               ))}
                             </Pie>
-                            <Tooltip contentStyle={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.1)' }} itemStyle={{ color: '#fff' }} />
+                            <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0' }} itemStyle={{ color: '#1e293b' }} />
                           </RechartsPieChart>
                         </ResponsiveContainer>
                       ) : (
-                        <div className="flex items-center justify-center h-full text-[#94A3B8]">No income data</div>
+                        <div className="flex items-center justify-center h-full text-slate-500">No income data</div>
                       )}
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Expenses by Category */}
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200 shadow-sm">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <TrendingDown className="w-5 h-5 text-red-400" />
                       Expenses by Category
                     </CardTitle>
@@ -1418,11 +1418,11 @@ export default function Reports() {
                                 <Cell key={`cell-${index}`} fill={COLORS[(index + 3) % COLORS.length]} />
                               ))}
                             </Pie>
-                            <Tooltip contentStyle={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.1)' }} itemStyle={{ color: '#fff' }} />
+                            <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0' }} itemStyle={{ color: '#1e293b' }} />
                           </RechartsPieChart>
                         </ResponsiveContainer>
                       ) : (
-                        <div className="flex items-center justify-center h-full text-[#94A3B8]">No expense data</div>
+                        <div className="flex items-center justify-center h-full text-slate-500">No expense data</div>
                       )}
                     </div>
                   </CardContent>
@@ -1431,51 +1431,51 @@ export default function Reports() {
 
               {/* Loans & Exchanger Commission Summary */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200 shadow-sm">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <Banknote className="w-5 h-5 text-purple-400" />
                       Loan Summary
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Disbursed</span>
-                        <span className="text-slate-800 font-mono">${(financialReport.loans?.total_disbursed || 0).toLocaleString()}</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Disbursed</span>
+                        <span className="text-slate-900 font-mono">${(financialReport.loans?.total_disbursed || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Outstanding Balance</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Outstanding Balance</span>
                         <span className="text-amber-400 font-mono">${(financialReport.loans?.total_outstanding || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Repaid</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Repaid</span>
                         <span className="text-emerald-400 font-mono">${(financialReport.loans?.total_repaid || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Active Loans</span>
-                        <span className="text-slate-800 font-mono">{financialReport.loans?.active_loans || 0}</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Active Loans</span>
+                        <span className="text-slate-900 font-mono">{financialReport.loans?.active_loans || 0}</span>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200 shadow-sm">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <Percent className="w-5 h-5 text-amber-400" />
                       Exchanger Commission Summary
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Commission Paid</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Commission Paid</span>
                         <span className="text-amber-400 font-mono font-bold">${(financialReport.vendor_commissions?.total_paid || 0).toLocaleString()}</span>
                       </div>
-                      <div className="p-3 bg-[#0F172A] rounded-lg">
-                        <p className="text-xs text-[#94A3B8] mb-2">This represents the total vendor commission deducted from settlements.</p>
-                        <p className="text-xs text-[#94A3B8]">Formula: Net Settlement = Deposits - Withdrawals - Commission</p>
+                      <div className="p-3 bg-slate-50 rounded-lg">
+                        <p className="text-xs text-slate-500 mb-2">This represents the total vendor commission deducted from settlements.</p>
+                        <p className="text-xs text-slate-500">Formula: Net Settlement = Deposits - Withdrawals - Commission</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1485,7 +1485,7 @@ export default function Reports() {
               {/* Detailed Income & Expenses Table */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                  <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                     <Wallet className="w-5 h-5 text-purple-500" />
                     All Income & Expenses (Detailed)
                   </CardTitle>
@@ -1609,33 +1609,33 @@ export default function Reports() {
 
               {/* Aging Summary */}
               {outstandingReport.aging && (
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200 shadow-sm">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <Clock className="w-5 h-5 text-amber-400" />
                       Aging Summary (Outstanding Amounts)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-5 gap-4">
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">Current</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">Current</p>
                         <p className="text-2xl font-mono text-emerald-400 font-bold">${(outstandingReport.aging.current || 0).toLocaleString()}</p>
                       </div>
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">1-30 Days</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">1-30 Days</p>
                         <p className="text-2xl font-mono text-amber-400 font-bold">${(outstandingReport.aging.days_1_30 || 0).toLocaleString()}</p>
                       </div>
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">31-60 Days</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">31-60 Days</p>
                         <p className="text-2xl font-mono text-orange-400 font-bold">${(outstandingReport.aging.days_31_60 || 0).toLocaleString()}</p>
                       </div>
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">61-90 Days</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">61-90 Days</p>
                         <p className="text-2xl font-mono text-red-400 font-bold">${(outstandingReport.aging.days_61_90 || 0).toLocaleString()}</p>
                       </div>
-                      <div className="p-4 bg-[#0F172A] rounded-lg text-center">
-                        <p className="text-xs text-[#94A3B8] mb-2">90+ Days</p>
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <p className="text-xs text-slate-500 mb-2">90+ Days</p>
                         <p className="text-2xl font-mono text-red-500 font-bold">${(outstandingReport.aging.days_over_90 || 0).toLocaleString()}</p>
                       </div>
                     </div>
@@ -1646,16 +1646,16 @@ export default function Reports() {
               {/* Receivables & Payables Breakdown */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Receivables Details */}
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200 shadow-sm">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <ArrowDownRight className="w-5 h-5 text-emerald-400" />
                       Receivables (Debtors)
                     </CardTitle>
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-[#94A3B8] hover:text-slate-800"
+                      className="text-slate-400 hover:text-slate-700"
                       onClick={() => downloadCSV(
                         debtsData.filter(d => d.debt_type === 'receivable').map(d => ({
                           party_name: d.party_name,
@@ -1686,17 +1686,17 @@ export default function Reports() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3 mb-4">
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Amount</span>
-                        <span className="text-slate-800 font-mono">${(outstandingReport.receivables?.total_amount || 0).toLocaleString()}</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Amount</span>
+                        <span className="text-slate-900 font-mono">${(outstandingReport.receivables?.total_amount || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Collected</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Collected</span>
                         <span className="text-emerald-400 font-mono">${(outstandingReport.receivables?.total_paid || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Outstanding</span>
-                        <span className="text-slate-800 font-mono font-bold">${(outstandingReport.receivables?.outstanding || 0).toLocaleString()}</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Outstanding</span>
+                        <span className="text-slate-900 font-mono font-bold">${(outstandingReport.receivables?.outstanding || 0).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-amber-500/10 rounded-lg">
                         <span className="text-amber-400">Overdue</span>
@@ -1711,15 +1711,15 @@ export default function Reports() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-slate-200">
-                            <TableHead className="text-[#94A3B8] text-xs">Party</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Outstanding</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs">Status</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Party</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Outstanding</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Status</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {debtsData.filter(d => d.debt_type === 'receivable').slice(0, 10).map((debt, i) => (
                             <TableRow key={i} className="border-slate-200">
-                              <TableCell className="text-slate-800 text-sm">{debt.party_name}</TableCell>
+                              <TableCell className="text-slate-900 text-sm">{debt.party_name}</TableCell>
                               <TableCell className="text-emerald-400 font-mono text-right text-sm">
                                 ${(debt.outstanding_balance || (debt.amount - (debt.total_paid || 0))).toLocaleString()}
                               </TableCell>
@@ -1736,7 +1736,7 @@ export default function Reports() {
                             </TableRow>
                           ))}
                           {debtsData.filter(d => d.debt_type === 'receivable').length === 0 && (
-                            <TableRow><TableCell colSpan={3} className="text-center text-[#94A3B8]">No receivables</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={3} className="text-center text-slate-500">No receivables</TableCell></TableRow>
                           )}
                         </TableBody>
                       </Table>
@@ -1745,16 +1745,16 @@ export default function Reports() {
                 </Card>
 
                 {/* Payables Details */}
-                <Card className="bg-[#1E293B] border-slate-200">
+                <Card className="bg-white border-slate-200 shadow-sm">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <ArrowUpRight className="w-5 h-5 text-red-400" />
                       Payables (Creditors)
                     </CardTitle>
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-[#94A3B8] hover:text-slate-800"
+                      className="text-slate-400 hover:text-slate-700"
                       onClick={() => downloadCSV(
                         debtsData.filter(d => d.debt_type === 'payable').map(d => ({
                           party_name: d.party_name,
@@ -1785,17 +1785,17 @@ export default function Reports() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3 mb-4">
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Amount</span>
-                        <span className="text-slate-800 font-mono">${(outstandingReport.payables?.total_amount || 0).toLocaleString()}</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Amount</span>
+                        <span className="text-slate-900 font-mono">${(outstandingReport.payables?.total_amount || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Total Paid</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Total Paid</span>
                         <span className="text-emerald-400 font-mono">${(outstandingReport.payables?.total_paid || 0).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-[#0F172A] rounded-lg">
-                        <span className="text-[#94A3B8]">Outstanding</span>
-                        <span className="text-slate-800 font-mono font-bold">${(outstandingReport.payables?.outstanding || 0).toLocaleString()}</span>
+                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <span className="text-slate-500">Outstanding</span>
+                        <span className="text-slate-900 font-mono font-bold">${(outstandingReport.payables?.outstanding || 0).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-amber-500/10 rounded-lg">
                         <span className="text-amber-400">Overdue</span>
@@ -1810,15 +1810,15 @@ export default function Reports() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-slate-200">
-                            <TableHead className="text-[#94A3B8] text-xs">Party</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs text-right">Outstanding</TableHead>
-                            <TableHead className="text-[#94A3B8] text-xs">Status</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Party</TableHead>
+                            <TableHead className="text-slate-500 text-xs text-right">Outstanding</TableHead>
+                            <TableHead className="text-slate-500 text-xs">Status</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {debtsData.filter(d => d.debt_type === 'payable').slice(0, 10).map((debt, i) => (
                             <TableRow key={i} className="border-slate-200">
-                              <TableCell className="text-slate-800 text-sm">{debt.party_name}</TableCell>
+                              <TableCell className="text-slate-900 text-sm">{debt.party_name}</TableCell>
                               <TableCell className="text-red-400 font-mono text-right text-sm">
                                 ${(debt.outstanding_balance || (debt.amount - (debt.total_paid || 0))).toLocaleString()}
                               </TableCell>
@@ -1835,7 +1835,7 @@ export default function Reports() {
                             </TableRow>
                           ))}
                           {debtsData.filter(d => d.debt_type === 'payable').length === 0 && (
-                            <TableRow><TableCell colSpan={3} className="text-center text-[#94A3B8]">No payables</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={3} className="text-center text-slate-500">No payables</TableCell></TableRow>
                           )}
                         </TableBody>
                       </Table>
@@ -1858,7 +1858,7 @@ export default function Reports() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs text-slate-500 uppercase tracking-wider">Total Disbursed</p>
-                        <p className="text-2xl font-bold text-slate-800">${loansReport.total_disbursed_usd?.toLocaleString()}</p>
+                        <p className="text-3xl font-bold text-slate-900">${loansReport.total_disbursed_usd?.toLocaleString()}</p>
                       </div>
                       <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
                         <Banknote className="w-5 h-5 text-blue-500" />
@@ -1915,7 +1915,7 @@ export default function Reports() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <Card className="bg-white border-slate-200">
                   <CardHeader>
-                    <CardTitle className="text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-slate-900 flex items-center gap-2">
                       <Building2 className="w-5 h-5 text-blue-500" />
                       Loans by Borrower
                     </CardTitle>
@@ -1934,7 +1934,7 @@ export default function Reports() {
                         <TableBody>
                           {loansReport.by_borrower && Object.entries(loansReport.by_borrower).map(([borrower, data]) => (
                             <TableRow key={borrower} className="border-slate-200">
-                              <TableCell className="font-medium text-slate-800">{borrower}</TableCell>
+                              <TableCell className="font-medium text-slate-900">{borrower}</TableCell>
                               <TableCell className="text-right text-slate-600">${data.disbursed?.toLocaleString()}</TableCell>
                               <TableCell className="text-right text-red-500">${data.outstanding?.toLocaleString()}</TableCell>
                               <TableCell className="text-right text-slate-500">{data.count}</TableCell>
@@ -1949,7 +1949,7 @@ export default function Reports() {
                 {/* Loan Status Pie Chart */}
                 <Card className="bg-white border-slate-200">
                   <CardHeader>
-                    <CardTitle className="text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-slate-900 flex items-center gap-2">
                       <PieChart className="w-5 h-5 text-purple-500" />
                       Loan Status Distribution
                     </CardTitle>
@@ -1992,7 +1992,7 @@ export default function Reports() {
               <Card className="bg-white border-slate-200">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-slate-800 flex items-center gap-2">
+                    <CardTitle className="text-slate-900 flex items-center gap-2">
                       <BarChart3 className="w-5 h-5 text-cyan-500" />
                       All Loans
                     </CardTitle>
@@ -2038,7 +2038,7 @@ export default function Reports() {
                           return (
                             <TableRow key={loan.loan_id} className="border-slate-200">
                               <TableCell className="font-mono text-xs text-slate-600">{loan.loan_id?.slice(0, 12)}</TableCell>
-                              <TableCell className="font-medium text-slate-800">{loan.borrower_name}</TableCell>
+                              <TableCell className="font-medium text-slate-900">{loan.borrower_name}</TableCell>
                               <TableCell className="text-right text-slate-600">{loan.amount?.toLocaleString()} {loan.currency}</TableCell>
                               <TableCell className="text-right text-slate-500">{loan.interest_rate}%</TableCell>
                               <TableCell className="text-right text-green-600">{loan.total_repaid?.toLocaleString() || 0} {loan.currency}</TableCell>
@@ -2162,7 +2162,7 @@ export default function Reports() {
               {/* Dealing P&L Table */}
               <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2 border-b border-slate-200">
-                  <CardTitle className="text-lg font-bold text-slate-800">Dealing P&L Records</CardTitle>
+                  <CardTitle className="text-lg font-bold text-slate-900">Dealing P&L Records</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <ScrollArea className="h-[500px]">
@@ -2189,7 +2189,7 @@ export default function Reports() {
                         ) : (
                           dealingPnLReport.map((record) => (
                             <TableRow key={record.date} className="border-slate-200 hover:bg-slate-50">
-                              <TableCell className="font-medium text-slate-800">{record.date}</TableCell>
+                              <TableCell className="font-medium text-slate-900">{record.date}</TableCell>
                               <TableCell className={`text-right font-mono ${record.mt5_booked_pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                 {record.mt5_booked_pnl >= 0 ? '+' : ''}{record.mt5_booked_pnl?.toLocaleString()}
                               </TableCell>

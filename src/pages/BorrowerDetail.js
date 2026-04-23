@@ -355,8 +355,7 @@ export default function BorrowerDetail() {
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-blue-600" />
               <h1
-                className="text-3xl font-bold uppercase tracking-tight text-slate-800"
-                style={{ fontFamily: "Barlow Condensed" }}
+                className="text-xl font-bold tracking-tight text-slate-900"
               >
                 {vendor.vendor_name}
               </h1>
