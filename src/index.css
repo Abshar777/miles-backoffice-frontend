@@ -34,7 +34,7 @@
         --radius: 0.375rem;
         --success: 145 80% 42%;
         --warning: 48 100% 50%;
-        
+
         /* Theme-specific colors */
         --bg-primary: #F8FAFC;
         --bg-secondary: #FFFFFF;
@@ -55,6 +55,59 @@
         --scrollbar-track: #F1F5F9;
         --scrollbar-thumb: #CBD5E1;
         --scrollbar-thumb-hover: #94A3B8;
+    }
+
+    /* Dark Theme */
+    [data-theme="dark"] {
+        --background: 222 47% 8%;
+        --foreground: 210 40% 95%;
+        --card: 217 33% 14%;
+        --card-foreground: 210 40% 95%;
+        --popover: 217 33% 14%;
+        --popover-foreground: 210 40% 95%;
+        --primary: 238 76% 72%;
+        --primary-foreground: 222 47% 8%;
+        --secondary: 217 33% 20%;
+        --secondary-foreground: 210 40% 95%;
+        --muted: 217 33% 18%;
+        --muted-foreground: 215 20% 60%;
+        --accent: 238 76% 72%;
+        --accent-foreground: 222 47% 8%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 210 40% 95%;
+        --border: 217 33% 22%;
+        --input: 217 33% 18%;
+        --ring: 238 76% 72%;
+        --chart-1: 238 76% 72%;
+        --chart-2: 145 60% 55%;
+        --chart-3: 48 90% 60%;
+        --chart-4: 0 84% 60%;
+        --chart-5: 280 60% 65%;
+        --radius: 0.5rem;
+        --success: 145 60% 55%;
+        --warning: 48 90% 60%;
+
+        /* Theme-specific colors */
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border-color: #334155;
+        --border-light: #1e293b;
+        --sidebar-bg: #080d1a;
+        --sidebar-border: #1e293b;
+        --sidebar-text: #64748b;
+        --sidebar-text-active: #a5b4fc;
+        --sidebar-bg-active: rgba(99, 102, 241, 0.2);
+        --header-bg: rgba(15, 23, 42, 0.98);
+        --card-bg: #1e293b;
+        --input-bg: #0f172a;
+        --accent-color: #818cf8;
+        --scrollbar-track: #1e293b;
+        --scrollbar-thumb: #334155;
+        --scrollbar-thumb-hover: #475569;
     }
 
     /* Banking Theme — Modern Banking White */
@@ -228,4 +281,129 @@
 [data-theme="banking"] textarea:focus {
     border-color: #6366f1 !important;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+}
+
+/* ============= DARK THEME PAGE OVERRIDES ============= */
+/* Surfaces */
+[data-theme="dark"] .bg-white          { background-color: #1e293b !important; }
+[data-theme="dark"] .bg-slate-50,
+[data-theme="dark"] .bg-gray-50        { background-color: #0f172a !important; }
+[data-theme="dark"] .bg-slate-100,
+[data-theme="dark"] .bg-gray-100       { background-color: #1e293b !important; }
+[data-theme="dark"] .bg-slate-200,
+[data-theme="dark"] .bg-gray-200       { background-color: #334155 !important; }
+
+/* Text */
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-gray-900     { color: #f1f5f9 !important; }
+[data-theme="dark"] .text-slate-800,
+[data-theme="dark"] .text-gray-800     { color: #e2e8f0 !important; }
+[data-theme="dark"] .text-slate-700,
+[data-theme="dark"] .text-gray-700     { color: #cbd5e1 !important; }
+[data-theme="dark"] .text-slate-600,
+[data-theme="dark"] .text-gray-600     { color: #94a3b8 !important; }
+[data-theme="dark"] .text-slate-500,
+[data-theme="dark"] .text-gray-500     { color: #64748b !important; }
+[data-theme="dark"] .text-slate-400,
+[data-theme="dark"] .text-gray-400     { color: #475569 !important; }
+
+/* Borders */
+[data-theme="dark"] .border-slate-100,
+[data-theme="dark"] .border-gray-100   { border-color: #1e293b !important; }
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-gray-200   { border-color: #334155 !important; }
+[data-theme="dark"] .border-slate-300,
+[data-theme="dark"] .border-gray-300   { border-color: #475569 !important; }
+
+/* Divide */
+[data-theme="dark"] .divide-slate-100 > * + *,
+[data-theme="dark"] .divide-gray-100 > * + *  { border-color: #1e293b !important; }
+[data-theme="dark"] .divide-slate-200 > * + *,
+[data-theme="dark"] .divide-gray-200 > * + *  { border-color: #334155 !important; }
+
+/* Inputs & selects */
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder { color: #475569 !important; }
+[data-theme="dark"] select option {
+    background-color: #1e293b;
+    color: #f1f5f9;
+}
+
+/* Dropdown / popover menus */
+[data-theme="dark"] [role="listbox"],
+[data-theme="dark"] [role="menu"] {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+[data-theme="dark"] [role="option"]:hover,
+[data-theme="dark"] [role="menuitem"]:hover,
+[data-theme="dark"] [role="option"][data-highlighted],
+[data-theme="dark"] [role="menuitem"][data-highlighted] {
+    background-color: #334155 !important;
+}
+
+/* Tabs */
+[data-theme="dark"] [role="tablist"] {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+[data-theme="dark"] [role="tab"][data-state="active"] {
+    background-color: #0f172a !important;
+    color: #a5b4fc !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important;
+}
+[data-theme="dark"] [role="tab"]:not([data-state="active"]) {
+    color: #94a3b8 !important;
+}
+
+/* Dialogs / modals */
+[data-theme="dark"] [role="dialog"] {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Table headers */
+[data-theme="dark"] thead tr,
+[data-theme="dark"] thead th {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] tbody tr:hover { background-color: rgba(30,41,59,0.6) !important; }
+[data-theme="dark"] tbody td        { border-color: #1e293b !important; color: #e2e8f0 !important; }
+
+/* Recharts tooltips */
+[data-theme="dark"] .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+[data-theme="dark"] .recharts-legend-item-text { color: #94a3b8 !important; }
+
+/* focus ring */
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.25) !important;
+}
+
+/* hide input wheel */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  display: none;
 }

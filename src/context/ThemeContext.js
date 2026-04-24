@@ -1,24 +1,38 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
-// Single theme: Modern Banking White
-const THEMES = ['banking'];
+const THEMES = ['banking', 'dark'];
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme] = useState('banking');
+  const [theme, setThemeState] = useState(() => {
+    const saved = localStorage.getItem('miles-theme');
+    return saved && THEMES.includes(saved) ? saved : 'banking';
+  });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'banking');
-    document.documentElement.classList.remove('dark');
-    document.documentElement.style.setProperty('--app-font', "'Plus Jakarta Sans', Inter, sans-serif");
-    localStorage.setItem('miles-theme', 'banking');
-  }, []);
+    document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    // Font: both themes use Plus Jakarta Sans / Inter
+    document.documentElement.style.setProperty(
+      '--app-font',
+      "'Plus Jakarta Sans', Inter, sans-serif"
+    );
+    localStorage.setItem('miles-theme', theme);
+  }, [theme]);
 
-  // No-op stubs — kept so existing call sites don't break
-  const cycleTheme = () => {};
-  const toggleTheme = () => {};
-  const setTheme = () => {};
+  const toggleTheme = () =>
+    setThemeState(t => (t === 'banking' ? 'dark' : 'banking'));
+
+  const cycleTheme = toggleTheme;
+
+  const setTheme = (t) => {
+    if (THEMES.includes(t)) setThemeState(t);
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, cycleTheme, THEMES }}>

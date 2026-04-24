@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/usePermissions';
+import { useTheme } from '../context/ThemeContext';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
@@ -39,14 +40,16 @@ import {
   MessageSquare,
   FileInput,
   RotateCcw,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
-// ── Theme styles — Modern Banking White (only theme) ─────────────────────────
-const S = {
+// ── Theme styles ──────────────────────────────────────────────────────────────
+const S_BANKING = {
   pageBg:        'bg-[#f8fafc]',
   sidebarBg:     'bg-[#0f172a] border-r border-[#1e293b]',
   sidebarBorder: 'border-[#1e293b]',
-  headerBg:      'bg-white border-b border-[#e2e8f0]',
+  headerBg:      'bg-white/90 backdrop-blur-sm border-b border-[#e2e8f0]',
   logoBg:        'bg-gradient-to-br from-[#6366f1] to-[#8b5cf6]',
   logoIcon:      '!text-white',
   logoText:      '!text-white',
@@ -63,11 +66,37 @@ const S = {
   headerBtn:     'text-slate-500 hover:bg-slate-100',
   userMenuBtn:   'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
   mainBg:        'bg-[#f8fafc]',
+  themeToggle:   'text-slate-500 hover:bg-slate-100 hover:text-slate-800',
+};
+
+const S_DARK = {
+  pageBg:        'bg-[#0f172a]',
+  sidebarBg:     'bg-[#080d1a] border-r border-[#1e293b]',
+  sidebarBorder: 'border-[#1e293b]',
+  headerBg:      'bg-[#0f172a]/95 backdrop-blur-sm border-b border-[#1e293b]',
+  logoBg:        'bg-gradient-to-br from-[#6366f1] to-[#8b5cf6]',
+  logoIcon:      '!text-white',
+  logoText:      '!text-white',
+  navActive:     'bg-[#6366f1]/20 !text-[#a5b4fc] border-l-2 border-[#6366f1]',
+  navInactive:   '!text-[#64748b] hover:!text-[#e2e8f0] hover:bg-white/5 border-l-2 border-transparent',
+  navSection:    '!text-[#475569]',
+  userText:      '!text-white',
+  userSubText:   '!text-[#94a3b8]',
+  avatarBg:      'bg-[#6366f1]/20 !text-[#a5b4fc]',
+  avatarBorder:  'border-[#6366f1]/30',
+  dropdownBg:    'bg-[#1e293b] border-[#334155] text-slate-200',
+  dropdownHover: 'hover:bg-[#334155] focus:bg-[#334155]',
+  dropdownBorder:'bg-[#334155]',
+  headerBtn:     'text-slate-400 hover:bg-[#1e293b] hover:text-slate-200',
+  userMenuBtn:   'text-slate-300 hover:text-slate-100 hover:bg-[#1e293b]',
+  mainBg:        'bg-[#0f172a]',
+  themeToggle:   'text-slate-400 hover:bg-[#1e293b] hover:text-yellow-300',
 };
 
 export default function Layout() {
   const { user, logout, impersonating, adminName, stopImpersonation } = useAuth();
   const { canView, loading: permissionsLoading } = usePermissions();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationCounts, setNotificationCounts] = useState({
@@ -76,7 +105,8 @@ export default function Layout() {
     txRequests: 0
   });
 
-  const s = S;
+  const isDark = theme === 'dark';
+  const s = isDark ? S_DARK : S_BANKING;
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
   // Fetch notification counts
@@ -321,6 +351,16 @@ export default function Layout() {
             </button>
 
             <div className="flex-1" />
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`p-1.5 rounded-[6px] transition-colors mr-1 ${s.themeToggle}`}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
 
             {/* User dropdown */}
             <DropdownMenu>
