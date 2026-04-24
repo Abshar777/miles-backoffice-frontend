@@ -28,6 +28,7 @@ import {
 import { Textarea } from '../components/ui/textarea';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import {
   Shield,
@@ -106,7 +107,7 @@ export default function RolesPermissions() {
       }
     } catch (error) {
       console.error('Error fetching roles:', error);
-      toast.error('Failed to load roles');
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   }, []);
 
@@ -153,11 +154,10 @@ export default function RolesPermissions() {
         resetForm();
         fetchRoles();
       } else {
-        const err = await response.json();
-        toast.error(err.detail || 'Failed to create role');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to create role');
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -182,11 +182,10 @@ export default function RolesPermissions() {
         setIsEditRoleOpen(false);
         fetchRoles();
       } else {
-        const err = await response.json();
-        toast.error(err.detail || 'Failed to update role');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to update role');
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 

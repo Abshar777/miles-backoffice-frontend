@@ -23,6 +23,7 @@ import {
 import { ScrollArea } from '../components/ui/scroll-area';
 import PaginationControls from '../components/PaginationControls';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import {
   Activity,
   Shield,
@@ -101,7 +102,7 @@ export default function Logs() {
       }
     } catch (error) {
       console.error('Error fetching logs:', error);
-      toast.error('Failed to load logs');
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -146,7 +147,7 @@ export default function Logs() {
         fetchStats();
       }
     } catch (error) {
-      toast.error('Failed to clear logs');
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 

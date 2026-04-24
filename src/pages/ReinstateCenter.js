@@ -13,6 +13,7 @@ import {
 } from "../components/ui/dialog";
 import PaginationControls from "../components/PaginationControls";
 import { toast } from "sonner";
+import { getApiError } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
 import {
   ArrowLeftRight,
@@ -449,8 +450,8 @@ function ReinstateTab({ tabCfg }) {
         setItems(data.items || data.data || []);
         setTotalItems(data.total || 0);
         setTotalPages(data.total_pages || 1);
-      } catch {
-        toast.error(`Failed to load ${tabCfg.label}`);
+      } catch (err) {
+        toast.error(err?.message || "Something went wrong. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -487,8 +488,8 @@ function ReinstateTab({ tabCfg }) {
       if (!res.ok) throw new Error("Failed to load preview");
       const preview = await res.json();
       setConfirmData({ item, preview });
-    } catch {
-      toast.error("Failed to load reinstatement summary");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setPreviewLoading(null);
     }
@@ -505,12 +506,12 @@ function ReinstateTab({ tabCfg }) {
         `${API_URL}/api/reinstate/${tabCfg.endpoint}/${id}`,
         { method: "POST", headers: getAuthHeaders() }
       );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Reinstate failed");
+      if (!res.ok) { toast.error(await getApiError(res)); return; }
+      await res.json();
       toast.success("Reinstated successfully");
       fetchItems(page, pageSize, search);
     } catch (e) {
-      toast.error(e.message);
+      toast.error(e?.message || "Something went wrong. Please try again.");
     } finally {
       setProcessing(null);
     }

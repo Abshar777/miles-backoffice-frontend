@@ -36,6 +36,7 @@ import {
 import { Textarea } from '../components/ui/textarea';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import {
   Plus,
   ArrowDownLeft,
@@ -165,11 +166,10 @@ export default function Debts() {
         resetDebtForm();
         fetchData();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to create debt');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to create debt');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -195,11 +195,10 @@ export default function Debts() {
         setSelectedDebt(null);
         fetchData();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to record payment');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to record payment');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 

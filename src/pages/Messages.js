@@ -14,6 +14,7 @@ import {
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import {
   MessageSquare, Send, Users, User, Search, Plus, Check, CheckCheck,
@@ -201,11 +202,10 @@ export default function Messages() {
         fetchMessages(selectedConversation.user_id);
         fetchConversations();
       } else {
-        const err = await response.json();
-        toast.error(err.detail || 'Failed to send message');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to send message');
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setSending(false);
     }

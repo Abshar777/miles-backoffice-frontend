@@ -34,6 +34,7 @@ import {
 } from '../components/ui/dropdown-menu';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import {
   Wallet,
   Plus,
@@ -149,11 +150,10 @@ export default function TradingAccounts() {
         resetForm();
         fetchAccounts();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Operation failed');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Operation failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 

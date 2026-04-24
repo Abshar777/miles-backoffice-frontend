@@ -40,6 +40,7 @@ import {
 import { Textarea } from "../components/ui/textarea";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { toast } from "sonner";
+import { getApiError } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
 import {
   Banknote,
@@ -405,11 +406,10 @@ export default function Loans() {
         fetchTreasuryAccounts();
         fetchLoanTransactions();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Failed to create loan");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to create loan");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setSubmittingLoan(false);
     }
@@ -459,11 +459,10 @@ export default function Loans() {
         fetchDashboard();
         fetchLoanTransactions();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Failed to swap loan");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to swap loan");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -492,11 +491,10 @@ export default function Loans() {
         fetchDashboard();
         fetchLoanTransactions();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Failed to write off loan");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to write off loan");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -543,11 +541,10 @@ export default function Loans() {
         });
         fetchExchangers();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Failed to create borrower");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to create borrower");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -602,11 +599,10 @@ export default function Loans() {
         fetchTreasuryAccounts();
         if (selectedLoan) fetchLoanDetail(selectedLoan.loan_id);
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Failed to record repayment");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to record repayment");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setSubmittingRepayment(false);
     }
@@ -633,11 +629,10 @@ export default function Loans() {
         fetchSummary();
         fetchTreasuryAccounts();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Delete failed");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Delete failed");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -825,10 +820,10 @@ export default function Loans() {
         window.URL.revokeObjectURL(url);
         toast.success("Loans exported to Excel");
       } else {
-        toast.error("Excel export failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Excel export failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -845,8 +840,8 @@ export default function Loans() {
         const data = await response.json();
         setBorrowerLoans(Array.isArray(data) ? data : data.items || []);
       }
-    } catch {
-      toast.error("Failed to load borrower loans");
+    } catch (err) {
+      toast.error(err?.message || "Failed to load borrower loans");
     } finally {
       setBorrowerLoansLoading(false);
     }
@@ -872,10 +867,10 @@ export default function Loans() {
         window.URL.revokeObjectURL(url);
         toast.success("Exported to Excel");
       } else {
-        toast.error("Excel export failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Excel export failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -899,10 +894,10 @@ export default function Loans() {
         window.URL.revokeObjectURL(url);
         toast.success("Exported to PDF");
       } else {
-        toast.error("PDF export failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("PDF export failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -936,10 +931,10 @@ export default function Loans() {
         window.URL.revokeObjectURL(url);
         toast.success("Loans exported to PDF");
       } else {
-        toast.error("PDF export failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("PDF export failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -3043,11 +3038,10 @@ export default function Loans() {
                               setSelectedLoan(await updated.json());
                             fetchLoanTransactions();
                           } else {
-                            const err = await resp.json();
-                            toast.error(err.detail || "Upload failed");
+                            toast.error(await getApiError(resp));
                           }
-                        } catch {
-                          toast.error("Upload failed");
+                        } catch (err) {
+                          toast.error(err?.message || "Something went wrong. Please try again.");
                         }
                         e.target.value = "";
                       }}

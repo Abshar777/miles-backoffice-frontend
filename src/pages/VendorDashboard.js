@@ -32,6 +32,7 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import { toast } from "sonner";
+import { getApiError } from '../lib/utils';
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { useAuth } from "../context/AuthContext";
 import PaginationControls from "../components/PaginationControls";
@@ -170,7 +171,7 @@ export default function ExchangerDashboard() {
       }
     } catch (error) {
       console.error("Error fetching vendor info:", error);
-      toast.error("Failed to load exchanger info");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -279,10 +280,10 @@ export default function ExchangerDashboard() {
       if (response.ok) {
         setStatementData(await response.json());
       } else {
-        toast.error("Failed to load statement");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Error loading statement");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setStatementLoading(false);
     }
@@ -414,14 +415,7 @@ export default function ExchangerDashboard() {
           );
 
           if (!uploadResponse.ok) {
-            let errorMessage = "Failed to upload proof";
-            try {
-              const error = await uploadResponse.json();
-              errorMessage = error.detail || errorMessage;
-            } catch (e) {
-              errorMessage = `Upload failed with status ${uploadResponse.status}`;
-            }
-            toast.error(errorMessage);
+            toast.error(await getApiError(uploadResponse));
             return;
           }
         }
@@ -474,18 +468,11 @@ export default function ExchangerDashboard() {
         fetchTransactions();
         fetchExchangerInfo();
       } else if (response) {
-        let errorMessage = "Action failed";
-        try {
-          const error = await response.json();
-          errorMessage = error.detail || errorMessage;
-        } catch (e) {
-          errorMessage = `Failed with status ${response.status}`;
-        }
-        toast.error(errorMessage);
+        toast.error(await getApiError(response));
       }
     } catch (error) {
       console.error("Action error:", error);
-      toast.error(error.message || "Action failed - please try again");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -599,11 +586,10 @@ export default function ExchangerDashboard() {
         fetchLoanTransactions();
         setLoanTxActionDialog({ open: false, tx: null, type: "" });
       } else {
-        const err = await response.json();
-        toast.error(err.detail || "Approval failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Approval failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -627,11 +613,10 @@ export default function ExchangerDashboard() {
         fetchLoanTransactions();
         setLoanTxActionDialog({ open: false, tx: null, type: "" });
       } else {
-        const err = await response.json();
-        toast.error(err.detail || "Rejection failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Rejection failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -654,11 +639,10 @@ export default function ExchangerDashboard() {
         setIeActionDialog({ open: false, entry: null, type: "" });
         resetIeActionState();
       } else {
-        const err = await response.json();
-        toast.error(err.detail || "Approval failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Approval failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -678,10 +662,10 @@ export default function ExchangerDashboard() {
         setIeActionDialog({ open: false, entry: null, type: "" });
         resetIeActionState();
       } else {
-        toast.error("Rejection failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Rejection failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -703,10 +687,10 @@ export default function ExchangerDashboard() {
         toast.success("Proof uploaded");
         fetchIeEntries();
       } else {
-        toast.error("Upload failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Upload failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 

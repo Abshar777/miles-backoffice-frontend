@@ -34,6 +34,7 @@ import {
 import { Textarea } from '../components/ui/textarea';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import {
   Landmark,
@@ -242,11 +243,10 @@ export default function LPAccounts() {
         resetDealingForm();
         fetchDealingPnL();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to save');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to save dealing P&L');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     } finally {
       setSavingDealingPnL(false);
     }
@@ -293,10 +293,10 @@ export default function LPAccounts() {
         toast.success('Record deleted');
         fetchDealingPnL();
       } else {
-        toast.error('Failed to delete');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to delete');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -314,11 +314,10 @@ export default function LPAccounts() {
         const data = await response.json();
         toast.success(`Email sent to ${data.recipients?.length || 0} directors`);
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to send email');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to send email');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -349,11 +348,10 @@ export default function LPAccounts() {
         fetchLPAccounts();
         fetchDashboard();
       } else {
-        const err = await response.json();
-        toast.error(err.detail || 'Failed to create LP account');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to create LP account');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -374,11 +372,10 @@ export default function LPAccounts() {
         fetchLPAccounts();
         fetchDashboard();
       } else {
-        const err = await response.json();
-        toast.error(err.detail || 'Failed to update LP account');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to update LP account');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -408,11 +405,10 @@ export default function LPAccounts() {
         fetchDashboard();
         if (isDetailOpen) fetchLPTransactions(selectedLP.lp_id);
       } else {
-        const err = await response.json();
-        toast.error(err.detail || 'Failed to record deposit');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to record deposit');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -442,11 +438,10 @@ export default function LPAccounts() {
         fetchDashboard();
         if (isDetailOpen) fetchLPTransactions(selectedLP.lp_id);
       } else {
-        const err = await response.json();
-        toast.error(err.detail || 'Failed to record withdrawal');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Failed to record withdrawal');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -468,7 +463,7 @@ export default function LPAccounts() {
         window.URL.revokeObjectURL(url);
         toast.success('LP data exported');
       }
-    } catch { toast.error('Export failed'); }
+    } catch (err) { toast.error(err?.message || "Something went wrong. Please try again."); }
   };
 
   const openLPDetail = async (lp) => {

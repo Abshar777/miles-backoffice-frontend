@@ -38,6 +38,7 @@ import {
   CommandList,
 } from "../components/ui/command";
 import { toast } from "sonner";
+import { getApiError } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
 import {
   Plus,
@@ -264,11 +265,10 @@ function EditableRequestCard({
         toast.success("Request updated successfully");
         onSaved();
       } else {
-        const e = await res.json();
-        toast.error(e.detail || "Failed to update");
+        toast.error(await getApiError(res));
       }
-    } catch {
-      toast.error("Failed to update");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -1131,11 +1131,10 @@ export default function TransactionRequests() {
         setProofPreviews([]);
         fetchRequests();
       } else {
-        const e = await res.json();
-        toast.error(e.detail || "Failed");
+        toast.error(await getApiError(res));
       }
-    } catch {
-      toast.error("Failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setCreating(false);
     }
@@ -1173,11 +1172,10 @@ export default function TransactionRequests() {
         setProcessDialog(null);
         fetchRequests();
       } else {
-        const e = await res.json();
-        toast.error(e.detail || "Failed");
+        toast.error(await getApiError(res));
       }
-    } catch {
-      toast.error("Failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setProcessing(false);
     }
@@ -1194,11 +1192,10 @@ export default function TransactionRequests() {
         toast.success("Deleted");
         fetchRequests();
       } else {
-        const e = await res.json();
-        toast.error(e.detail || "Failed");
+        toast.error(await getApiError(res));
       }
-    } catch {
-      toast.error("Failed");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 

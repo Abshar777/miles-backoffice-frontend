@@ -62,6 +62,7 @@ import {
   CommandList,
 } from "../components/ui/command";
 import { toast } from "sonner";
+import { getApiError } from "../lib/utils";
 import {
   ArrowLeftRight,
   Plus,
@@ -393,7 +394,7 @@ export default function Transactions() {
       }
     } catch (error) {
       console.error("Error fetching transactions:", error);
-      toast.error("Failed to load transactions");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -484,11 +485,10 @@ export default function Transactions() {
         setNewTagName("");
         fetchClientTags();
       } else {
-        const err = await res.json();
-        toast.error(err.detail || "Failed to create tag");
+        toast.error(await getApiError(res));
       }
-    } catch {
-      toast.error("Failed to create tag");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -503,8 +503,8 @@ export default function Transactions() {
         toast.success("Tag deleted");
         fetchClientTags();
       }
-    } catch {
-      toast.error("Failed to delete tag");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -775,32 +775,11 @@ export default function Transactions() {
         resetForm();
         fetchTransactions();
       } else {
-        let errorMsg = `Server error (${response.status})`;
-        try {
-          const errorData = await response.json();
-          if (Array.isArray(errorData.detail)) {
-            errorMsg = errorData.detail
-              .map((e) => e.msg || e.message || JSON.stringify(e))
-              .join(", ");
-          } else {
-            errorMsg = errorData.detail || errorMsg;
-          }
-        } catch {
-          const text = await response.text();
-          if (text) errorMsg = text.substring(0, 200);
-        }
-        console.error(
-          "Transaction creation failed:",
-          response.status,
-          errorMsg,
-        );
-        toast.error(errorMsg);
+        toast.error(await getApiError(response));
       }
     } catch (error) {
       console.error("Transaction creation error:", error);
-      toast.error(
-        error.message || "Network error - please check your connection",
-      );
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -903,11 +882,10 @@ export default function Transactions() {
         setDestEditTx(null);
         fetchTransactions();
       } else {
-        const err = await response.json();
-        toast.error(err.detail || "Failed");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Failed to update");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setDestSaving(false);
     }
@@ -992,11 +970,10 @@ export default function Transactions() {
         setFieldEditTx(null);
         fetchTransactions();
       } else {
-        const err = await response.json();
-        toast.error(err.detail || "Failed to update");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Failed to update");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setFieldEditSaving(false);
     }
@@ -1024,11 +1001,10 @@ export default function Transactions() {
         setTagEditTx(null);
         fetchTransactions();
       } else {
-        const err = await response.json();
-        toast.error(err.detail || "Failed to update tags");
+        toast.error(await getApiError(response));
       }
-    } catch {
-      toast.error("Failed to update tags");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setTagEditSaving(false);
     }
@@ -1053,11 +1029,10 @@ export default function Transactions() {
         const data = await res.json();
         setBulkValidation(data);
       } else {
-        const err = await res.json();
-        toast.error(err.detail || "Validation failed");
+        toast.error(await getApiError(res));
       }
     } catch (e) {
-      toast.error("Failed to validate file: " + (e.message || "Network error"));
+      toast.error(e?.message || "Something went wrong. Please try again.");
     } finally {
       setBulkLoading(false);
     }
@@ -1080,11 +1055,10 @@ export default function Transactions() {
         setBulkValidation(null);
         fetchTransactions();
       } else {
-        const err = await res.json();
-        toast.error(err.detail || "Bulk creation failed");
+        toast.error(await getApiError(res));
       }
-    } catch {
-      toast.error("Failed to create transactions");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setBulkCreating(false);
     }
@@ -1109,8 +1083,8 @@ export default function Transactions() {
         a.click();
         URL.revokeObjectURL(url);
       }
-    } catch {
-      toast.error("Failed to download template");
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -1212,9 +1186,9 @@ export default function Transactions() {
       URL.revokeObjectURL(link.href);
       toast.dismiss(toastId);
       toast.success(`CSV downloaded — ${allData.length} records`);
-    } catch {
+    } catch (err) {
       toast.dismiss(toastId);
-      toast.error("Export failed");
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -1264,9 +1238,9 @@ export default function Transactions() {
       XLSX.writeFile(wb, `transactions_${new Date().toISOString().split("T")[0]}.xlsx`);
       toast.dismiss(toastId);
       toast.success(`Excel downloaded — ${allData.length} records`);
-    } catch {
+    } catch (err) {
       toast.dismiss(toastId);
-      toast.error("Export failed");
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -1347,9 +1321,9 @@ export default function Transactions() {
       printWindow.document.close();
       toast.dismiss(toastId);
       toast.success(`PDF opened — ${allData.length} records`);
-    } catch {
+    } catch (err) {
       toast.dismiss(toastId);
-      toast.error("Export failed");
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 

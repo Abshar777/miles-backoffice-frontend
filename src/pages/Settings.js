@@ -46,6 +46,7 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import { toast } from "sonner";
+import { getApiError } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -277,10 +278,10 @@ export default function Settings() {
         toast.success("Manual FX rates saved");
         fetchManualFxRates();
       } else {
-        toast.error("Failed to save FX rates");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to save FX rates");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setSavingFxRates(false);
     }
@@ -317,11 +318,10 @@ export default function Settings() {
         resetForm();
         fetchUsers();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Operation failed");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Operation failed");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -337,11 +337,10 @@ export default function Settings() {
         toast.success("User deleted");
         fetchUsers();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Delete failed");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Delete failed");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -430,11 +429,10 @@ export default function Settings() {
         }));
         fetchEmailSettings();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Failed to save settings");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to save settings");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setSavingEmail(false);
     }
@@ -453,11 +451,10 @@ export default function Settings() {
         toast.success("Test email sent! Check your inbox.");
         fetchEmailLogs();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Failed to send test email");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to send test email");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setSendingTest(false);
     }
@@ -476,11 +473,10 @@ export default function Settings() {
         toast.success("Daily report sent!");
         fetchEmailLogs();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Failed to send report");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to send report");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setSendingReport(false);
     }
@@ -500,11 +496,10 @@ export default function Settings() {
         toast.success(data.message || "Monthly report sent!");
         fetchEmailLogs();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || "Failed to send monthly report");
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error("Failed to send monthly report");
+      toast.error(error?.message || "Something went wrong. Please try again.");
     } finally {
       setSendingMonthlyReport(false);
     }
@@ -1226,8 +1221,8 @@ export default function Settings() {
                                 : "Daily reports disabled",
                             );
                           }
-                        } catch (error) {
-                          toast.error("Failed to update setting");
+                        } catch (err) {
+                          toast.error(err?.message || "Something went wrong. Please try again.");
                           setEmailSettings((prev) => ({
                             ...prev,
                             report_enabled: !checked,
@@ -1336,8 +1331,8 @@ export default function Settings() {
                                 : "Monthly reports disabled",
                             );
                           }
-                        } catch (error) {
-                          toast.error("Failed to update setting");
+                        } catch (err) {
+                          toast.error(err?.message || "Something went wrong. Please try again.");
                           setEmailSettings((prev) => ({
                             ...prev,
                             monthly_report_enabled: !checked,
@@ -1421,8 +1416,8 @@ export default function Settings() {
                               ? "2FA enabled — all users will need email verification"
                               : "2FA disabled",
                           );
-                        } catch {
-                          toast.error("Failed to update");
+                        } catch (err) {
+                          toast.error(err?.message || "Something went wrong. Please try again.");
                           setTwofaEnabled(!checked);
                         }
                       }}
@@ -1451,8 +1446,8 @@ export default function Settings() {
                             toast.success(
                               `Session timeout set to ${val} hours`,
                             );
-                          } catch {
-                            toast.error("Failed to update");
+                          } catch (err) {
+                            toast.error(err?.message || "Something went wrong. Please try again.");
                           }
                         }}
                         className="bg-slate-50 border-slate-200 text-slate-900 px-3 py-1.5 rounded-md text-sm"
@@ -1494,8 +1489,8 @@ export default function Settings() {
                                 ? "Notifications enabled"
                                 : "Notifications disabled",
                             );
-                          } catch {
-                            toast.error("Failed to update");
+                          } catch (err) {
+                            toast.error(err?.message || "Something went wrong. Please try again.");
                             setApprovalNotifications(!checked);
                           }
                         }}
@@ -1773,11 +1768,10 @@ export default function Settings() {
                       document.getElementById("new-password").value = "";
                       document.getElementById("confirm-password").value = "";
                     } else {
-                      const err = await response.json();
-                      toast.error(err.detail || "Failed to change password");
+                      toast.error(await getApiError(response));
                     }
-                  } catch {
-                    toast.error("Failed to change password");
+                  } catch (err) {
+                    toast.error(err?.message || "Something went wrong. Please try again.");
                   }
                 }}
               >
@@ -1861,8 +1855,8 @@ export default function Settings() {
                             ? "Approval notifications enabled"
                             : "Approval notifications disabled",
                         );
-                      } catch {
-                        toast.error("Failed to update");
+                      } catch (err) {
+                        toast.error(err?.message || "Something went wrong. Please try again.");
                         setApprovalNotifications(!checked);
                       }
                     }}

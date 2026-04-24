@@ -36,6 +36,7 @@ import { Textarea } from '../components/ui/textarea';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import {
   Users,
   Plus,
@@ -149,10 +150,9 @@ export default function Clients() {
         if (data.errors?.length) toast.warning(`${data.errors.length} row errors`);
         fetchClients();
       } else {
-        const err = await res.json();
-        toast.error(err.detail || 'Upload failed');
+        toast.error(await getApiError(res));
       }
-    } catch { toast.error('Upload failed'); }
+    } catch (err) { toast.error(err?.message || 'Something went wrong. Please try again.'); }
     finally { setUploading(false); e.target.value = ''; }
   };
 
@@ -280,11 +280,10 @@ export default function Clients() {
         resetForm();
         fetchClients();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Operation failed');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Operation failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -301,9 +300,11 @@ export default function Clients() {
       if (response.ok) {
         toast.success('Client deleted');
         fetchClients();
+      } else {
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Delete failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 

@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import { TrendingUp, Mail, Lock, ArrowLeft, KeyRound, ShieldCheck, DollarSign } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -79,14 +80,15 @@ export default function Login() {
   const handleForgotSendCode = async (e) => {
     e.preventDefault(); setIsLoading(true);
     try {
-      const res  = await fetch(`${API_URL}/api/auth/forgot-password`, {
+      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail }),
       });
+      if (!res.ok) { toast.error(await getApiError(res)); return; }
       const data = await res.json();
       toast.success(data.message || 'Check your email for the reset code');
       setForgotStep('code');
-    } catch { toast.error('Failed to send reset code'); }
+    } catch (err) { toast.error(err?.message || 'Failed to send reset code'); }
     finally { setIsLoading(false); }
   };
 
@@ -100,15 +102,11 @@ export default function Login() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail, otp_code: resetCode, new_password: newPassword }),
       });
-      if (res.ok) {
-        toast.success('Password reset successfully!');
-        setForgotStep('');
-        setResetEmail(''); setResetCode(''); setNewPassword(''); setConfirmPassword('');
-      } else {
-        const err = await res.json();
-        toast.error(err.detail || 'Reset failed');
-      }
-    } catch { toast.error('Reset failed'); }
+      if (!res.ok) { toast.error(await getApiError(res)); return; }
+      toast.success('Password reset successfully!');
+      setForgotStep('');
+      setResetEmail(''); setResetCode(''); setNewPassword(''); setConfirmPassword('');
+    } catch (err) { toast.error(err?.message || 'Reset failed'); }
     finally { setIsLoading(false); }
   };
 

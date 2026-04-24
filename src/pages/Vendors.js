@@ -49,6 +49,7 @@ import {
   PaginationPrevious,
 } from '../components/ui/pagination';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import {
   Store,
@@ -374,11 +375,10 @@ export default function Exchangers() {
         resetForm();
         fetchExchangers(currentPage, searchTerm);
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Operation failed');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Operation failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -396,11 +396,10 @@ export default function Exchangers() {
         toast.success('Exchanger deleted');
         fetchExchangers(currentPage, searchTerm);
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Delete failed');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Delete failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -479,11 +478,10 @@ export default function Exchangers() {
         fetchExchangerSettlements(viewExchanger.vendor_id);
         fetchExchangers(currentPage, searchTerm);
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Settlement failed');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Settlement failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 

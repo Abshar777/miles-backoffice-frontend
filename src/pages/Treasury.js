@@ -41,6 +41,7 @@ import {
   TabsTrigger,
 } from '../components/ui/tabs';
 import { toast } from 'sonner';
+import { getApiError } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import {
   Landmark,
@@ -405,11 +406,10 @@ export default function Treasury() {
         setIsTransferDialogOpen(false);
         fetchAccounts();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Transfer failed');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Transfer failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     } finally {
       setTransferProcessing(false);
       setCaptchaAnswer('');
@@ -462,11 +462,10 @@ export default function Treasury() {
         resetForm();
         fetchAccounts();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Operation failed');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Operation failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -484,11 +483,10 @@ export default function Treasury() {
         toast.success('Account deleted');
         fetchAccounts();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Delete failed');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Delete failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -517,11 +515,10 @@ export default function Treasury() {
         setBalanceFixAccount(null);
         fetchAccounts();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Balance fix failed');
+        toast.error(await getApiError(response));
       }
     } catch (error) {
-      toast.error('Balance fix failed');
+      toast.error(error?.message || 'Something went wrong. Please try again.');
     } finally {
       setBalanceFixSaving(false);
     }
