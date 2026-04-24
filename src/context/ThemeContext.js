@@ -1,8 +1,21 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const THEMES = ['banking', 'dark'];
 
 const ThemeContext = createContext();
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  root.style.setProperty('--app-font', "'Plus Jakarta Sans', Inter, sans-serif");
+  if (theme === 'dark') {
+    root.setAttribute('data-theme', 'dark');
+    root.classList.add('dark');
+  } else {
+    root.setAttribute('data-theme', 'banking');
+    root.classList.remove('dark');
+  }
+  localStorage.setItem('miles-theme', theme);
+}
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
@@ -11,31 +24,22 @@ export function ThemeProvider({ children }) {
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    // Font: both themes use Plus Jakarta Sans / Inter
-    document.documentElement.style.setProperty(
-      '--app-font',
-      "'Plus Jakarta Sans', Inter, sans-serif"
-    );
-    localStorage.setItem('miles-theme', theme);
+    applyTheme(theme);
   }, [theme]);
 
-  const toggleTheme = () =>
-    setThemeState(t => (t === 'banking' ? 'dark' : 'banking'));
+  const setTheme = useCallback((t) => {
+    const next = THEMES.includes(t) ? t : 'banking';
+    setThemeState(next);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setThemeState(prev => prev === 'dark' ? 'banking' : 'dark');
+  }, []);
 
   const cycleTheme = toggleTheme;
 
-  const setTheme = (t) => {
-    if (THEMES.includes(t)) setThemeState(t);
-  };
-
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, cycleTheme, THEMES }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, cycleTheme, THEMES, isDark: theme === 'dark' }}>
       {children}
     </ThemeContext.Provider>
   );
