@@ -959,7 +959,7 @@ export default function Reconciliation() {
                                       {/* Treasury: running balance */}
                                       {isTreasury && tx.running_balance != null && (
                                         <span className="text-[10px] text-slate-400 font-mono mt-0.5">
-                                          Bal: {formatAmount(tx.running_balance, selectedAccount?.currency)}
+                                          Running balance: {formatAmount(tx.running_balance, selectedAccount?.currency)}
                                         </span>
                                       )}
 
