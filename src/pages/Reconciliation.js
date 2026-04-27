@@ -23,7 +23,7 @@ import { getApiError } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import {
   Upload, CheckCircle2, Clock, History, Loader2, FileText, Download, Eye,
-  X, FileSpreadsheet, Building2, CreditCard, Store,
+  X, FileSpreadsheet, Building2, CreditCard, Store, Trash2,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -503,6 +503,25 @@ export default function Reconciliation() {
       }
     } catch (err) {
       toast.error(err?.message || 'Something went wrong. Please try again.');
+    }
+  };
+
+  const handleDeleteStatement = async (stmt) => {
+    if (!window.confirm(`Remove "${stmt.filename}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`${API_URL}/api/reconciliation/statements/${stmt.statement_id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        toast.success('Statement removed');
+        fetchStatements(selectedAccountId, selectedAccountType);
+        fetchHistory();
+      } else {
+        toast.error(await getApiError(res));
+      }
+    } catch (err) {
+      toast.error(err?.message || 'Failed to remove statement');
     }
   };
 
@@ -1096,6 +1115,15 @@ export default function Reconciliation() {
                                         <CheckCircle2 className="w-3.5 h-3.5" />
                                       </Button>
                                     )}
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 text-red-400 hover:text-red-600 hover:bg-red-50"
+                                      onClick={() => handleDeleteStatement(stmt)}
+                                      title="Remove statement"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
                                   </div>
                                 </TableCell>
                               </TableRow>
