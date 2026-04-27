@@ -703,6 +703,19 @@ export default function Reconciliation() {
   }, {});
   const sortedTxDates = Object.keys(groupedTx).sort((a, b) => b.localeCompare(a));
 
+  // Compute daily net settlement per currency for PSP/exchanger
+  const getDailyNetByCurrency = (txs) => {
+    const netMap = {};
+    txs.forEach(tx => {
+      const amt  = tx.base_amount ?? tx.amount ?? 0;
+      const cur  = tx.base_currency || tx.currency || selectedAccount?.currency || '';
+      const type = tx.transaction_type || tx.type || '';
+      const sign = /withdrawal|withdraw|debit|out/i.test(type) ? -1 : 1;
+      netMap[cur] = (netMap[cur] || 0) + sign * Math.abs(Number(amt));
+    });
+    return Object.entries(netMap); // [[currency, net], ...]
+  };
+
   const getAccountName = (accountId) =>
     allAccounts.find(a => a.id === accountId)?.name || accountId;
 
@@ -886,40 +899,80 @@ export default function Reconciliation() {
                       <ScrollArea className="h-[480px]">
                         {sortedTxDates.map(date => {
                           const txs = groupedTx[date];
-                          const net = txs.reduce((s, tx) => s + (Number(tx.amount) || 0), 0);
+                          const isTreasury = selectedAccount?.type === 'treasury';
+                          const dailyNets = getDailyNetByCurrency(txs);
+
                           return (
                             <div key={date}>
                               {/* Date group header */}
                               <div className="flex items-center justify-between px-4 py-1.5 bg-slate-50 border-y border-slate-100 sticky top-0 z-10">
                                 <span className="text-xs font-semibold text-slate-500">
                                   {formatDate(date)}
+                                  <span className="ml-2 text-slate-400 font-normal">({txs.length} txn{txs.length !== 1 ? 's' : ''})</span>
                                 </span>
-                                <span className={`text-xs font-bold ${net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  Net: {net >= 0 ? '+' : '-'}{formatAmount(net, selectedAccount?.currency)}
-                                </span>
-                              </div>
-                              {txs.map((tx, i) => (
-                                <div
-                                  key={tx.transaction_id || i}
-                                  className="flex items-center justify-between px-4 py-2.5 border-b border-slate-50 hover:bg-slate-50/80"
-                                >
-                                  <div className="min-w-0">
-                                    <p className="text-xs font-medium text-slate-800 truncate">
-                                      {tx.reference || tx.client_name || 'Transaction'}
-                                    </p>
-                                    <p className="text-xs text-slate-400 capitalize">
-                                      {tx.type || tx.transaction_type || 'transfer'}
-                                    </p>
+                                {isTreasury ? (
+                                  /* Treasury: show daily net in account currency */
+                                  (() => {
+                                    const net = txs.reduce((s, tx) => s + (Number(tx.amount) || 0), 0);
+                                    return (
+                                      <span className={`text-xs font-bold ${net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        Net: {net >= 0 ? '+' : '-'}{formatAmount(net, selectedAccount?.currency)}
+                                      </span>
+                                    );
+                                  })()
+                                ) : (
+                                  /* PSP/Exchanger: net per payment currency */
+                                  <div className="flex flex-col items-end gap-0.5">
+                                    {dailyNets.map(([cur, net]) => (
+                                      <span key={cur} className={`text-xs font-bold ${net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        Net: {net >= 0 ? '+' : ''}{formatAmount(net, cur)}
+                                      </span>
+                                    ))}
                                   </div>
-                                  <span className={`text-sm font-semibold ml-3 shrink-0 ${(Number(tx.amount) || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {(Number(tx.amount) || 0) >= 0 ? '+' : '-'}
-                                    {formatAmount(
-                                      tx.base_amount ?? tx.amount,
-                                      tx.base_currency || tx.currency || selectedAccount?.currency
-                                    )}
-                                  </span>
-                                </div>
-                              ))}
+                                )}
+                              </div>
+
+                              {txs.map((tx, i) => {
+                                const payAmt  = tx.base_amount ?? tx.amount;
+                                const payCur  = tx.base_currency || tx.currency || selectedAccount?.currency;
+                                const isCredit = (Number(tx.amount) || 0) >= 0;
+                                const txType  = tx.type || tx.transaction_type || 'transfer';
+
+                                return (
+                                  <div
+                                    key={tx.transaction_id || i}
+                                    className="flex items-center justify-between px-4 py-2.5 border-b border-slate-50 hover:bg-slate-50/80"
+                                  >
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-xs font-medium text-slate-800 truncate">
+                                        {tx.reference || tx.client_name || 'Transaction'}
+                                      </p>
+                                      <p className="text-xs text-slate-400 capitalize">{txType}</p>
+                                    </div>
+
+                                    <div className="flex flex-col items-end ml-3 shrink-0">
+                                      {/* Payment currency amount */}
+                                      <span className={`text-sm font-semibold ${isCredit ? 'text-green-600' : 'text-red-600'}`}>
+                                        {isCredit ? '+' : '-'}{formatAmount(payAmt, payCur)}
+                                      </span>
+
+                                      {/* Treasury: running balance */}
+                                      {isTreasury && tx.running_balance != null && (
+                                        <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+                                          Bal: {formatAmount(tx.running_balance, selectedAccount?.currency)}
+                                        </span>
+                                      )}
+
+                                      {/* PSP/Exchanger: show USD equivalent if different from payment currency */}
+                                      {!isTreasury && payCur && payCur !== 'USD' && tx.amount != null && (
+                                        <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+                                          ≈ USD {Math.abs(Number(tx.amount) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           );
                         })}
