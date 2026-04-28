@@ -249,6 +249,8 @@ export default function Reconciliation() {
   // Left panel: internal transactions
   const [transactions, setTransactions] = useState([]);
   const [txLoading, setTxLoading] = useState(false);
+  const [txPage, setTxPage] = useState(0);
+  const TX_PAGE_SIZE = 5; // date-groups per page
 
   // Right panel: uploaded statements
   const [statements, setStatements] = useState([]);
@@ -444,6 +446,7 @@ export default function Reconciliation() {
     setTransactions([]);
     setStatements([]);
     setSummary({ txCount: 0, uploaded: 0, reconciled: 0, pending: 0 });
+    setTxPage(0);
     fetchTransactions(id, type);
     fetchStatements(id, type);
   };
@@ -721,6 +724,8 @@ export default function Reconciliation() {
     return acc;
   }, {});
   const sortedTxDates = Object.keys(groupedTx).sort((a, b) => b.localeCompare(a));
+  const totalTxPages = Math.ceil(sortedTxDates.length / TX_PAGE_SIZE);
+  const pagedTxDates = sortedTxDates.slice(txPage * TX_PAGE_SIZE, (txPage + 1) * TX_PAGE_SIZE);
 
   // Compute daily net settlement per currency for PSP/exchanger
   const getDailyNetByCurrency = (txs) => {
@@ -969,8 +974,9 @@ export default function Reconciliation() {
                         No transactions for this account
                       </div>
                     ) : (
+                      <>
                       <ScrollArea className="h-[480px]">
-                        {sortedTxDates.map(date => {
+                        {pagedTxDates.map(date => {
                           const txs = groupedTx[date];
                           const isTreasury = selectedAccount?.type === 'treasury';
                           const dailyNets = getDailyNetByCurrency(txs);
@@ -1040,6 +1046,53 @@ export default function Reconciliation() {
                           );
                         })}
                       </ScrollArea>
+
+                      {/* Pagination controls */}
+                      {totalTxPages > 1 && (
+                        <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/60">
+                          <span className="text-xs text-slate-400">
+                            Page {txPage + 1} of {totalTxPages}
+                            <span className="ml-2 text-slate-300">·</span>
+                            <span className="ml-2">{transactions.length} transactions</span>
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setTxPage(0)}
+                              disabled={txPage === 0}
+                              className="px-2 py-1 text-xs rounded border border-slate-200 bg-white text-slate-500 hover:border-slate-400 disabled:opacity-30 disabled:cursor-not-allowed"
+                            >«</button>
+                            <button
+                              onClick={() => setTxPage(p => Math.max(0, p - 1))}
+                              disabled={txPage === 0}
+                              className="px-2 py-1 text-xs rounded border border-slate-200 bg-white text-slate-500 hover:border-slate-400 disabled:opacity-30 disabled:cursor-not-allowed"
+                            >‹ Prev</button>
+                            {Array.from({ length: totalTxPages }, (_, i) => i)
+                              .filter(i => Math.abs(i - txPage) <= 2)
+                              .map(i => (
+                                <button
+                                  key={i}
+                                  onClick={() => setTxPage(i)}
+                                  className={`px-2.5 py-1 text-xs rounded border ${
+                                    i === txPage
+                                      ? 'bg-slate-800 text-white border-slate-800'
+                                      : 'border-slate-200 bg-white text-slate-500 hover:border-slate-400'
+                                  }`}
+                                >{i + 1}</button>
+                              ))}
+                            <button
+                              onClick={() => setTxPage(p => Math.min(totalTxPages - 1, p + 1))}
+                              disabled={txPage === totalTxPages - 1}
+                              className="px-2 py-1 text-xs rounded border border-slate-200 bg-white text-slate-500 hover:border-slate-400 disabled:opacity-30 disabled:cursor-not-allowed"
+                            >Next ›</button>
+                            <button
+                              onClick={() => setTxPage(totalTxPages - 1)}
+                              disabled={txPage === totalTxPages - 1}
+                              className="px-2 py-1 text-xs rounded border border-slate-200 bg-white text-slate-500 hover:border-slate-400 disabled:opacity-30 disabled:cursor-not-allowed"
+                            >»</button>
+                          </div>
+                        </div>
+                      )}
+                      </>
                     )}
                   </CardContent>
                 </Card>
