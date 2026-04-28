@@ -929,17 +929,7 @@ export default function Reconciliation() {
                                   {formatDate(date)}
                                   <span className="ml-2 text-slate-400 font-normal">({txs.length} txn{txs.length !== 1 ? 's' : ''})</span>
                                 </span>
-                                {isTreasury ? (
-                                  /* Treasury: show daily net in account currency */
-                                  (() => {
-                                    const net = txs.reduce((s, tx) => s + (Number(tx.amount) || 0), 0);
-                                    return (
-                                      <span className={`text-xs font-bold ${net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        Net: {net >= 0 ? '+' : '-'}{formatAmount(net, selectedAccount?.currency)}
-                                      </span>
-                                    );
-                                  })()
-                                ) : (
+                                {!isTreasury && (
                                   /* PSP/Exchanger: net per payment currency */
                                   <div className="flex flex-col items-end gap-0.5">
                                     {dailyNets.map(([cur, net]) => (
