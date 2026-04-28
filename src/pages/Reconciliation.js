@@ -906,6 +906,60 @@ export default function Reconciliation() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
+                    {/* PSP: net pending settlement summary */}
+                    {selectedAccount?.type === 'psp' && !txLoading && transactions.length > 0 && (() => {
+                      const pending = transactions.filter(t => t.status !== 'settled');
+                      // group pending net by currency
+                      const netMap = {};
+                      pending.forEach(t => {
+                        const cur = t.base_currency || t.currency || 'USD';
+                        const type = t.transaction_type || t.type || '';
+                        const sign = /withdrawal|withdraw|debit|out/i.test(type) ? -1 : 1;
+                        netMap[cur] = (netMap[cur] || 0) + sign * Math.abs(Number(t.base_amount ?? t.amount) || 0);
+                      });
+                      const entries = Object.entries(netMap);
+                      if (entries.length === 0) return null;
+                      return (
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 bg-amber-50 border-b border-amber-100">
+                          <span className="text-xs font-semibold text-amber-700 shrink-0">Net Pending Settlement</span>
+                          <span className="text-xs text-amber-500 shrink-0">({pending.length} txn{pending.length !== 1 ? 's' : ''})</span>
+                          <div className="flex flex-wrap gap-x-3 gap-y-0.5 ml-auto">
+                            {entries.map(([cur, net]) => (
+                              <span key={cur} className={`text-xs font-bold ${net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {net >= 0 ? '+' : ''}{formatAmount(net, cur)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Exchanger: total net settlement in payment currency */}
+                    {selectedAccount?.type === 'exchanger' && !txLoading && transactions.length > 0 && (() => {
+                      const netMap = {};
+                      transactions.forEach(t => {
+                        const cur = t.base_currency || t.currency || selectedAccount?.currency || '';
+                        const type = t.transaction_type || t.type || '';
+                        const sign = /withdrawal|withdraw|debit|out/i.test(type) ? -1 : 1;
+                        netMap[cur] = (netMap[cur] || 0) + sign * Math.abs(Number(t.base_amount ?? t.amount) || 0);
+                      });
+                      const entries = Object.entries(netMap);
+                      if (entries.length === 0) return null;
+                      return (
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 bg-orange-50 border-b border-orange-100">
+                          <span className="text-xs font-semibold text-orange-700 shrink-0">Net Settlement</span>
+                          <span className="text-xs text-orange-400 shrink-0">({transactions.length} txn{transactions.length !== 1 ? 's' : ''})</span>
+                          <div className="flex flex-wrap gap-x-3 gap-y-0.5 ml-auto">
+                            {entries.map(([cur, net]) => (
+                              <span key={cur} className={`text-xs font-bold ${net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {net >= 0 ? '+' : ''}{formatAmount(net, cur)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {txLoading ? (
                       <div className="flex justify-center py-10">
                         <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
