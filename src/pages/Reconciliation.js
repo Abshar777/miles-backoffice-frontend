@@ -1680,11 +1680,11 @@ export default function Reconciliation() {
                                               className="flex items-start gap-1 group cursor-pointer"
                                               onClick={() => {
                                                 setEditingDescId(row.statement.statement_id);
-                                                setEditDescValue(row.statement.description || '');
+                                                setEditDescValue(row.statement.description || row.statement.notes || '');
                                               }}
                                             >
-                                              <span className={`text-xs flex-1 ${row.statement.description ? 'text-slate-600' : 'text-slate-300 italic'}`}>
-                                                {row.statement.description || 'Add description…'}
+                                              <span className={`text-xs flex-1 ${(row.statement.description || row.statement.notes) ? 'text-slate-600' : 'text-slate-300 italic'}`}>
+                                                {row.statement.description || row.statement.notes || 'Add description…'}
                                               </span>
                                               <Pencil className="w-3 h-3 text-slate-300 group-hover:text-blue-500 shrink-0 mt-0.5 transition-colors" />
                                             </div>
