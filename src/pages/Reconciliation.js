@@ -250,7 +250,7 @@ export default function Reconciliation() {
   const [transactions, setTransactions] = useState([]);
   const [txLoading, setTxLoading] = useState(false);
   const [txPage, setTxPage] = useState(0);
-  const TX_PAGE_SIZE = 5; // date-groups per page
+  const TX_PAGE_SIZE = 20; // individual transactions per page
 
   // Exchanger: inner tab + settlement history
   const [exchInnerTab, setExchInnerTab] = useState('transactions'); // 'transactions' | 'settlements'
@@ -746,16 +746,22 @@ export default function Reconciliation() {
 
   const selectedAccount = allAccounts.find(a => a.id === selectedAccountId);
 
-  // Group transactions by date
-  const groupedTx = transactions.reduce((acc, tx) => {
-    const date = (tx.created_at || tx.date || '')?.split('T')[0] || 'Unknown';
+  // Sort all transactions newest-first for pagination
+  const sortedAllTxs = [...transactions].sort((a, b) => {
+    const da = a.created_at || a.date || '';
+    const db = b.created_at || b.date || '';
+    return db.localeCompare(da);
+  });
+  const totalTxPages = Math.ceil(sortedAllTxs.length / TX_PAGE_SIZE);
+  const pagedTxs = sortedAllTxs.slice(txPage * TX_PAGE_SIZE, (txPage + 1) * TX_PAGE_SIZE);
+  // Group paged transactions by date for display headers
+  const pagedGrouped = pagedTxs.reduce((acc, tx) => {
+    const date = (tx.created_at || tx.date || '').split('T')[0] || 'Unknown';
     if (!acc[date]) acc[date] = [];
     acc[date].push(tx);
     return acc;
   }, {});
-  const sortedTxDates = Object.keys(groupedTx).sort((a, b) => b.localeCompare(a));
-  const totalTxPages = Math.ceil(sortedTxDates.length / TX_PAGE_SIZE);
-  const pagedTxDates = sortedTxDates.slice(txPage * TX_PAGE_SIZE, (txPage + 1) * TX_PAGE_SIZE);
+  const pagedDates = Object.keys(pagedGrouped).sort((a, b) => b.localeCompare(a));
 
   // Compute daily net settlement per currency for PSP/exchanger
   const getDailyNetByCurrency = (txs) => {
@@ -1101,8 +1107,8 @@ export default function Reconciliation() {
                     ) : (
                       <>
                       <ScrollArea className="h-[480px]">
-                        {pagedTxDates.map(date => {
-                          const txs = groupedTx[date];
+                        {pagedDates.map(date => {
+                          const txs = pagedGrouped[date];
                           const isTreasury = selectedAccount?.type === 'treasury';
                           const dailyNets = getDailyNetByCurrency(txs);
 
@@ -1173,12 +1179,10 @@ export default function Reconciliation() {
                       </ScrollArea>
 
                       {/* Pagination controls */}
-                      {totalTxPages > 1 && (
+                      {transactions.length > 0 && (
                         <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/60">
                           <span className="text-xs text-slate-400">
-                            Page {txPage + 1} of {totalTxPages}
-                            <span className="ml-2 text-slate-300">·</span>
-                            <span className="ml-2">{transactions.length} transactions</span>
+                            {txPage * TX_PAGE_SIZE + 1}–{Math.min((txPage + 1) * TX_PAGE_SIZE, sortedAllTxs.length)} of {sortedAllTxs.length} transactions
                           </span>
                           <div className="flex items-center gap-1">
                             <button
