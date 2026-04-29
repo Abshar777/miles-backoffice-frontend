@@ -450,12 +450,16 @@ export default function Reconciliation() {
         const list = data.statements || (Array.isArray(data) ? data : []);
         setStatements(list);
         const reconciled = list.filter(s => isDone(s.status)).length;
-        setSummary(prev => ({
-          ...prev,
-          uploaded: list.length,
-          reconciled,
-          pending: list.length - reconciled,
-        }));
+        setSummary(prev => {
+          // Only count pending if transactions exist for this account
+          const hasTx = (prev.txCount || 0) > 0;
+          return {
+            ...prev,
+            uploaded: list.length,
+            reconciled: hasTx ? reconciled : 0,
+            pending: hasTx ? (list.length - reconciled) : 0,
+          };
+        });
       }
     } catch (e) {
       console.error('Error fetching statements:', e);
@@ -711,25 +715,7 @@ export default function Reconciliation() {
           });
         });
 
-        // Also add rows for statements that don't correspond to a date with transactions
-        accStatements.forEach(s => {
-          const sd = (s.statement_date || '').split('T')[0];
-          const alreadyCovered = rows.some(r => r.account_id === acc.id && r.date === sd);
-          if (!alreadyCovered) {
-            rows.push({
-              key: `${acc.id}-stmt-${s.statement_id}`,
-              account_id: acc.id,
-              account_name: acc.name,
-              account_type: acc.type,
-              currency: acc.currency,
-              date: sd,
-              tx_count: 0,
-              net_amount: 0,
-              statement: s,
-              status: isDone(s.status) ? 'done' : 'pending',
-            });
-          }
-        });
+        // Only rows with actual transactions are tracked — statement-only dates are excluded.
       });
 
       // Sort: newest date first, then by account name
