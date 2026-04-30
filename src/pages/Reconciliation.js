@@ -674,9 +674,12 @@ export default function Reconciliation() {
               fetch(`${API_URL}/api/psp/${acc.id}/pending-transactions?page_size=200`, { headers }),
               fetch(`${API_URL}/api/psp/${acc.id}/withdrawal-transactions?page_size=200`, { headers }),
             ]);
-            const normalise = t => ({ ...t, amount: t.base_amount ?? t.gross_amount ?? t.amount, currency: t.base_currency || t.currency || 'USD' });
+            // Use psp_net_amount (USD after commissions) or amount (USD gross) — never base_amount which is the client's payment currency
+            const normalise = t => ({ ...t, amount: t.psp_net_amount ?? t.amount, currency: 'USD' });
             const srData = sr.ok ? await sr.json() : {};
-            const settled = (Array.isArray(srData) ? srData : (srData.transactions || [])).map(normalise);
+            const settled = (Array.isArray(srData) ? srData : (srData.transactions || [])).map(t => ({
+              ...t, amount: t.expected_net ?? t.psp_net_amount ?? t.amount, currency: 'USD',
+            }));
             const dep     = dr.ok ? ((await dr.json()).items || []) : [];
             const wth     = wr.ok ? ((await wr.json()).items || []) : [];
             const settledIds = new Set(settled.map(t => t.transaction_id));
@@ -686,7 +689,8 @@ export default function Reconciliation() {
             if (r.ok) {
               const d = await r.json();
               const raw = Array.isArray(d) ? d : d.items || [];
-              txList = raw.map(t => ({ ...t, amount: t.base_amount ?? t.amount, currency: t.base_currency || t.currency || 'USD' }));
+              // Use USD amount, not base_amount (which is client payment currency)
+              txList = raw.map(t => ({ ...t, amount: t.amount, currency: t.currency || 'USD' }));
             }
           }
           return { acc, txList };
@@ -701,10 +705,12 @@ export default function Reconciliation() {
         // Group this account's transactions by date
         const byDate = {};
         txList.forEach(tx => {
-          const d = (tx.created_at || tx.date || '')?.split('T')[0] || 'Unknown';
+          const d = (tx.transaction_date || tx.created_at || tx.date || '')?.split('T')[0] || 'Unknown';
           if (!byDate[d]) byDate[d] = { txs: [], net: 0 };
           byDate[d].txs.push(tx);
-          byDate[d].net += Number(tx.amount) || 0;
+          // Withdrawals reduce the net; all other types (deposit, rebate, etc.) increase it
+          const sign = tx.transaction_type === 'withdrawal' ? -1 : 1;
+          byDate[d].net += sign * (Number(tx.amount) || 0);
         });
 
         // Cross-reference: find statement for this account that covers each date
