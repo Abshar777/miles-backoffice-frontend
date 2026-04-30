@@ -297,12 +297,22 @@ export default function Transactions() {
   const [createCaptchaAnswer, setCreateCaptchaAnswer] = useState("");
   const [showCreateCaptcha, setShowCreateCaptcha] = useState(false);
 
-  // Client Tags
+  // Client Tags (inherited from client)
   const [clientTags, setClientTags] = useState([]);
   const [tagFilter, setTagFilter] = useState("all");
   const [tagManageOpen, setTagManageOpen] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#3B82F6");
+
+  // Transaction Tags (per-transaction, separate collection)
+  const [txnTags, setTxnTags] = useState([]);
+  const [txnTagFilter, setTxnTagFilter] = useState("all");
+  const [txnTagManageOpen, setTxnTagManageOpen] = useState(false);
+  const [newTxnTagName, setNewTxnTagName] = useState("");
+  const [newTxnTagColor, setNewTxnTagColor] = useState("#F59E0B");
+  const [txnTagEditTx, setTxnTagEditTx] = useState(null);
+  const [txnTagEditTags, setTxnTagEditTags] = useState([]);
+  const [txnTagEditSaving, setTxnTagEditSaving] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -370,6 +380,8 @@ export default function Transactions() {
       if (dateTo) params.append("date_to", dateTo);
       if (tagFilter && tagFilter !== "all")
         params.append("client_tag", tagFilter);
+      if (txnTagFilter && txnTagFilter !== "all")
+        params.append("transaction_tag", txnTagFilter);
 
       const response = await fetch(
         `${API_URL}/api/transactions?${params.toString()}`,
@@ -471,6 +483,18 @@ export default function Transactions() {
     }
   };
 
+  const fetchTxnTags = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/transaction-tags`, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (response.ok) setTxnTags(await response.json());
+    } catch (error) {
+      console.error("Error fetching transaction tags:", error);
+    }
+  };
+
   const handleCreateTag = async () => {
     if (!newTagName.trim()) return;
     try {
@@ -505,6 +529,75 @@ export default function Transactions() {
       }
     } catch (err) {
       toast.error(err?.message || "Something went wrong. Please try again.");
+    }
+  };
+
+  const handleCreateTxnTag = async () => {
+    if (!newTxnTagName.trim()) return;
+    try {
+      const res = await fetch(`${API_URL}/api/transaction-tags`, {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name: newTxnTagName.trim(), color: newTxnTagColor }),
+      });
+      if (res.ok) {
+        toast.success("Transaction tag created");
+        setNewTxnTagName("");
+        fetchTxnTags();
+      } else {
+        toast.error(await getApiError(res));
+      }
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
+    }
+  };
+
+  const handleDeleteTxnTag = async (tagId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/transaction-tags/${tagId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (res.ok) {
+        toast.success("Transaction tag deleted");
+        fetchTxnTags();
+      }
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
+    }
+  };
+
+  const openTxnTagEdit = (tx) => {
+    setTxnTagEditTx(tx);
+    setTxnTagEditTags(tx.transaction_tags || []);
+  };
+
+  const saveTxnTagEdit = async () => {
+    if (!txnTagEditTx) return;
+    setTxnTagEditSaving(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/api/transactions/${txnTagEditTx.transaction_id}/transaction-tags`,
+        {
+          method: "PATCH",
+          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ transaction_tags: txnTagEditTags }),
+        },
+      );
+      if (response.ok) {
+        toast.success("Transaction tags updated");
+        setTxnTagEditTx(null);
+        fetchTransactions();
+      } else {
+        toast.error(await getApiError(response));
+      }
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
+    } finally {
+      setTxnTagEditSaving(false);
     }
   };
 
@@ -569,6 +662,7 @@ export default function Transactions() {
     setCurrentPage(1);
     fetchTransactions(1);
     fetchClientTags();
+    fetchTxnTags();
   }, [
     typeFilter,
     statusFilter,
@@ -577,6 +671,7 @@ export default function Transactions() {
     dateTo,
     pageSize,
     tagFilter,
+    txnTagFilter,
   ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Re-fetch transactions with debounce for text inputs (search, email)
@@ -1136,6 +1231,7 @@ export default function Transactions() {
     if (dateFrom) params.append("date_from", dateFrom);
     if (dateTo) params.append("date_to", dateTo);
     if (tagFilter && tagFilter !== "all") params.append("client_tag", tagFilter);
+    if (txnTagFilter && txnTagFilter !== "all") params.append("transaction_tag", txnTagFilter);
 
     const res = await fetch(`${API_URL}/api/transactions/export?${params.toString()}`, {
       headers: getAuthHeaders(),
@@ -2897,8 +2993,50 @@ export default function Transactions() {
           className="border-slate-200 text-slate-600 hover:bg-slate-50 text-xs"
           data-testid="manage-tags-btn"
         >
-          <Tag className="w-3.5 h-3.5 mr-1" /> Manage Tags
+          <Tag className="w-3.5 h-3.5 mr-1" /> Manage Client Tags
         </Button>
+
+        <Select value={txnTagFilter} onValueChange={setTxnTagFilter}>
+          <SelectTrigger
+            className="w-full sm:w-44 bg-white border-amber-200 text-slate-800"
+            data-testid="filter-txn-tag"
+          >
+            <SelectValue placeholder="Txn Tag" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-slate-200">
+            <SelectItem
+              value="all"
+              className="text-slate-800 hover:bg-slate-100"
+            >
+              All Txn Tags
+            </SelectItem>
+            {txnTags.map((tag) => (
+              <SelectItem
+                key={tag.tag_id}
+                value={tag.name}
+                className="text-slate-800 hover:bg-slate-100"
+              >
+                <span className="flex items-center gap-2">
+                  <span
+                    className="w-2 h-2 rounded-full inline-block"
+                    style={{ backgroundColor: tag.color }}
+                  />{" "}
+                  {tag.name}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setTxnTagManageOpen(true)}
+          className="border-amber-200 text-amber-600 hover:bg-amber-50 text-xs"
+          data-testid="manage-txn-tags-btn"
+        >
+          <Tag className="w-3.5 h-3.5 mr-1" /> Manage Txn Tags
+        </Button>
+
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             <span className="text-xs text-slate-500">From:</span>
@@ -2924,6 +3062,7 @@ export default function Transactions() {
             dateTo ||
             destinationFilter !== "all" ||
             tagFilter !== "all" ||
+            txnTagFilter !== "all" ||
             emailFilter) && (
             <Button
               variant="ghost"
@@ -2934,6 +3073,7 @@ export default function Transactions() {
                 setDestinationFilter("all");
                 setEmailFilter("");
                 setTagFilter("all");
+                setTxnTagFilter("all");
               }}
               className="text-slate-500 hover:text-red-500"
             >
@@ -2978,7 +3118,10 @@ export default function Transactions() {
                     Destination
                   </TableHead>
                   <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">
-                    Tags
+                    Client Tags
+                  </TableHead>
+                  <TableHead className="text-amber-500 font-bold uppercase tracking-wider text-xs">
+                    Txn Tags
                   </TableHead>
                   <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">
                     Status
@@ -2991,14 +3134,14 @@ export default function Transactions() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={12} className="text-center py-8">
+                    <TableCell colSpan={13} className="text-center py-8">
                       <div className="w-6 h-6 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
                 ) : filteredTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={12}
+                      colSpan={13}
                       className="text-center py-8 text-slate-500"
                     >
                       No transactions found
@@ -3155,8 +3298,45 @@ export default function Transactions() {
                             size="sm"
                             onClick={() => openTagEdit(tx)}
                             className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 h-6 w-6 p-0 shrink-0"
-                            title="Edit Tags"
+                            title="Edit Client Tags"
                             data-testid={`tx-tag-edit-${tx.transaction_id}`}
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <div className="flex flex-wrap gap-0.5 flex-1 min-w-0">
+                            {(tx.transaction_tags || []).length > 0 ? (
+                              tx.transaction_tags.map((tag) => {
+                                const tagObj = txnTags.find(
+                                  (t) => t.name === tag,
+                                );
+                                return (
+                                  <span
+                                    key={tag}
+                                    className="px-1.5 py-0.5 rounded-full text-[10px] font-medium text-white whitespace-nowrap"
+                                    style={{
+                                      backgroundColor:
+                                        tagObj?.color || "#F59E0B",
+                                    }}
+                                  >
+                                    {tag}
+                                  </span>
+                                );
+                              })
+                            ) : (
+                              <span className="text-xs text-slate-400">-</span>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openTxnTagEdit(tx)}
+                            className="text-slate-400 hover:text-amber-600 hover:bg-amber-50 h-6 w-6 p-0 shrink-0"
+                            title="Edit Transaction Tags"
+                            data-testid={`tx-txntag-edit-${tx.transaction_id}`}
                           >
                             <Pencil className="w-3 h-3" />
                           </Button>
@@ -4382,6 +4562,173 @@ export default function Transactions() {
                 data-testid="tag-edit-save"
               >
                 {tagEditSaving ? "Saving..." : "Save Tags"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Manage Transaction Tags Dialog */}
+      <Dialog open={txnTagManageOpen} onOpenChange={setTxnTagManageOpen}>
+        <DialogContent className="sm:max-w-md bg-white border border-amber-200">
+          <DialogHeader>
+            <DialogTitle className="text-slate-800 flex items-center gap-2">
+              <Tag className="w-5 h-5 text-amber-500" /> Manage Transaction Tags
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex gap-2">
+              <Input
+                placeholder="New tag name..."
+                value={newTxnTagName}
+                onChange={(e) => setNewTxnTagName(e.target.value)}
+                className="flex-1 bg-slate-50 border-slate-200 text-slate-800"
+                data-testid="new-txn-tag-name"
+                onKeyDown={(e) => e.key === "Enter" && handleCreateTxnTag()}
+              />
+              <input
+                type="color"
+                value={newTxnTagColor}
+                onChange={(e) => setNewTxnTagColor(e.target.value)}
+                className="w-9 h-9 rounded cursor-pointer border border-slate-200"
+                data-testid="new-txn-tag-color"
+              />
+              <Button
+                onClick={handleCreateTxnTag}
+                size="sm"
+                className="bg-amber-500 text-white hover:bg-amber-600"
+                data-testid="create-txn-tag-btn"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
+              {txnTags.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-4">
+                  No transaction tags yet. Create one above.
+                </p>
+              ) : (
+                txnTags.map((tag) => (
+                  <div
+                    key={tag.tag_id}
+                    className="flex items-center justify-between p-2 rounded-sm hover:bg-slate-50 border border-slate-100"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: tag.color }}
+                      />
+                      <span className="text-sm text-slate-700 font-medium">
+                        {tag.name}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteTxnTag(tag.tag_id)}
+                      className="text-red-400 hover:text-red-600 hover:bg-red-50 h-7 w-7 p-0"
+                      data-testid={`delete-txn-tag-${tag.tag_id}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transaction Tag Edit Dialog */}
+      <Dialog
+        open={!!txnTagEditTx}
+        onOpenChange={(open) => {
+          if (!open) setTxnTagEditTx(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base">
+              Edit Transaction Tags - {txnTagEditTx?.reference || txnTagEditTx?.transaction_id}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-1.5">
+              {txnTagEditTags.map((tag) => {
+                const tagObj = txnTags.find((t) => t.name === tag);
+                return (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-white"
+                    style={{ backgroundColor: tagObj?.color || "#F59E0B" }}
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setTxnTagEditTags(txnTagEditTags.filter((t) => t !== tag))
+                      }
+                      className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center text-[10px]"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                );
+              })}
+              {txnTagEditTags.length === 0 && (
+                <span className="text-sm text-slate-400">No tags assigned</span>
+              )}
+            </div>
+            <Select
+              onValueChange={(val) => {
+                if (!txnTagEditTags.includes(val))
+                  setTxnTagEditTags([...txnTagEditTags, val]);
+              }}
+            >
+              <SelectTrigger
+                className="h-9 text-sm"
+                data-testid="txn-tag-edit-select"
+              >
+                <SelectValue placeholder="Add a transaction tag..." />
+              </SelectTrigger>
+              <SelectContent>
+                {txnTags
+                  .filter((t) => !txnTagEditTags.includes(t.name))
+                  .map((tag) => (
+                    <SelectItem key={tag.tag_id} value={tag.name}>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ backgroundColor: tag.color }}
+                        />
+                        {tag.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                {txnTags.filter((t) => !txnTagEditTags.includes(t.name))
+                  .length === 0 && (
+                  <SelectItem value="_none" disabled>
+                    All tags assigned
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTxnTagEditTx(null)}
+                data-testid="txn-tag-edit-cancel"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={saveTxnTagEdit}
+                disabled={txnTagEditSaving}
+                className="bg-amber-500 text-white hover:bg-amber-600"
+                data-testid="txn-tag-edit-save"
+              >
+                {txnTagEditSaving ? "Saving..." : "Save Tags"}
               </Button>
             </div>
           </div>
