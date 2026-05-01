@@ -73,6 +73,8 @@ export default function RolesPermissions() {
   const [actions, setActions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mainTab, setMainTab] = useState('roles');
+  const [treasuryAccounts, setTreasuryAccounts] = useState([]);
+  const [borrowerCompanies, setBorrowerCompanies] = useState([]);
   
   // Dialogs
   const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
@@ -86,6 +88,8 @@ export default function RolesPermissions() {
     description: '',
     hierarchy_level: 50,
     permissions: {},
+    treasury_account_ids: null, // null = all accounts; array = specific only
+    borrower_ids: null,         // null = all borrower companies; array = specific only
   });
 
   const getAuthHeaders = () => {
@@ -132,6 +136,30 @@ export default function RolesPermissions() {
   useEffect(() => {
     fetchRoles();
     fetchModulesAndActions();
+    // Fetch all treasury accounts for the selector
+    const fetchTreasuryAccounts = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/treasury?page_size=200`, { headers: getAuthHeaders() });
+        if (res.ok) {
+          const data = await res.json();
+          setTreasuryAccounts(data.items || (Array.isArray(data) ? data : []));
+        }
+      } catch (e) { console.error('Failed to fetch treasury accounts', e); }
+    };
+
+    // Fetch all borrower companies (vendors) for the selector
+    const fetchBorrowerCompanies = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/loans/vendors`, { headers: getAuthHeaders() });
+        if (res.ok) {
+          const data = await res.json();
+          setBorrowerCompanies(Array.isArray(data) ? data : []);
+        }
+      } catch (e) { console.error('Failed to fetch borrower companies', e); }
+    };
+
+    fetchTreasuryAccounts();
+    fetchBorrowerCompanies();
   }, [fetchRoles, fetchModulesAndActions]);
 
   const handleCreateRole = async () => {
@@ -174,6 +202,8 @@ export default function RolesPermissions() {
           description: roleForm.description,
           permissions: roleForm.permissions,
           hierarchy_level: roleForm.hierarchy_level,
+          treasury_account_ids: roleForm.treasury_account_ids,
+          borrower_ids: roleForm.borrower_ids,
         }),
       });
       
@@ -197,6 +227,8 @@ export default function RolesPermissions() {
       description: role.description || '',
       hierarchy_level: role.hierarchy_level || 50,
       permissions: role.permissions || {},
+      treasury_account_ids: role.treasury_account_ids || null,
+      borrower_ids: role.borrower_ids || null,
     });
     setIsEditRoleOpen(true);
   };
@@ -208,6 +240,8 @@ export default function RolesPermissions() {
       description: '',
       hierarchy_level: 50,
       permissions: {},
+      treasury_account_ids: null,
+      borrower_ids: null,
     });
   };
 
@@ -301,37 +335,137 @@ export default function RolesPermissions() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {modules.map(module => (
-              <TableRow key={module.id} className="border-slate-200 hover:bg-slate-50">
-                <TableCell className="font-medium text-slate-700 sticky left-0 bg-white">
-                  {module.name}
-                </TableCell>
-                {actions.map(action => {
-                  const Icon = ACTION_ICONS[action] || CheckCircle;
-                  const isChecked = hasPermission(module.id, action);
-                  return (
-                    <TableCell key={action} className="text-center">
-                      <button
-                        onClick={() => togglePermission(module.id, action)}
-                        className={`p-2 rounded-md transition-all ${
-                          isChecked 
-                            ? ACTION_COLORS[action] 
-                            : 'bg-slate-100 text-slate-300 hover:bg-slate-200'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4" />
-                      </button>
+            {modules.map(module => {
+              const isTreasury = module.id === 'treasury';
+              const isLoans = module.id === 'loans';
+              const hasTreasuryPerm = isTreasury && (roleForm.permissions['treasury']?.length || 0) > 0;
+              const hasLoansPerm = isLoans && (roleForm.permissions['loans']?.length || 0) > 0;
+              return (
+                <>
+                <TableRow key={module.id} className="border-slate-200 hover:bg-slate-50">
+                  <TableCell className="font-medium text-slate-700 sticky left-0 bg-white">
+                    {module.name}
+                  </TableCell>
+                  {actions.map(action => {
+                    const Icon = ACTION_ICONS[action] || CheckCircle;
+                    const isChecked = hasPermission(module.id, action);
+                    return (
+                      <TableCell key={action} className="text-center">
+                        <button
+                          onClick={() => togglePermission(module.id, action)}
+                          className={`p-2 rounded-md transition-all ${
+                            isChecked
+                              ? ACTION_COLORS[action]
+                              : 'bg-slate-100 text-slate-300 hover:bg-slate-200'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </button>
+                      </TableCell>
+                    );
+                  })}
+                  <TableCell className="text-center">
+                    <Checkbox
+                      checked={(roleForm.permissions[module.id]?.length || 0) === actions.length}
+                      onCheckedChange={() => toggleAllModulePermissions(module.id)}
+                    />
+                  </TableCell>
+                </TableRow>
+
+                {/* Treasury account selector — shows when treasury perms are enabled */}
+                {hasTreasuryPerm && treasuryAccounts.length > 0 && (
+                  <TableRow key="treasury-accounts" className="bg-blue-50/40 border-slate-200">
+                    <TableCell colSpan={actions.length + 2} className="py-2 px-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-blue-700 shrink-0">Allowed Accounts:</span>
+                        <button
+                          onClick={() => setRoleForm(prev => ({ ...prev, treasury_account_ids: null }))}
+                          className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                            roleForm.treasury_account_ids === null
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white text-slate-500 border-slate-300 hover:border-blue-400'
+                          }`}
+                        >All</button>
+                        {treasuryAccounts.map(acc => {
+                          const selected = Array.isArray(roleForm.treasury_account_ids) &&
+                            roleForm.treasury_account_ids.includes(acc.account_id);
+                          return (
+                            <button
+                              key={acc.account_id}
+                              onClick={() => {
+                                setRoleForm(prev => {
+                                  const current = Array.isArray(prev.treasury_account_ids) ? prev.treasury_account_ids : [];
+                                  const next = selected
+                                    ? current.filter(id => id !== acc.account_id)
+                                    : [...current, acc.account_id];
+                                  return { ...prev, treasury_account_ids: next.length ? next : null };
+                                });
+                              }}
+                              className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                                selected
+                                  ? 'bg-blue-100 text-blue-700 border-blue-400'
+                                  : 'bg-white text-slate-500 border-slate-300 hover:border-blue-400 hover:text-blue-600'
+                              }`}
+                            >
+                              {acc.account_name}
+                              {acc.currency && <span className="ml-1 opacity-60">({acc.currency})</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </TableCell>
-                  );
-                })}
-                <TableCell className="text-center">
-                  <Checkbox
-                    checked={(roleForm.permissions[module.id]?.length || 0) === actions.length}
-                    onCheckedChange={() => toggleAllModulePermissions(module.id)}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableRow>
+                )}
+
+                {/* Loans borrower company selector — shows when loans perms are enabled */}
+                {hasLoansPerm && borrowerCompanies.length > 0 && (
+                  <TableRow key="loan-borrowers" className="bg-emerald-50/40 border-slate-200">
+                    <TableCell colSpan={actions.length + 2} className="py-2 px-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-emerald-700 shrink-0">Allowed Borrower Companies:</span>
+                        <button
+                          onClick={() => setRoleForm(prev => ({ ...prev, borrower_ids: null }))}
+                          className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                            roleForm.borrower_ids === null
+                              ? 'bg-emerald-600 text-white border-emerald-600'
+                              : 'bg-white text-slate-500 border-slate-300 hover:border-emerald-400'
+                          }`}
+                        >All</button>
+                        {borrowerCompanies.map(company => {
+                          const selected = Array.isArray(roleForm.borrower_ids) &&
+                            roleForm.borrower_ids.includes(company.vendor_id);
+                          return (
+                            <button
+                              key={company.vendor_id}
+                              onClick={() => {
+                                setRoleForm(prev => {
+                                  const current = Array.isArray(prev.borrower_ids) ? prev.borrower_ids : [];
+                                  const next = selected
+                                    ? current.filter(id => id !== company.vendor_id)
+                                    : [...current, company.vendor_id];
+                                  return { ...prev, borrower_ids: next.length ? next : null };
+                                });
+                              }}
+                              className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                                selected
+                                  ? 'bg-emerald-100 text-emerald-700 border-emerald-400'
+                                  : 'bg-white text-slate-500 border-slate-300 hover:border-emerald-400 hover:text-emerald-600'
+                              }`}
+                            >
+                              {company.name || company.vendor_name}
+                              {company.loan_stats?.active_loans > 0 && (
+                                <span className="ml-1 opacity-60">({company.loan_stats.active_loans} loans)</span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+                </>
+              );
+            })}
           </TableBody>
         </Table>
       </ScrollArea>
