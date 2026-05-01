@@ -384,6 +384,7 @@ export default function Layout() {
                 align="end"
                 className={`w-56 rounded-[8px] ${s.dropdownBg}`}
               >
+                
                 <div className="px-3 py-2.5">
                   <p className="text-sm font-semibold">{user?.name}</p>
                   <p className={`text-xs mt-0.5 ${s.userSubText}`}>{user?.email}</p>

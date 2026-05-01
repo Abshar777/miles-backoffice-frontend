@@ -9,6 +9,7 @@ import { UserCircle, Mail, Shield, Bell, BellOff } from 'lucide-react';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
+
 export default function Profile() {
   const { user } = useAuth();
   const { theme } = useTheme();
