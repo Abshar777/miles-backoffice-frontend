@@ -24,6 +24,7 @@ import Messages from "./pages/Messages";
 import AuditCompliance from "./pages/AuditCompliance";
 import LogsManagement from "./pages/Logs";
 import ReinstateCenter from "./pages/ReinstateCenter";
+import Profile from "./pages/Profile";
 import Layout from "./components/Layout";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
@@ -114,6 +115,7 @@ function AppRouter() {
         <Route path="reconciliation" element={<Reconciliation />} />
         <Route path="messages" element={<Messages />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="profile" element={<Profile />} />
         <Route 
           path="roles" 
           element={
