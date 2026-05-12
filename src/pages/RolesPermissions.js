@@ -88,8 +88,9 @@ export default function RolesPermissions() {
     description: '',
     hierarchy_level: 50,
     permissions: {},
-    treasury_account_ids: null, // null = all accounts; array = specific only
-    borrower_ids: null,         // null = all borrower companies; array = specific only
+    treasury_account_ids: null,  // null = all accounts; array = specific only
+    borrower_ids: null,          // null = all borrower companies; array = specific only
+    ie_own_entries_only: false,  // true = data entry team sees only their own entries
   });
 
   const getAuthHeaders = () => {
@@ -204,6 +205,7 @@ export default function RolesPermissions() {
           hierarchy_level: roleForm.hierarchy_level,
           treasury_account_ids: roleForm.treasury_account_ids,
           borrower_ids: roleForm.borrower_ids,
+          ie_own_entries_only: roleForm.ie_own_entries_only,
         }),
       });
       
@@ -229,6 +231,7 @@ export default function RolesPermissions() {
       permissions: role.permissions || {},
       treasury_account_ids: role.treasury_account_ids || null,
       borrower_ids: role.borrower_ids || null,
+      ie_own_entries_only: role.ie_own_entries_only || false,
     });
     setIsEditRoleOpen(true);
   };
@@ -242,6 +245,7 @@ export default function RolesPermissions() {
       permissions: {},
       treasury_account_ids: null,
       borrower_ids: null,
+      ie_own_entries_only: false,
     });
   };
 
@@ -338,8 +342,10 @@ export default function RolesPermissions() {
             {modules.map(module => {
               const isTreasury = module.id === 'treasury';
               const isLoans = module.id === 'loans';
+              const isIE = module.id === 'income_expenses';
               const hasTreasuryPerm = isTreasury && (roleForm.permissions['treasury']?.length || 0) > 0;
               const hasLoansPerm = isLoans && (roleForm.permissions['loans']?.length || 0) > 0;
+              const hasIEPerm = isIE && (roleForm.permissions['income_expenses']?.length || 0) > 0;
               return (
                 <>
                 <TableRow key={module.id} className="border-slate-200 hover:bg-slate-50">
@@ -459,6 +465,33 @@ export default function RolesPermissions() {
                             </button>
                           );
                         })}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {/* Income & Expenses — own entries only toggle */}
+                {hasIEPerm && (
+                  <TableRow key="ie-own-only" className="bg-violet-50/40 border-slate-200">
+                    <TableCell colSpan={actions.length + 2} className="py-2 px-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-semibold text-violet-700 shrink-0">Data Entry Restriction:</span>
+                        <button
+                          onClick={() => setRoleForm(prev => ({ ...prev, ie_own_entries_only: !prev.ie_own_entries_only }))}
+                          className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
+                            roleForm.ie_own_entries_only
+                              ? 'bg-violet-600 text-white border-violet-600'
+                              : 'bg-white text-slate-500 border-slate-300 hover:border-violet-400 hover:text-violet-600'
+                          }`}
+                        >
+                          <span className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${roleForm.ie_own_entries_only ? 'border-white' : 'border-slate-400'}`}>
+                            {roleForm.ie_own_entries_only && <span className="w-1.5 h-1.5 rounded-full bg-white block" />}
+                          </span>
+                          Own entries only — can only see &amp; access records they created
+                        </button>
+                        {!roleForm.ie_own_entries_only && (
+                          <span className="text-xs text-slate-400">All entries visible</span>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
