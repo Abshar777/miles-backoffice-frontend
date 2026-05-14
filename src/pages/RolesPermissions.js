@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Fragment } from 'react';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -347,8 +347,8 @@ export default function RolesPermissions() {
               const hasLoansPerm = isLoans && (roleForm.permissions['loans']?.length || 0) > 0;
               const hasIEPerm = isIE && (roleForm.permissions['income_expenses']?.length || 0) > 0;
               return (
-                <>
-                <TableRow key={module.id} className="border-slate-200 hover:bg-slate-50">
+                <Fragment key={module.id}>
+                <TableRow className="border-slate-200 hover:bg-slate-50">
                   <TableCell className="font-medium text-slate-700 sticky left-0 bg-white">
                     {module.name}
                   </TableCell>
@@ -496,7 +496,7 @@ export default function RolesPermissions() {
                     </TableCell>
                   </TableRow>
                 )}
-                </>
+                </Fragment>
               );
             })}
           </TableBody>
