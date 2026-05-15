@@ -88,9 +88,10 @@ export default function RolesPermissions() {
     description: '',
     hierarchy_level: 50,
     permissions: {},
-    treasury_account_ids: null,  // null = all accounts; array = specific only
-    borrower_ids: null,          // null = all borrower companies; array = specific only
-    ie_own_entries_only: false,  // true = data entry team sees only their own entries
+    treasury_account_ids: null,     // null = all accounts; array = specific only
+    borrower_ids: null,             // null = all borrower companies; array = specific only
+    ie_own_entries_only: false,     // true = data entry team sees only their own entries
+    transaction_type_ids: null,     // null = all types; array = specific types only
   });
 
   const getAuthHeaders = () => {
@@ -206,6 +207,7 @@ export default function RolesPermissions() {
           treasury_account_ids: roleForm.treasury_account_ids,
           borrower_ids: roleForm.borrower_ids,
           ie_own_entries_only: roleForm.ie_own_entries_only,
+          transaction_type_ids: roleForm.transaction_type_ids,
         }),
       });
       
@@ -232,6 +234,7 @@ export default function RolesPermissions() {
       treasury_account_ids: role.treasury_account_ids || null,
       borrower_ids: role.borrower_ids || null,
       ie_own_entries_only: role.ie_own_entries_only || false,
+      transaction_type_ids: role.transaction_type_ids || null,
     });
     setIsEditRoleOpen(true);
   };
@@ -246,6 +249,7 @@ export default function RolesPermissions() {
       treasury_account_ids: null,
       borrower_ids: null,
       ie_own_entries_only: false,
+      transaction_type_ids: null,
     });
   };
 
@@ -343,9 +347,12 @@ export default function RolesPermissions() {
               const isTreasury = module.id === 'treasury';
               const isLoans = module.id === 'loans';
               const isIE = module.id === 'income_expenses';
+              const isTransactions = module.id === 'transactions';
               const hasTreasuryPerm = isTreasury && (roleForm.permissions['treasury']?.length || 0) > 0;
               const hasLoansPerm = isLoans && (roleForm.permissions['loans']?.length || 0) > 0;
               const hasIEPerm = isIE && (roleForm.permissions['income_expenses']?.length || 0) > 0;
+              const hasTransactionsPerm = isTransactions && (roleForm.permissions['transactions']?.length || 0) > 0;
+              const TRANSACTION_TYPES = ['deposit','withdrawal','transfer','commission','rebate','adjustment'];
               return (
                 <Fragment key={module.id}>
                 <TableRow className="border-slate-200 hover:bg-slate-50">
@@ -492,6 +499,48 @@ export default function RolesPermissions() {
                         {!roleForm.ie_own_entries_only && (
                           <span className="text-xs text-slate-400">All entries visible</span>
                         )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {/* Transactions — allowed transaction types selector */}
+                {hasTransactionsPerm && (
+                  <TableRow key="tx-types" className="bg-amber-50/40 border-slate-200">
+                    <TableCell colSpan={actions.length + 2} className="py-2 px-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-amber-700 shrink-0">Allowed Types:</span>
+                        <button
+                          onClick={() => setRoleForm(prev => ({ ...prev, transaction_type_ids: null }))}
+                          className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                            roleForm.transaction_type_ids === null
+                              ? 'bg-amber-600 text-white border-amber-600'
+                              : 'bg-white text-slate-500 border-slate-300 hover:border-amber-400'
+                          }`}
+                        >All</button>
+                        {TRANSACTION_TYPES.map(type => {
+                          const selected = Array.isArray(roleForm.transaction_type_ids) &&
+                            roleForm.transaction_type_ids.includes(type);
+                          return (
+                            <button
+                              key={type}
+                              onClick={() => {
+                                setRoleForm(prev => {
+                                  const current = Array.isArray(prev.transaction_type_ids) ? prev.transaction_type_ids : [];
+                                  const next = selected
+                                    ? current.filter(t => t !== type)
+                                    : [...current, type];
+                                  return { ...prev, transaction_type_ids: next.length ? next : null };
+                                });
+                              }}
+                              className={`text-xs px-2.5 py-1 rounded-full border font-medium capitalize transition-colors ${
+                                selected
+                                  ? 'bg-amber-100 text-amber-700 border-amber-400'
+                                  : 'bg-white text-slate-500 border-slate-300 hover:border-amber-400 hover:text-amber-600'
+                              }`}
+                            >{type}</button>
+                          );
+                        })}
                       </div>
                     </TableCell>
                   </TableRow>
