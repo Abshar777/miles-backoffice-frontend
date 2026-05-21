@@ -1873,7 +1873,10 @@ export default function PSPs() {
                               <TableCell>
                                 <div className="font-mono text-green-500 font-bold text-xs">
                                   +${settlement.net_amount?.toLocaleString()}
-                                  {hasDiffCurrency && baseNet != null && <p className="text-[10px] text-blue-500 font-normal">{baseNet.toLocaleString(undefined, {maximumFractionDigits: 2})} {settlement.payment_currency}</p>}
+                                  {hasDiffCurrency && (settlement.treasury_amount != null
+                                    ? <p className="text-[10px] text-blue-500 font-normal">{settlement.treasury_amount.toLocaleString(undefined, {maximumFractionDigits: 2})} {settlement.treasury_currency || settlement.payment_currency}</p>
+                                    : baseNet != null && <p className="text-[10px] text-blue-500 font-normal">{baseNet.toLocaleString(undefined, {maximumFractionDigits: 2})} {settlement.payment_currency}</p>
+                                  )}
                                 </div>
                               </TableCell>
                               <TableCell className="text-slate-500 text-xs">{formatDate(settlement.settled_at || settlement.created_at)}</TableCell>
