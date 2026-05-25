@@ -3209,8 +3209,8 @@ export default function AccountantDashboard() {
                           )}
                           {filteredPsps.map((psp) => (
                             <SelectItem
-                              key={`psp_${psp.psp_id}`}
-                              value={`psp_${psp.psp_id}`}
+                              key={`${psp.psp_id}`}
+                              value={`${psp.psp_id}`}
                               className="text-slate-900 hover:bg-slate-50"
                             >
                               <div className="flex items-center gap-2">
