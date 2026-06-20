@@ -1342,8 +1342,8 @@ export default function Reconciliation() {
                                         {tx.reference || tx.client_name || 'Transaction'}
                                       </p>
                                       <p className="text-xs text-slate-400 capitalize">{txType}</p>
-                                      {tx.description && (
-                                        <p className="text-xs text-slate-500 truncate mt-0.5">{tx.description}</p>
+                                      {(tx.description || tx.client_name) && (
+                                        <p className="text-xs text-slate-500 truncate mt-0.5">{tx.description || tx.client_name}</p>
                                       )}
                                       {/* Tag chips */}
                                       {(tx.client_tags || []).length > 0 && (
