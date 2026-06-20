@@ -206,6 +206,8 @@ export default function Loans() {
     try {
       let url = `${API_URL}/api/loans?page=${currentPage}&page_size=${pageSize}`;
       if (statusFilter) url += `&status=${statusFilter}`;
+      if (borrowerFilter) url += `&borrower=${encodeURIComponent(borrowerFilter)}`;
+      if (loanSearch) url += `&search=${encodeURIComponent(loanSearch)}`;
 
       const response = await fetch(url, {
         headers: getAuthHeaders(),
