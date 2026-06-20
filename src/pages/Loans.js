@@ -131,6 +131,7 @@ export default function Loans() {
   // Filters for All Loans tab
   const [statusFilter, setStatusFilter] = useState("");
   const [borrowerFilter, setBorrowerFilter] = useState("");
+  const [loanSearch, setLoanSearch] = useState("");
   const [principalMinFilter, setPrincipalMinFilter] = useState("");
   const [principalMaxFilter, setPrincipalMaxFilter] = useState("");
   const [outstandingMinFilter, setOutstandingMinFilter] = useState("");
