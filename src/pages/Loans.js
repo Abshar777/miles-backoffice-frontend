@@ -225,7 +225,7 @@ export default function Loans() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, currentPage, pageSize]);
+  }, [statusFilter, borrowerFilter, loanSearch, currentPage, pageSize]);
 
   const fetchTreasuryAccounts = async () => {
     try {
@@ -1524,7 +1524,22 @@ export default function Loans() {
                     </Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  {/* Search by loan ID */}
+                  <div>
+                    <Label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">
+                      Search
+                    </Label>
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input
+                        placeholder="Loan ID…"
+                        value={loanSearch}
+                        onChange={(e) => { setLoanSearch(e.target.value); setCurrentPage(1); }}
+                        className="pl-8 h-9 border-slate-200 text-sm"
+                      />
+                    </div>
+                  </div>
                   {/* Borrower Filter */}
                   <div>
                     <Label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">
@@ -1535,7 +1550,7 @@ export default function Loans() {
                       <Input
                         placeholder="Search borrower..."
                         value={borrowerFilter}
-                        onChange={(e) => setBorrowerFilter(e.target.value)}
+                        onChange={(e) => { setBorrowerFilter(e.target.value); setCurrentPage(1); }}
                         className="pl-8 h-9 border-slate-200 text-sm"
                         data-testid="borrower-filter"
                       />
