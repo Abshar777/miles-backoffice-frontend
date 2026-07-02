@@ -20,7 +20,9 @@ import {
   MessageSquare, Send, Users, User, Search, Plus, Check, CheckCheck,
   Loader2, Paperclip, X, FileText, Image as ImageIcon, FileSpreadsheet, File,
   Hash, MessageCircle, ChevronRight, Video, ZoomIn, PanelRightOpen, Settings, Trash2,
+  Bell, BellOff,
 } from 'lucide-react';
+import { useChatNotification } from '../context/ChatNotificationContext';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -92,15 +94,19 @@ export default function Messages() {
   const atDmBottomRef = useRef(true);
   const atChannelBottomRef = useRef(true);
 
-  // Stable refs for WS handler (avoid stale closures)
+  // Stable refs so WS handlers always see fresh selected state
   const selectedConvRef = useRef(null);
   const selectedChannelRef = useRef(null);
   const threadMsgRef = useRef(null);
-  const wsHandlerRef = useRef(null);
 
   useEffect(() => { selectedConvRef.current = selectedConversation; }, [selectedConversation]);
   useEffect(() => { selectedChannelRef.current = selectedChannel; }, [selectedChannel]);
   useEffect(() => { threadMsgRef.current = threadMsg; }, [threadMsg]);
+
+  const { registerHandler, soundEnabled, toggleSound, trackThreadParticipation, hasParticipated, resetUnread } = useChatNotification();
+
+  // Clear handler on unmount so context doesn't call into a dead component
+  useEffect(() => () => registerHandler(null), [registerHandler]);
 
   const isAdmin = user?.role === 'admin';
 
@@ -215,19 +221,36 @@ export default function Messages() {
     atChannelBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
   };
 
-  // ── WebSocket ──────────────────────────────────────────────────────────────
-  // The handler ref is reassigned every render so it always captures latest state
-  wsHandlerRef.current = (data) => {
+  // ── Register WS handler with global context (reassigned each render for fresh closure) ──
+  registerHandler((data) => {
     switch (data.type) {
       case 'dm_message': {
         const msg = data.message;
         const otherId = msg.sender_id === user?.user_id ? msg.recipient_id : msg.sender_id;
         if (selectedConvRef.current?.user_id === otherId) {
           setMessages(prev => prev.some(m => m.message_id === msg.message_id) ? prev : [...prev, msg]);
+        } else if (msg.sender_id !== user?.user_id) {
+          // In-page toast when on Messages page but viewing a different conversation
+          const preview = msg.content || (msg.attachments?.length ? '📎 Attachment' : '');
+          toast(`💬 ${msg.sender_name}`, {
+            description: preview,
+            action: {
+              label: 'View',
+              onClick: () => {
+                const conv = conversations.find(c => c.user_id === otherId)
+                  || { user_id: otherId, name: msg.sender_name, email: '', role: '' };
+                setSelectedConversation(conv);
+                setActiveSection('dm');
+                setSelectedChannel(null);
+                setThreadMsg(null);
+              },
+            },
+            duration: 6000,
+          });
         }
         setConversations(prev => {
           const exists = prev.some(c => c.user_id === otherId);
-          const preview = msg.content || (msg.attachment ? '📎 Attachment' : '');
+          const preview = msg.content || (msg.attachments?.length ? '📎 Attachment' : '');
           if (exists) {
             return prev.map(c => c.user_id === otherId ? {
               ...c,
@@ -253,6 +276,20 @@ export default function Messages() {
         const msg = data.message;
         if (selectedChannelRef.current?.channel_id === msg.channel_id) {
           setChannelMessages(prev => prev.some(m => m.msg_id === msg.msg_id) ? prev : [...prev, msg]);
+        } else if (msg.sender_id !== user?.user_id) {
+          // In-page toast for a different channel
+          const chName = data.channel_name || channels.find(c => c.channel_id === msg.channel_id)?.name || 'Channel';
+          toast(`# ${chName}`, {
+            description: `${msg.sender_name}: ${msg.content || '📎'}`,
+            action: {
+              label: 'View',
+              onClick: () => {
+                const ch = channels.find(c => c.channel_id === msg.channel_id);
+                if (ch) { setSelectedChannel(ch); setActiveSection('channels'); setSelectedConversation(null); setThreadMsg(null); }
+              },
+            },
+            duration: 6000,
+          });
         }
         setChannels(prev => prev.map(ch => ch.channel_id === msg.channel_id ? {
           ...ch,
@@ -273,45 +310,23 @@ export default function Messages() {
             ? { ...m, reply_count: (m.reply_count || 0) + (prev.some(x => x.msg_id === reply.msg_id) ? 0 : 1) }
             : m));
         }
+        // In-page toast if user is author or participated in this thread but not currently viewing it
+        if (reply.sender_id !== user?.user_id) {
+          const isParent = data.parent_sender_id === user?.user_id;
+          const participated = hasParticipated(reply.channel_id, reply.thread_root_id);
+          const threadOpen = threadMsgRef.current?.msg_id === reply.thread_root_id;
+          if ((isParent || participated) && !threadOpen) {
+            toast(`↩ ${reply.sender_name} replied in thread`, {
+              description: reply.content || '📎',
+              duration: 6000,
+            });
+          }
+        }
         break;
       }
       default: break;
     }
-  };
-
-  useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    if (!token) return;
-    let ws;
-    let reconnectTimer;
-    let pingInterval;
-    let destroyed = false;
-
-    const connect = () => {
-      if (destroyed) return;
-      const wsBase = API_URL.replace(/^http/, 'ws');
-      ws = new WebSocket(`${wsBase}/api/ws?token=${encodeURIComponent(token)}`);
-      ws.onmessage = (e) => {
-        if (e.data === 'pong') return;
-        try { wsHandlerRef.current?.(JSON.parse(e.data)); } catch (err) { /* ignore */ }
-      };
-      ws.onclose = () => { if (!destroyed) reconnectTimer = setTimeout(connect, 3000); };
-      ws.onerror = () => ws.close();
-    };
-
-    connect();
-    pingInterval = setInterval(() => {
-      if (ws?.readyState === WebSocket.OPEN) ws.send('ping');
-    }, 25000);
-
-    return () => {
-      destroyed = true;
-      clearTimeout(reconnectTimer);
-      clearInterval(pingInterval);
-      ws?.close();
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   // Auto-scroll when new messages arrive
   useEffect(() => {
@@ -444,6 +459,7 @@ export default function Messages() {
         setThreadReplies(prev => prev.some(m => m.msg_id === reply.msg_id) ? prev : [...prev, reply]);
         setChannelMessages(prev => prev.map(m => m.msg_id === threadMsg.msg_id
           ? { ...m, reply_count: (m.reply_count || 0) + 1 } : m));
+        trackThreadParticipation(selectedChannel.channel_id, threadMsg.msg_id);
       } else toast.error(await getApiError(r));
     } catch (e) { toast.error(e?.message || 'Something went wrong'); } finally { setSendingThread(false); }
   };
@@ -649,6 +665,14 @@ export default function Messages() {
           <h1 className="text-2xl font-bold text-slate-800">Messages</h1>
           <p className="text-slate-500 mt-0.5 text-sm">Direct messages &amp; group channels</p>
         </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleSound}
+            title={soundEnabled ? 'Mute notifications' : 'Unmute notifications'}
+            className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+          >
+            {soundEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+          </button>
         {isAdmin && (
           <div className="flex items-center bg-slate-100 rounded-lg p-1">
             <Button variant={viewMode === 'my' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('my')} className="rounded-md">
@@ -659,6 +683,7 @@ export default function Messages() {
             </Button>
           </div>
         )}
+        </div>
       </div>
 
       {/* Admin all-comms view */}
