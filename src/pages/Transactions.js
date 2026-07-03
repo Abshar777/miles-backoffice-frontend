@@ -386,8 +386,8 @@ export default function Transactions() {
       }
       if (searchTerm) params.append("search", searchTerm);
       if (emailFilter) params.append("client_email", emailFilter);
-      if (dateFrom) params.append(txDateType === "approved" ? "approved_date_from" : txDateType === "bank_receipt" ? "bank_receipt_date_from" : "date_from", dateFrom);
-      if (dateTo) params.append(txDateType === "approved" ? "approved_date_to" : txDateType === "bank_receipt" ? "bank_receipt_date_to" : "date_to", dateTo);
+      if (dateFrom) params.append(txDateType === "approved" ? "approved_date_from" : txDateType === "bank_receipt" ? "bank_receipt_date_from" : txDateType === "request_processed" ? "request_processed_date_from" : "date_from", dateFrom);
+      if (dateTo) params.append(txDateType === "approved" ? "approved_date_to" : txDateType === "bank_receipt" ? "bank_receipt_date_to" : txDateType === "request_processed" ? "request_processed_date_to" : "date_to", dateTo);
       if (tagFilter && tagFilter !== "all")
         params.append("client_tag", tagFilter);
       if (txnTagFilter && txnTagFilter !== "all")
@@ -1262,8 +1262,8 @@ export default function Transactions() {
     }
     if (searchTerm) params.append("search", searchTerm);
     if (emailFilter) params.append("client_email", emailFilter);
-    if (dateFrom) params.append(txDateType === "approved" ? "approved_date_from" : txDateType === "bank_receipt" ? "bank_receipt_date_from" : "date_from", dateFrom);
-    if (dateTo) params.append(txDateType === "approved" ? "approved_date_to" : txDateType === "bank_receipt" ? "bank_receipt_date_to" : "date_to", dateTo);
+    if (dateFrom) params.append(txDateType === "approved" ? "approved_date_from" : txDateType === "bank_receipt" ? "bank_receipt_date_from" : txDateType === "request_processed" ? "request_processed_date_from" : "date_from", dateFrom);
+    if (dateTo) params.append(txDateType === "approved" ? "approved_date_to" : txDateType === "bank_receipt" ? "bank_receipt_date_to" : txDateType === "request_processed" ? "request_processed_date_to" : "date_to", dateTo);
     if (tagFilter && tagFilter !== "all") params.append("client_tag", tagFilter);
     if (txnTagFilter && txnTagFilter !== "all") params.append("transaction_tag", txnTagFilter);
 
@@ -3166,6 +3166,7 @@ export default function Transactions() {
             <option value="transaction">Txn Date</option>
             <option value="approved">Processed Date</option>
             <option value="bank_receipt">Approved Date</option>
+            <option value="request_processed">Req. Processed Date</option>
           </select>
           <div className="flex items-center gap-1">
             <span className="text-xs text-slate-500">From:</span>
@@ -3235,6 +3236,9 @@ export default function Transactions() {
                     Approved Date
                   </TableHead>
                   <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">
+                    Req. Processed Date
+                  </TableHead>
+                  <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">
                     CRM Ref
                   </TableHead>
                   <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">
@@ -3272,14 +3276,14 @@ export default function Transactions() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={15} className="text-center py-8">
+                    <TableCell colSpan={16} className="text-center py-8">
                       <div className="w-6 h-6 border-2 border-[#66FCF1] border-t-transparent rounded-full animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
                 ) : filteredTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={15}
+                      colSpan={16}
                       className="text-center py-8 text-slate-500"
                     >
                       No transactions found
@@ -3327,6 +3331,9 @@ export default function Transactions() {
                       </TableCell>
                       <TableCell className="text-slate-500 text-xs whitespace-nowrap">
                         {tx.bank_receipt_date ? formatDate(tx.bank_receipt_date) : "-"}
+                      </TableCell>
+                      <TableCell className="text-slate-500 text-xs whitespace-nowrap">
+                        {tx.request_processed_at ? formatDate(tx.request_processed_at) : "-"}
                       </TableCell>
                       <TableCell className="font-mono text-xs text-purple-600">
                         {tx.crm_reference || "-"}
