@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { ScrollArea } from "../components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Download, TrendingUp, TrendingDown, Wallet, Loader2 } from "lucide-react";
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -58,6 +59,29 @@ export default function DailyPnL() {
   const [grandUsd, setGrandUsd] = useState({ income: 0, expenses: 0, net: 0 });
   const [loading, setLoading] = useState(true);
   const [currency, setCurrency] = useState("all");
+  const [dayModal, setDayModal] = useState(null); // { date, currency } being drilled into
+  const [dayEntries, setDayEntries] = useState([]);
+  const [dayLoading, setDayLoading] = useState(false);
+
+  const openDay = useCallback(async (row) => {
+    setDayModal({ date: row.date, currency: row.currency });
+    setDayEntries([]);
+    setDayLoading(true);
+    try {
+      const params = new URLSearchParams({ date: row.date });
+      if (row.currency) params.set("currency", row.currency);
+      const res = await fetch(
+        `${API_URL}/api/reports/daily-pnl/entries?${params.toString()}`,
+        { headers: getAuthHeaders(), credentials: "include" },
+      );
+      if (res.ok) {
+        const d = await res.json();
+        setDayEntries(Array.isArray(d.entries) ? d.entries : []);
+      }
+    } catch (e) { /* ignore */ } finally {
+      setDayLoading(false);
+    }
+  }, []);
 
   const fetchReport = useCallback(async () => {
     setLoading(true);
@@ -200,7 +224,7 @@ export default function DailyPnL() {
                 ) : (
                   <>
                     {displayRows.map((r) => (
-                      <TableRow key={`${r.date}-${r.currency}`} className="border-slate-200 hover:bg-slate-50">
+                      <TableRow key={`${r.date}-${r.currency}`} onClick={() => openDay(r)} title="View this day's transactions" className="border-slate-200 hover:bg-slate-50 cursor-pointer">
                         <TableCell className="text-slate-700 text-sm whitespace-nowrap">{fmtDate(r.date)}</TableCell>
                         <TableCell><span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">{r.currency}</span></TableCell>
                         <TableCell className="text-right font-mono text-emerald-600">{fmtNum(r.income)}</TableCell>
@@ -261,6 +285,51 @@ export default function DailyPnL() {
           </CardContent>
         </Card>
       )}
+
+      {/* Day drill-down: that day's income/expense transactions with descriptions */}
+      <Dialog open={!!dayModal} onOpenChange={(o) => { if (!o) setDayModal(null); }}>
+        <DialogContent className="bg-white border-slate-200 max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-slate-800">
+              {dayModal ? `${fmtDate(dayModal.date)} · ${dayModal.currency}` : ""} — Transactions
+            </DialogTitle>
+          </DialogHeader>
+          {dayLoading ? (
+            <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-slate-400" /></div>
+          ) : dayEntries.length === 0 ? (
+            <div className="py-10 text-center text-slate-500 text-sm">No transactions for this day</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-slate-200 hover:bg-transparent">
+                  <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Description</TableHead>
+                  <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Category</TableHead>
+                  <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Type</TableHead>
+                  <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs text-right">Amount</TableHead>
+                  <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">By</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {dayEntries.map((e, i) => (
+                  <TableRow key={e.entry_id || i} className="border-slate-200 hover:bg-slate-50">
+                    <TableCell className="text-slate-700 text-sm">{e.description || "—"}</TableCell>
+                    <TableCell className="text-slate-500 text-xs">{e.category || "—"}</TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${e.entry_type === "income" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}>
+                        {e.entry_type === "income" ? "Income" : "Expense"}
+                      </span>
+                    </TableCell>
+                    <TableCell className={`text-right font-mono ${e.entry_type === "income" ? "text-emerald-600" : "text-red-500"}`}>
+                      {e.entry_type === "income" ? "+" : "-"}{e.currency} {fmtNum(e.amount)}
+                    </TableCell>
+                    <TableCell className="text-slate-500 text-xs">{e.created_by_name || "—"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
