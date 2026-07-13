@@ -946,7 +946,7 @@ export default function Reconciliation() {
                 </div>
                 <div className="flex-1 min-w-[200px]">
                   <Label className="text-xs text-slate-500 mb-1 block">
-                    File — PDF, XLSX, XLS, CSV, TXT
+                    File — PDF, XLSX, XLS, CSV, TXT · or paste (Ctrl/Cmd+V)
                   </Label>
                   <Input
                     ref={fileInputRef}

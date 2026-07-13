@@ -2292,7 +2292,7 @@ export default function TransactionRequests() {
                     <div className="space-y-2">
                       <Upload className="w-8 h-8 mx-auto text-slate-500" />
                       <p className="text-sm text-slate-500">Click to upload proof of payment</p>
-                      <p className="text-xs text-slate-500/60">PNG, JPG, PDF up to 10MB · multiple allowed</p>
+                      <p className="text-xs text-slate-500/60">PNG, JPG, PDF up to 10MB · multiple · or paste (Ctrl/Cmd+V)</p>
                     </div>
                   )}
                 </label>

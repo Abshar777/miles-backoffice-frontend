@@ -2775,7 +2775,7 @@ export default function Loans() {
                     Click to attach files
                   </span>
                   <span className="text-[10px] text-slate-400">
-                    PDF, Excel, Images (max 10MB each)
+                    PDF, Excel, Images (max 10MB each) · or paste (Ctrl/Cmd+V)
                   </span>
                 </label>
               </div>
