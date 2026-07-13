@@ -20,7 +20,7 @@ import {
   MessageSquare, Send, Users, User, Search, Plus, Check, CheckCheck,
   Loader2, Paperclip, X, FileText, Image as ImageIcon, FileSpreadsheet, File,
   Hash, MessageCircle, ChevronRight, Video, ZoomIn, PanelRightOpen, Settings, Trash2,
-  Bell, BellOff,
+  Bell, BellOff, Pencil, Search as SearchIcon,
 } from 'lucide-react';
 import { useChatNotification } from '../context/ChatNotificationContext';
 
@@ -54,6 +54,11 @@ export default function Messages() {
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [channelMessages, setChannelMessages] = useState([]);
+  // Message edit / in-chat search + filter
+  const [editingId, setEditingId] = useState(null);   // message_id (DM) or msg_id (channel)
+  const [editText, setEditText] = useState('');
+  const [msgSearch, setMsgSearch] = useState('');
+  const [msgFilter, setMsgFilter] = useState('all');  // all | media | links
   const [activeSection, setActiveSection] = useState('dm');
   const [channelMsg, setChannelMsg] = useState('');
   const [channelFiles, setChannelFiles] = useState([]);
@@ -111,25 +116,36 @@ export default function Messages() {
   const isAdmin = user?.role === 'admin';
 
   // ── Helpers ────────────────────────────────────────────────────────────────
+  // All chat times are shown in IST (Asia/Kolkata)
+  const IST = 'Asia/Kolkata';
   const formatTime = (d) => {
     if (!d) return '';
     const dt = new Date(d);
     const now = new Date();
     const diff = Math.floor((now - dt) / 86400000);
-    if (diff === 0) return dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    if (diff === 0) return dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: IST });
     if (diff === 1) return 'Yesterday';
-    if (diff < 7) return dt.toLocaleDateString('en-US', { weekday: 'short' });
-    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (diff < 7) return dt.toLocaleDateString('en-US', { weekday: 'short', timeZone: IST });
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: IST });
   };
 
   const formatFullTime = (d) => {
     if (!d) return '';
-    return new Date(d).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return new Date(d).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: IST });
   };
 
   const formatDate = (d) => {
     if (!d) return '';
-    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: IST });
+  };
+
+  // Full IST date + time (for tooltips): "11 Jul 2026, 08:46 PM IST"
+  const formatISTFull = (d) => {
+    if (!d) return '';
+    return new Date(d).toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true, timeZone: IST,
+    }) + ' IST';
   };
 
   const getDateLabel = (d) => {
@@ -139,6 +155,75 @@ export default function Messages() {
     if (dt.toDateString() === today.toDateString()) return 'Today';
     if (dt.toDateString() === yesterday.toDateString()) return 'Yesterday';
     return dt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  };
+
+  // ── Edit / delete message handlers ─────────────────────────────────────────
+  const startEdit = (id, content) => { setEditingId(id); setEditText(content || ''); };
+  const cancelEdit = () => { setEditingId(null); setEditText(''); };
+
+  const saveEditDM = async (message_id) => {
+    const content = editText.trim();
+    try {
+      const r = await fetch(`${API_URL}/api/messages/${message_id}`, {
+        method: 'PUT',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content }),
+      });
+      if (r.ok) {
+        const u = await r.json();
+        setMessages(prev => prev.map(m => m.message_id === message_id ? u : m));
+        cancelEdit();
+      } else { toast.error((await r.json().catch(() => ({})))?.detail || 'Edit failed'); }
+    } catch { toast.error('Edit failed'); }
+  };
+
+  const deleteDM = async (message_id) => {
+    if (!window.confirm('Delete this message?')) return;
+    try {
+      const r = await fetch(`${API_URL}/api/messages/${message_id}`, {
+        method: 'DELETE', headers: getAuthHeaders(), credentials: 'include',
+      });
+      if (r.ok) setMessages(prev => prev.map(m => m.message_id === message_id ? { ...m, deleted: true, content: '', attachment: null } : m));
+      else toast.error('Delete failed');
+    } catch { toast.error('Delete failed'); }
+  };
+
+  const saveEditChannel = async (msg_id) => {
+    const content = editText.trim();
+    if (!selectedChannel) return;
+    try {
+      const r = await fetch(`${API_URL}/api/channels/${selectedChannel.channel_id}/messages/${msg_id}`, {
+        method: 'PUT',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content }),
+      });
+      if (r.ok) {
+        const u = await r.json();
+        setChannelMessages(prev => prev.map(m => m.msg_id === msg_id ? { ...m, ...u } : m));
+        cancelEdit();
+      } else { toast.error((await r.json().catch(() => ({})))?.detail || 'Edit failed'); }
+    } catch { toast.error('Edit failed'); }
+  };
+
+  const deleteChannelMsg = async (msg_id) => {
+    if (!selectedChannel || !window.confirm('Delete this message?')) return;
+    try {
+      const r = await fetch(`${API_URL}/api/channels/${selectedChannel.channel_id}/messages/${msg_id}`, {
+        method: 'DELETE', headers: getAuthHeaders(), credentials: 'include',
+      });
+      if (r.ok) setChannelMessages(prev => prev.map(m => m.msg_id === msg_id ? { ...m, deleted: true, content: '', attachments: [] } : m));
+      else toast.error('Delete failed');
+    } catch { toast.error('Delete failed'); }
+  };
+
+  // In-chat search + filter predicate
+  const msgMatches = (m) => {
+    if (msgFilter === 'media' && !(m.attachment || (m.attachments && m.attachments.length))) return false;
+    if (msgFilter === 'links' && !/https?:\/\//i.test(m.content || '')) return false;
+    if (msgSearch && !((m.content || '').toLowerCase().includes(msgSearch.toLowerCase()))) return false;
+    return true;
   };
 
   const getInitials = (n) => !n ? '?' : n.split(' ').map(s => s[0]).join('').toUpperCase().slice(0, 2);
@@ -322,6 +407,18 @@ export default function Messages() {
             });
           }
         }
+        break;
+      }
+      case 'dm_edit':
+      case 'dm_delete': {
+        const m = data.message;
+        setMessages(prev => prev.map(x => x.message_id === m.message_id ? m : x));
+        break;
+      }
+      case 'channel_edit':
+      case 'channel_delete': {
+        const m = data.message;
+        setChannelMessages(prev => prev.map(x => x.msg_id === m.msg_id ? { ...x, ...m } : x));
         break;
       }
       default: break;
@@ -875,6 +972,24 @@ export default function Messages() {
                     </div>
                   </div>
 
+                  {/* Channel search + filter */}
+                  <div className="flex items-center gap-2 px-4 py-2 border-b bg-slate-50/60 shrink-0">
+                    <div className="relative flex-1 max-w-xs">
+                      <SearchIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input value={msgSearch} onChange={e => setMsgSearch(e.target.value)} placeholder="Search messages…"
+                        className="w-full pl-8 pr-2 h-8 text-sm rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-blue-300" />
+                    </div>
+                    <select value={msgFilter} onChange={e => setMsgFilter(e.target.value)}
+                      className="h-8 text-xs rounded-md border border-slate-200 bg-white px-2 text-slate-600">
+                      <option value="all">All</option>
+                      <option value="media">Media</option>
+                      <option value="links">Links</option>
+                    </select>
+                    {(msgSearch || msgFilter !== 'all') && (
+                      <button onClick={() => { setMsgSearch(''); setMsgFilter('all'); }} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-0.5"><X className="w-3.5 h-3.5" />Clear</button>
+                    )}
+                  </div>
+
                   {/* Channel messages */}
                   <div ref={channelScrollRef} onScroll={handleChannelScroll} className="flex-1 overflow-y-auto py-2">
                     {channelMessages.length === 0 ? (
@@ -884,7 +999,7 @@ export default function Messages() {
                         <p className="text-sm mt-1">Be the first to say something in #{selectedChannel.name}</p>
                       </div>
                     ) : (
-                      groupedChannelMessages.map(msg => {
+                      groupedChannelMessages.filter(msgMatches).map(msg => {
                         const isSelf = msg.sender_id === user?.user_id;
                         const openThread = () => { setThreadMsg(msg); if (selectedChannel) fetchThreadReplies(selectedChannel.channel_id, msg.msg_id); };
                         return (
@@ -925,18 +1040,36 @@ export default function Messages() {
                                   </button>
                                 )}
                                 {/* Bubble (text + attachments together) */}
-                                {(msg.content || msg.attachments?.length > 0) && (
-                                  <div className={`inline-block rounded-2xl px-4 py-2.5 max-w-lg ${
+                                {msg.deleted ? (
+                                  <div className="inline-block rounded-2xl px-4 py-2 max-w-lg bg-slate-100 text-slate-400 italic text-sm">🚫 This message was deleted</div>
+                                ) : editingId === msg.msg_id ? (
+                                  <div className="flex flex-col gap-1 max-w-lg">
+                                    <textarea value={editText} onChange={e => setEditText(e.target.value)} rows={2}
+                                      className="w-full text-sm rounded-lg border border-blue-300 px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400" autoFocus />
+                                    <div className="flex gap-2">
+                                      <button onClick={() => saveEditChannel(msg.msg_id)} className="text-xs bg-blue-600 text-white rounded px-2 py-0.5 hover:bg-blue-700">Save</button>
+                                      <button onClick={cancelEdit} className="text-xs text-slate-500 hover:text-slate-700">Cancel</button>
+                                    </div>
+                                  </div>
+                                ) : (msg.content || msg.attachments?.length > 0) && (
+                                  <div className={`relative group/msg inline-block rounded-2xl px-4 py-2.5 max-w-lg ${
                                     isSelf
                                       ? 'bg-blue-600 text-white rounded-tl-sm'
                                       : 'bg-slate-100 text-slate-800 rounded-tl-sm'
                                   }`}>
+                                    {(isSelf || isAdmin) && (
+                                      <div className="absolute -top-2 -right-2 opacity-0 group-hover/msg:opacity-100 transition-opacity flex gap-0.5 bg-white border border-slate-200 rounded-full shadow-sm px-1 z-10">
+                                        {isSelf && <button title="Edit" onClick={() => startEdit(msg.msg_id, msg.content)} className="p-1 text-slate-500 hover:text-blue-600"><Pencil className="w-3 h-3" /></button>}
+                                        <button title="Delete" onClick={() => deleteChannelMsg(msg.msg_id)} className="p-1 text-slate-500 hover:text-red-600"><Trash2 className="w-3 h-3" /></button>
+                                      </div>
+                                    )}
                                     {msg.content && (
                                       <p className={`text-sm whitespace-pre-wrap leading-relaxed ${isSelf ? 'text-white' : 'text-slate-800'}`}>
                                         {msg.content}
                                       </p>
                                     )}
                                     {msg.attachments?.length > 0 && renderAttachments(msg.attachments, isSelf)}
+                                    {msg.edited && <span className={`text-[10px] ml-1 ${isSelf ? 'text-blue-200' : 'text-slate-400'}`}>(edited)</span>}
                                   </div>
                                 )}
                                 {/* Thread reply count */}
@@ -1008,6 +1141,24 @@ export default function Messages() {
                     <Badge variant="outline" className="text-xs shrink-0">{selectedConversation.role}</Badge>
                   </div>
 
+                  {/* DM search + filter */}
+                  <div className="flex items-center gap-2 px-4 py-2 border-b bg-slate-50/60 shrink-0">
+                    <div className="relative flex-1 max-w-xs">
+                      <SearchIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input value={msgSearch} onChange={e => setMsgSearch(e.target.value)} placeholder="Search messages…"
+                        className="w-full pl-8 pr-2 h-8 text-sm rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-blue-300" />
+                    </div>
+                    <select value={msgFilter} onChange={e => setMsgFilter(e.target.value)}
+                      className="h-8 text-xs rounded-md border border-slate-200 bg-white px-2 text-slate-600">
+                      <option value="all">All</option>
+                      <option value="media">Media</option>
+                      <option value="links">Links</option>
+                    </select>
+                    {(msgSearch || msgFilter !== 'all') && (
+                      <button onClick={() => { setMsgSearch(''); setMsgFilter('all'); }} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-0.5"><X className="w-3.5 h-3.5" />Clear</button>
+                    )}
+                  </div>
+
                   {/* DM messages */}
                   <div ref={dmScrollRef} onScroll={handleDmScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
                     {messages.length === 0 ? (
@@ -1016,9 +1167,9 @@ export default function Messages() {
                         <p className="font-medium text-slate-600">No messages yet</p>
                         <p className="text-sm mt-1">Start the conversation</p>
                       </div>
-                    ) : messages.map((msg, i) => {
+                    ) : messages.filter(msgMatches).map((msg, i, arr) => {
                       const isSelf = msg.sender_id === user?.user_id;
-                      const prev = messages[i - 1];
+                      const prev = arr[i - 1];
                       const sameDay = prev && new Date(msg.created_at).toDateString() === new Date(prev.created_at).toDateString();
                       return (
                         <div key={msg.message_id}>
@@ -1032,7 +1183,25 @@ export default function Messages() {
                                 </AvatarFallback>
                               </Avatar>
                             )}
-                            <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${isSelf ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'}`}>
+                            {msg.deleted ? (
+                              <div className="max-w-[70%] rounded-2xl px-4 py-2 bg-slate-100 text-slate-400 italic text-sm">🚫 This message was deleted</div>
+                            ) : editingId === msg.message_id ? (
+                              <div className="max-w-[70%] w-full flex flex-col gap-1">
+                                <textarea value={editText} onChange={e => setEditText(e.target.value)} rows={2}
+                                  className="text-sm rounded-lg border border-blue-300 px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400" autoFocus />
+                                <div className="flex gap-2 justify-end">
+                                  <button onClick={() => saveEditDM(msg.message_id)} className="text-xs bg-blue-600 text-white rounded px-2 py-0.5 hover:bg-blue-700">Save</button>
+                                  <button onClick={cancelEdit} className="text-xs text-slate-500 hover:text-slate-700">Cancel</button>
+                                </div>
+                              </div>
+                            ) : (
+                            <div className={`relative group/msg max-w-[70%] rounded-2xl px-4 py-2.5 ${isSelf ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'}`}>
+                              {(isSelf || isAdmin) && (
+                                <div className="absolute -top-2 -right-2 opacity-0 group-hover/msg:opacity-100 transition-opacity flex gap-0.5 bg-white border border-slate-200 rounded-full shadow-sm px-1 z-10">
+                                  {isSelf && <button title="Edit" onClick={() => startEdit(msg.message_id, msg.content)} className="p-1 text-slate-500 hover:text-blue-600"><Pencil className="w-3 h-3" /></button>}
+                                  <button title="Delete" onClick={() => deleteDM(msg.message_id)} className="p-1 text-slate-500 hover:text-red-600"><Trash2 className="w-3 h-3" /></button>
+                                </div>
+                              )}
                               {msg.content && <p className="text-sm leading-relaxed">{msg.content}</p>}
                               {msg.attachment && (
                                 isImage(msg.attachment.filename, msg.attachment.content_type) ? (
@@ -1061,7 +1230,8 @@ export default function Messages() {
                                 )
                               )}
                               <div className={`flex items-center justify-end gap-1 mt-0.5 ${isSelf ? 'text-blue-200' : 'text-slate-400'}`}>
-                                <span className="text-xs">{formatTime(msg.created_at)}</span>
+                                {msg.edited && <span className="text-[10px] opacity-80 mr-0.5">(edited)</span>}
+                                <span className="text-xs" title={formatISTFull(msg.created_at)}>{formatTime(msg.created_at)}</span>
                                 {isSelf && (
                                   msg.read
                                     ? <CheckCheck className="w-3.5 h-3.5 text-blue-100" />
@@ -1069,6 +1239,7 @@ export default function Messages() {
                                 )}
                               </div>
                             </div>
+                            )}
                           </div>
                         </div>
                       );
