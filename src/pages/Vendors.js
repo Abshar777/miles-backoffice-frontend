@@ -369,12 +369,13 @@ export default function Exchangers() {
     }
     return {
       title: 'Loan Transactions',
-      head: ['Date', 'Ref ID', 'Direction', 'Type', 'Borrower', 'Amount', 'Currency', 'Status'],
+      head: ['Date', 'Ref ID', 'Loan ID', 'Direction', 'Type', 'Borrower', 'Amount', 'Currency', 'Status'],
       body: rows.map((tx) => {
         const isVendorSource = tx.source_vendor_id === viewExchanger?.vendor_id;
         return [
           formatDate(tx.created_at),
           tx.transaction_id ? tx.transaction_id.slice(-12).toUpperCase() : '',
+          tx.loan_id || '',
           isVendorSource ? 'OUT (Disbursement)' : 'IN (Repayment)',
           tx.transaction_type || '',
           tx.borrower_name || '',
@@ -1320,6 +1321,7 @@ export default function Exchangers() {
                         <TableHeader>
                           <TableRow className="border-slate-200 hover:bg-transparent">
                             <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Reference</TableHead>
+                            <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Loan ID</TableHead>
                             <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Type</TableHead>
                             <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Borrower</TableHead>
                             <TableHead className="text-slate-500 font-bold uppercase tracking-wider text-xs">Amount</TableHead>
@@ -1335,6 +1337,7 @@ export default function Exchangers() {
                             return (
                               <TableRow key={tx.transaction_id} className="border-slate-200 hover:bg-slate-100">
                                 <TableCell className="font-mono text-slate-800 text-xs">{tx.transaction_id?.slice(-12).toUpperCase()}</TableCell>
+                                <TableCell className="font-mono text-slate-500 text-xs">{tx.loan_id || '-'}</TableCell>
                                 <TableCell>
                                   <span className={`flex items-center gap-1 ${isVendorSource ? 'text-red-400' : 'text-green-400'}`}>
                                     {isVendorSource ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
