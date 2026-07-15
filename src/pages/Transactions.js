@@ -265,6 +265,7 @@ const TX_SUMMARY_COLUMNS = [
   { id: "client_tags",      label: "Client Tags",         defaultVisible: true },
   { id: "txn_tags",         label: "Txn Tags",            defaultVisible: true, headClass: "text-amber-500 font-bold uppercase tracking-wider text-xs" },
   { id: "status",           label: "Status",              defaultVisible: true },
+  { id: "completed",        label: "Completed",           defaultVisible: true },
   { id: "actions",          label: "Actions",             defaultVisible: true, alwaysVisible: true, headClass: "text-slate-500 font-bold uppercase tracking-wider text-xs text-right" },
 ];
 
@@ -286,6 +287,8 @@ export default function Transactions() {
   const [emailFilter, setEmailFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [completedFilter, setCompletedFilter] = useState("all"); // all | yes | no
+  const [hasCrmFilter, setHasCrmFilter] = useState("all");       // all | yes | no
   const [destinationFilter, setDestinationFilter] = useState("all");
   const [destinationIdFilter, setDestinationIdFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -428,6 +431,16 @@ export default function Transactions() {
         return (
           <TableCell key="crm_ref" className="font-mono text-xs text-purple-600">
             {tx.crm_reference || "-"}
+          </TableCell>
+        );
+      case "completed":
+        return (
+          <TableCell key="completed" className="text-xs whitespace-nowrap">
+            {["deposit", "withdrawal"].includes(tx.transaction_type)
+              ? (tx.completed
+                  ? <span className="text-green-600 font-medium">✅ Completed</span>
+                  : <span className="text-slate-400">⚪ Not completed</span>)
+              : <span className="text-slate-400">-</span>}
           </TableCell>
         );
       case "client":
@@ -687,6 +700,10 @@ export default function Transactions() {
         params.append("transaction_type", typeFilter);
       if (statusFilter && statusFilter !== "all")
         params.append("status", statusFilter);
+      if (completedFilter && completedFilter !== "all")
+        params.append("completed", completedFilter);
+      if (hasCrmFilter && hasCrmFilter !== "all")
+        params.append("has_crm", hasCrmFilter);
       if (destinationFilter && destinationFilter !== "all")
         params.append("destination_type", destinationFilter);
       if (destinationIdFilter && destinationIdFilter !== "all") {
@@ -986,6 +1003,8 @@ export default function Transactions() {
   }, [
     typeFilter,
     statusFilter,
+    completedFilter,
+    hasCrmFilter,
     destinationFilter,
     destinationIdFilter,
     dateFrom,
@@ -1041,10 +1060,6 @@ export default function Transactions() {
     e.preventDefault();
     if (!formData.client_id || !formData.amount) {
       toast.error("Please fill in required fields");
-      return;
-    }
-    if (["deposit", "withdrawal"].includes(formData.transaction_type) && !formData.crm_reference?.trim()) {
-      toast.error("CRM Reference is required for deposits and withdrawals");
       return;
     }
     const a = Math.floor(Math.random() * 10) + 1;
@@ -3318,6 +3333,26 @@ export default function Transactions() {
                 {type.label}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select value={completedFilter} onValueChange={setCompletedFilter}>
+          <SelectTrigger className="w-full sm:w-40 bg-white border-slate-200 text-slate-800" data-testid="filter-completed">
+            <SelectValue placeholder="Completed" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-slate-200">
+            <SelectItem value="all" className="text-slate-800 hover:bg-slate-100">All (completion)</SelectItem>
+            <SelectItem value="yes" className="text-slate-800 hover:bg-slate-100">✅ Completed</SelectItem>
+            <SelectItem value="no" className="text-slate-800 hover:bg-slate-100">⚪ Not completed</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={hasCrmFilter} onValueChange={setHasCrmFilter}>
+          <SelectTrigger className="w-full sm:w-40 bg-white border-slate-200 text-slate-800" data-testid="filter-has-crm">
+            <SelectValue placeholder="CRM Ref" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-slate-200">
+            <SelectItem value="all" className="text-slate-800 hover:bg-slate-100">All (CRM ref)</SelectItem>
+            <SelectItem value="yes" className="text-slate-800 hover:bg-slate-100">Has CRM ref</SelectItem>
+            <SelectItem value="no" className="text-slate-800 hover:bg-slate-100">No CRM ref (N/A)</SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
