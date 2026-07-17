@@ -287,6 +287,7 @@ export default function Transactions() {
   const [emailFilter, setEmailFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [baseCurrencyFilter, setBaseCurrencyFilter] = useState("all"); // base_currency (the real payment currency)
   const [completedFilter, setCompletedFilter] = useState("all"); // all | yes | no
   const [hasCrmFilter, setHasCrmFilter] = useState("all");       // all | yes | no
   const [destinationFilter, setDestinationFilter] = useState("all");
@@ -723,6 +724,8 @@ export default function Transactions() {
         params.append("transaction_type", typeFilter);
       if (statusFilter && statusFilter !== "all")
         params.append("status", statusFilter);
+      if (baseCurrencyFilter && baseCurrencyFilter !== "all")
+        params.append("base_currency", baseCurrencyFilter);
       if (completedFilter && completedFilter !== "all")
         params.append("completed", completedFilter);
       if (hasCrmFilter && hasCrmFilter !== "all")
@@ -1026,6 +1029,7 @@ export default function Transactions() {
   }, [
     typeFilter,
     statusFilter,
+    baseCurrencyFilter,
     completedFilter,
     hasCrmFilter,
     destinationFilter,
@@ -1648,6 +1652,7 @@ export default function Transactions() {
     const params = new URLSearchParams();
     if (typeFilter && typeFilter !== "all") params.append("transaction_type", typeFilter);
     if (statusFilter && statusFilter !== "all") params.append("status", statusFilter);
+    if (baseCurrencyFilter && baseCurrencyFilter !== "all") params.append("base_currency", baseCurrencyFilter);
     if (destinationFilter && destinationFilter !== "all") params.append("destination_type", destinationFilter);
     if (destinationIdFilter && destinationIdFilter !== "all") {
       if (destinationFilter === "vendor") params.append("vendor_id", destinationIdFilter);
@@ -3428,6 +3433,24 @@ export default function Transactions() {
                 className="text-slate-800 hover:bg-slate-100"
               >
                 {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={baseCurrencyFilter} onValueChange={setBaseCurrencyFilter}>
+          <SelectTrigger
+            className="w-full sm:w-40 bg-white border-slate-200 text-slate-800"
+            data-testid="filter-tx-base-currency"
+          >
+            <SelectValue placeholder="Currency" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-slate-200">
+            <SelectItem value="all" className="text-slate-800 hover:bg-slate-100">
+              All Currencies
+            </SelectItem>
+            {currencies.map((c) => (
+              <SelectItem key={c} value={c} className="text-slate-800 hover:bg-slate-100">
+                {c}
               </SelectItem>
             ))}
           </SelectContent>
