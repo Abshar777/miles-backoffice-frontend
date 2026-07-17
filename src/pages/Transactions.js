@@ -438,30 +438,26 @@ export default function Transactions() {
         return (
           <TableCell key="completed" className="text-xs whitespace-nowrap">
             {["deposit", "withdrawal"].includes(tx.transaction_type) ? (
-              <div className="flex items-center gap-1">
-                <span className="flex-1 min-w-0">
-                  {tx.completed ? (
-                    <span
-                      className="text-green-600 font-medium"
-                      title={tx.completed_by_name ? `Completed by ${tx.completed_by_name}` : undefined}
-                    >
-                      ✅ Completed
-                    </span>
-                  ) : (
-                    <span className="text-slate-400">⚪ Not completed</span>
-                  )}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleToggleCompleted(tx)}
-                  className="text-slate-400 hover:text-green-600 hover:bg-green-50 h-6 w-6 p-0 shrink-0"
-                  title={tx.completed ? "Mark as not completed" : "Mark as completed"}
-                  data-testid={`tx-completed-toggle-${tx.transaction_id}`}
+              <Select
+                value={tx.completed ? "yes" : "no"}
+                onValueChange={(v) => handleSetCompleted(tx, v === "yes")}
+              >
+                <SelectTrigger
+                  className={`h-7 w-[150px] text-xs bg-white border-slate-200 ${tx.completed ? "text-green-600 font-medium" : "text-slate-400"}`}
+                  title={tx.completed && tx.completed_by_name ? `Completed by ${tx.completed_by_name}` : undefined}
+                  data-testid={`tx-completed-select-${tx.transaction_id}`}
                 >
-                  <Pencil className="w-3 h-3" />
-                </Button>
-              </div>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  <SelectItem value="yes" className="text-slate-800 hover:bg-slate-100">
+                    ✅ Completed
+                  </SelectItem>
+                  <SelectItem value="no" className="text-slate-800 hover:bg-slate-100">
+                    ⚪ Not completed
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             ) : (
               <span className="text-slate-400">-</span>
             )}
@@ -1493,9 +1489,9 @@ export default function Transactions() {
     }
   };
 
-  // Flip a deposit/withdrawal between Completed and Not completed (also syncs the chat card badge).
-  const handleToggleCompleted = async (tx) => {
-    const next = !tx.completed;
+  // Set a deposit/withdrawal's Completed state from the column dropdown (also syncs the chat card badge).
+  const handleSetCompleted = async (tx, next) => {
+    if (next === !!tx.completed) return;
     try {
       const response = await fetch(
         `${API_URL}/api/transactions/${tx.transaction_id}/completed`,
