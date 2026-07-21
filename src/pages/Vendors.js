@@ -130,6 +130,11 @@ export default function Exchangers() {
   const [ltType, setLtType] = useState('all');
   const [ltDateFrom, setLtDateFrom] = useState('');
   const [ltDateTo, setLtDateTo] = useState('');
+  // Reconciliation summary: opening/credits/debits/closing per currency, over a date range
+  const [reconSummary, setReconSummary] = useState([]);
+  const [reconSumFrom, setReconSumFrom] = useState('');
+  const [reconSumTo, setReconSumTo] = useState('');
+  const [reconSumLoading, setReconSumLoading] = useState(false);
   const [proofGallery, setProofGallery] = useState(null);
   const [settleDialogOpen, setSettleDialogOpen] = useState(false);
   const [statementData, setStatementData] = useState(null);
@@ -250,6 +255,37 @@ export default function Exchangers() {
     } catch (error) {
       console.error('Error fetching vendor settlements:', error);
     }
+  };
+
+  // Opening/credits/debits/closing per currency over the selected date range.
+  const fetchReconSummary = async (vendorId, from = reconSumFrom, to = reconSumTo) => {
+    if (!vendorId) return;
+    setReconSumLoading(true);
+    try {
+      const p = new URLSearchParams();
+      if (from) p.set('date_from', from);
+      if (to) p.set('date_to', to);
+      const qs = p.toString();
+      const response = await fetch(`${API_URL}/api/vendors/${vendorId}/reconciliation-summary${qs ? `?${qs}` : ''}`, { headers: getAuthHeaders(), credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        setReconSummary(data.summary || []);
+      }
+    } catch (error) {
+      console.error('Error fetching reconciliation summary:', error);
+    } finally {
+      setReconSumLoading(false);
+    }
+  };
+
+  // Quick date presets for the reconciliation summary range.
+  const setReconPeriod = (preset) => {
+    const now = new Date();
+    const fmt = (d) => d.toISOString().split('T')[0];
+    if (preset === 'all') { setReconSumFrom(''); setReconSumTo(''); }
+    else if (preset === 'this_month') { setReconSumFrom(fmt(new Date(now.getFullYear(), now.getMonth(), 1))); setReconSumTo(fmt(new Date(now.getFullYear(), now.getMonth() + 1, 0))); }
+    else if (preset === 'last_month') { setReconSumFrom(fmt(new Date(now.getFullYear(), now.getMonth() - 1, 1))); setReconSumTo(fmt(new Date(now.getFullYear(), now.getMonth(), 0))); }
+    else if (preset === 'this_year') { setReconSumFrom(fmt(new Date(now.getFullYear(), 0, 1))); setReconSumTo(fmt(new Date(now.getFullYear(), 11, 31))); }
   };
 
   const fetchVendorIeEntries = async (vendorId, page = 1) => {
@@ -544,6 +580,13 @@ export default function Exchangers() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewExchanger?.vendor_id]);
+
+  // Reconciliation summary: refetch when the exchanger or the summary date range changes
+  useEffect(() => {
+    if (!viewExchanger?.vendor_id) return;
+    fetchReconSummary(viewExchanger.vendor_id, reconSumFrom, reconSumTo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewExchanger?.vendor_id, reconSumFrom, reconSumTo]);
 
   // Transactions tab: refetch on page/filter change (debounced for typing)
   useEffect(() => {
@@ -876,6 +919,67 @@ export default function Exchangers() {
             )}
           </div>
         </div>
+              {/* Reconciliation Summary — opening/closing over a date range (like Treasury) */}
+              <div className="p-4 bg-slate-50 rounded-sm border-l-4 border-l-blue-400">
+                <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+                  <p className="text-xs text-blue-600 uppercase tracking-wider flex items-center">
+                    Opening &amp; Closing Balance
+                    {reconSumLoading && <RefreshCw className="w-3 h-3 animate-spin ml-2 text-blue-400" />}
+                  </p>
+                  <div className="flex items-end gap-2 flex-wrap">
+                    <div className="flex gap-1">
+                      {[['all', 'All'], ['this_month', 'This month'], ['last_month', 'Last month'], ['this_year', 'This year']].map(([p, label]) => (
+                        <button key={p} type="button" onClick={() => setReconPeriod(p)}
+                          className="text-[11px] px-2 py-1 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">{label}</button>
+                      ))}
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">From</label>
+                      <input type="date" value={reconSumFrom} onChange={(e) => setReconSumFrom(e.target.value)}
+                        className="text-xs border border-slate-200 rounded px-2 py-1 bg-white text-slate-800 h-8" data-testid="recon-sum-from" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">To</label>
+                      <input type="date" value={reconSumTo} onChange={(e) => setReconSumTo(e.target.value)}
+                        className="text-xs border border-slate-200 rounded px-2 py-1 bg-white text-slate-800 h-8" data-testid="recon-sum-to" />
+                    </div>
+                    {(reconSumFrom || reconSumTo) && (
+                      <button type="button" onClick={() => { setReconSumFrom(''); setReconSumTo(''); }}
+                        className="text-[11px] px-2 py-1 rounded text-slate-400 hover:text-slate-700 h-8">Clear</button>
+                    )}
+                  </div>
+                </div>
+                {reconSummary.length === 0 ? (
+                  <p className="text-sm text-slate-400">No activity in this range</p>
+                ) : (
+                  <div className="space-y-3">
+                    {reconSummary.map((s) => (
+                      <div key={s.currency}>
+                        <Badge className="bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-mono mb-2">{s.currency}</Badge>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          <div className="p-2 bg-white rounded border border-slate-200">
+                            <p className="text-[10px] uppercase tracking-wider text-slate-400">Opening</p>
+                            <p className="text-sm font-mono font-semibold text-slate-700">{(s.opening_balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                          </div>
+                          <div className="p-2 bg-green-50 rounded border border-green-200">
+                            <p className="text-[10px] uppercase tracking-wider text-green-600">Credits</p>
+                            <p className="text-sm font-mono font-semibold text-green-700">+{(s.total_credits ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                          </div>
+                          <div className="p-2 bg-red-50 rounded border border-red-200">
+                            <p className="text-[10px] uppercase tracking-wider text-red-600">Debits</p>
+                            <p className="text-sm font-mono font-semibold text-red-700">-{(s.total_debits ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                          </div>
+                          <div className="p-2 bg-blue-50 rounded border border-blue-200">
+                            <p className="text-[10px] uppercase tracking-wider text-blue-600">Closing</p>
+                            <p className="text-sm font-mono font-semibold text-blue-700">{(s.closing_balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="p-4 bg-slate-50 rounded-sm border-l-4 border-l-[#66FCF1]">
                 <p className="text-xs text-blue-600 uppercase tracking-wider mb-3">Settlement Balance (Money In - Money Out - Commission)</p>
                 {viewExchanger.settlement_by_currency && viewExchanger.settlement_by_currency.length > 0 ? (
