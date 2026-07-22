@@ -1440,6 +1440,7 @@ export default function Reports() {
                                     {accTxs.length === 0 ? (
                                       <p className="text-xs text-slate-400 py-2">No transactions for this account{dateFrom || dateTo ? ' in the selected period' : ''}.</p>
                                     ) : (
+                                      <div className="overflow-x-auto">
                                       <table className="w-full text-xs">
                                         <thead>
                                           <tr className="text-slate-400 border-b border-slate-200">
@@ -1482,6 +1483,7 @@ export default function Reports() {
                                           ))}
                                         </tbody>
                                       </table>
+                                      </div>
                                     )}
                                   </div>
                                 </TableCell>
@@ -1930,7 +1932,7 @@ export default function Reports() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                       <div className="p-4 bg-slate-50 rounded-lg text-center">
                         <p className="text-xs text-slate-500 mb-2">Current</p>
                         <p className="text-2xl font-mono text-emerald-400 font-bold">${(outstandingReport.aging.current || 0).toLocaleString()}</p>
