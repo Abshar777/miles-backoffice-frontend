@@ -862,14 +862,28 @@ function EditableRequestCard({
                 <Label className="text-xs text-slate-500 uppercase font-bold">
                   Transaction Date
                 </Label>
-                <Input
-                  type="date"
-                  value={form.transaction_date}
-                  onChange={(e) =>
-                    setForm({ ...form, transaction_date: e.target.value })
-                  }
-                  className="bg-slate-50 border-slate-200"
-                />
+                {form.transaction_type === "withdrawal" ? (
+                  <>
+                    <Input
+                      type="date"
+                      value={form.transaction_date}
+                      readOnly
+                      disabled
+                      title="Locked to the creation date for withdrawals"
+                      className="bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed"
+                    />
+                    <p className="text-[10px] text-slate-400">Locked to the creation date for withdrawals.</p>
+                  </>
+                ) : (
+                  <Input
+                    type="date"
+                    value={form.transaction_date}
+                    onChange={(e) =>
+                      setForm({ ...form, transaction_date: e.target.value })
+                    }
+                    className="bg-slate-50 border-slate-200"
+                  />
+                )}
               </div>
 
               {/* Row 5: Description */}
@@ -1208,6 +1222,8 @@ export default function TransactionRequests() {
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => {
+        // Withdrawals are stamped with the creation date by the backend — never send it.
+        if (k === "transaction_date" && form.transaction_type === "withdrawal") return;
         if (v) fd.append(k, v);
       });
       proofImages.forEach(img => fd.append("proof_images", img));
@@ -2172,15 +2188,30 @@ export default function TransactionRequests() {
               <Label className="text-xs text-slate-500 uppercase">
                 Transaction Date
               </Label>
-              <Input
-                type="date"
-                value={form.transaction_date}
-                onChange={(e) =>
-                  setForm({ ...form, transaction_date: e.target.value })
-                }
-                className="bg-slate-50"
-                data-testid="txreq-transaction-date"
-              />
+              {form.transaction_type === "withdrawal" ? (
+                <>
+                  <Input
+                    type="date"
+                    value={form.transaction_date}
+                    readOnly
+                    disabled
+                    title="Auto-set to the creation date for withdrawals"
+                    className="bg-slate-100 text-slate-500 cursor-not-allowed"
+                    data-testid="txreq-transaction-date"
+                  />
+                  <p className="text-[10px] text-slate-400">Auto-set to the creation date for withdrawals.</p>
+                </>
+              ) : (
+                <Input
+                  type="date"
+                  value={form.transaction_date}
+                  onChange={(e) =>
+                    setForm({ ...form, transaction_date: e.target.value })
+                  }
+                  className="bg-slate-50"
+                  data-testid="txreq-transaction-date"
+                />
+              )}
             </div>
             {/* Client Tags — read-only, auto-filled from selected client */}
             <div>
