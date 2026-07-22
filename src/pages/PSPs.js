@@ -1272,7 +1272,11 @@ export default function PSPs() {
           </div>
             <div className="space-y-4 flex-1 flex flex-col">
               {/* PSP Info */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-slate-50 rounded-sm">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-4 bg-slate-50 rounded-sm">
+                <div className="rounded-sm bg-emerald-50 border border-emerald-200 -m-1 p-2">
+                  <p className="text-xs text-emerald-700 uppercase tracking-wider mb-1">Balance</p>
+                  <p className="text-xl font-mono font-bold text-emerald-700">${Number(viewPsp.provider_balance ?? viewPsp.available_balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Commission Rate</p>
                   <p className="text-xl font-mono text-slate-800">{viewPsp.commission_rate}%</p>
