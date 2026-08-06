@@ -2,15 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -34,26 +26,22 @@ import {
 } from '../components/ui/tabs';
 import PaginationControls from '../components/PaginationControls';
 import { toast } from 'sonner';
-import { getApiError } from '../lib/utils';
 import { usePermissions } from '../context/usePermissions';
 import {
   ArrowLeft,
   Loader2,
-  Plus,
-  Edit,
-  Trash2,
   Landmark,
   Wallet,
+  Building2,
+  CreditCard,
+  Repeat,
+  Coins,
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'AED', 'SAR', 'INR', 'JPY', 'USDT'];
 
 const fmtUsd = (n) =>
   `$${(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-const fmtAmount = (n, currency) =>
-  `${(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency || ''}`.trim();
 
 const formatDate = (s) =>
   s
@@ -62,12 +50,18 @@ const formatDate = (s) =>
       })
     : '-';
 
-const emptyForm = { account_name: '', bank_name: '', account_number: '', currency: 'USD', balance: '0', description: '' };
+const DEST_ICONS = {
+  treasury: Landmark,
+  vendor: Repeat,
+  psp: CreditCard,
+  bank: Building2,
+  usdt: Coins,
+};
 
 export default function PartnerDetail() {
   const { tagId } = useParams();
   const navigate = useNavigate();
-  const { canView, canCreate, canEdit, canDelete } = usePermissions();
+  const { canView } = usePermissions();
   const canManageTreasury = canView('partner_treasury');
 
   const [loading, setLoading] = useState(true);
@@ -82,14 +76,10 @@ export default function PartnerDetail() {
   const [txType, setTxType] = useState('all');
   const [txLoading, setTxLoading] = useState(false);
 
-  // Treasury tab
-  const [treasuryAccounts, setTreasuryAccounts] = useState([]);
+  // Treasury tab (computed from real transactions, read-only)
+  const [treasuryGroups, setTreasuryGroups] = useState([]);
   const [treasuryTotal, setTreasuryTotal] = useState(0);
   const [treasuryLoading, setTreasuryLoading] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAccount, setEditingAccount] = useState(null);
-  const [formData, setFormData] = useState(emptyForm);
-  const [submitting, setSubmitting] = useState(false);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('auth_token');
@@ -163,8 +153,8 @@ export default function PartnerDetail() {
       });
       if (r.ok) {
         const d = await r.json();
-        setTreasuryAccounts(d.items || []);
-        setTreasuryTotal(d.total_balance || 0);
+        setTreasuryGroups(d.groups || []);
+        setTreasuryTotal(d.grand_total_net_usd || 0);
       } else {
         toast.error('Failed to load partner treasury');
       }
@@ -178,75 +168,6 @@ export default function PartnerDetail() {
   useEffect(() => {
     if (activeTab === 'treasury') fetchTreasury();
   }, [activeTab, fetchTreasury]);
-
-  const openCreate = () => {
-    setEditingAccount(null);
-    setFormData(emptyForm);
-    setIsDialogOpen(true);
-  };
-
-  const openEdit = (account) => {
-    setEditingAccount(account);
-    setFormData({
-      account_name: account.account_name,
-      bank_name: account.bank_name || '',
-      account_number: account.account_number || '',
-      currency: account.currency,
-      balance: String(account.balance ?? 0),
-      description: account.description || '',
-    });
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      const url = editingAccount
-        ? `${API_URL}/api/partner-treasury/${editingAccount.account_id}`
-        : `${API_URL}/api/partner-treasury`;
-      const method = editingAccount ? 'PUT' : 'POST';
-      const payload = { ...formData, balance: parseFloat(formData.balance) || 0 };
-      if (!editingAccount) payload.tag_id = tagId;
-
-      const r = await fetch(url, {
-        method,
-        headers: getAuthHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(payload),
-      });
-      if (r.ok) {
-        toast.success(editingAccount ? 'Account updated' : 'Account created');
-        setIsDialogOpen(false);
-        fetchTreasury();
-      } else {
-        toast.error(await getApiError(r));
-      }
-    } catch (error) {
-      toast.error(error?.message || 'Something went wrong. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDelete = async (accountId) => {
-    if (!window.confirm('Delete this account? This only removes it from the partner treasury, not any real accounts.')) return;
-    try {
-      const r = await fetch(`${API_URL}/api/partner-treasury/${accountId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-        credentials: 'include',
-      });
-      if (r.ok) {
-        toast.success('Account deleted');
-        fetchTreasury();
-      } else {
-        toast.error(await getApiError(r));
-      }
-    } catch (error) {
-      toast.error(error?.message || 'Something went wrong. Please try again.');
-    }
-  };
 
   if (loading) {
     return (
@@ -376,155 +297,76 @@ export default function PartnerDetail() {
         </TabsContent>
 
         {canManageTreasury && (
-          <TabsContent value="treasury" className="mt-4 space-y-4">
-            <div className="flex items-center justify-between">
+          <TabsContent value="treasury" className="mt-4 space-y-5">
+            <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs text-slate-400 uppercase tracking-wider">Partner Treasury</p>
-                <p className="text-xs text-slate-400 mt-0.5">This partner's own accounts - separate from the company Treasury, no shared balance.</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Where {partner.name}'s money actually moved - computed from approved and completed transactions. Net = deposits &minus; withdrawals.
+                </p>
               </div>
-              {canCreate('partner_treasury') && (
-                <Button onClick={openCreate} className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase tracking-wider text-xs" data-testid="add-partner-treasury-account">
-                  <Plus className="w-4 h-4 mr-2" /> Add Account
-                </Button>
-              )}
+              <div className="text-right shrink-0">
+                <p className="text-xs text-slate-400 uppercase tracking-wider">Total Net</p>
+                <p className={`text-xl font-mono font-bold ${treasuryTotal >= 0 ? 'text-green-600' : 'text-red-600'}`} data-testid="ptreasury-grand-total">
+                  {fmtUsd(treasuryTotal)}
+                </p>
+              </div>
             </div>
 
             {treasuryLoading ? (
               <div className="flex justify-center py-10">
                 <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
               </div>
-            ) : treasuryAccounts.length === 0 ? (
+            ) : treasuryGroups.every((g) => g.entries.length === 0) ? (
               <Card className="bg-white border-slate-200">
                 <CardContent className="p-10 text-center text-slate-400">
                   <Landmark className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p className="font-medium text-slate-600">No treasury accounts for {partner.name} yet</p>
-                  {canCreate('partner_treasury') && <p className="text-sm mt-1">Click "Add Account" to create one</p>}
+                  <p className="font-medium text-slate-600">No transactions for {partner.name} yet</p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {treasuryAccounts.map((account) => (
-                  <Card key={account.account_id} className="bg-white border-slate-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <p className="font-semibold text-slate-800">{account.account_name}</p>
-                          <p className="text-xs text-slate-500">{account.bank_name || 'N/A'}</p>
+              treasuryGroups
+                .filter((g) => g.entries.length > 0)
+                .map((group) => {
+                  const Icon = DEST_ICONS[group.destination_type] || Landmark;
+                  return (
+                    <div key={group.destination_type} className="space-y-2" data-testid={`ptreasury-group-${group.destination_type}`}>
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
+                        <div className="flex items-center gap-2">
+                          <Icon className="w-4 h-4 text-slate-400" />
+                          <span className="text-sm font-semibold text-slate-700">{group.label}</span>
+                          <Badge variant="outline" className="text-xs">{group.entries.length}</Badge>
                         </div>
-                        <div className="flex gap-1 shrink-0">
-                          {canEdit('partner_treasury') && (
-                            <Button variant="ghost" size="sm" onClick={() => openEdit(account)} className="h-7 w-7 p-0 text-slate-500 hover:text-slate-800">
-                              <Edit className="w-3.5 h-3.5" />
-                            </Button>
-                          )}
-                          {canDelete('partner_treasury') && (
-                            <Button variant="ghost" size="sm" onClick={() => handleDelete(account.account_id)} className="h-7 w-7 p-0 text-red-500 hover:text-red-700">
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          )}
-                        </div>
+                        <span className={`font-mono text-sm font-semibold ${group.net_usd >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {fmtUsd(group.net_usd)}
+                        </span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-500 text-sm">Balance</span>
-                        <span className="text-lg font-mono font-bold text-slate-800">{fmtAmount(account.balance, account.currency)}</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {group.entries.map((entry) => (
+                          <Card key={entry.key} className="bg-white border-slate-200">
+                            <CardContent className="p-4">
+                              <p className="font-semibold text-slate-800 truncate" title={entry.name}>{entry.name}</p>
+                              <div className="flex items-baseline justify-between mt-2">
+                                <span className="text-slate-500 text-sm">Net</span>
+                                <span className={`text-lg font-mono font-bold ${entry.net_usd >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {fmtUsd(entry.net_usd)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs mt-2 pt-2 border-t border-slate-200">
+                                <span className="text-green-600">+{fmtUsd(entry.deposits_usd)} <span className="text-slate-400">({entry.deposit_count})</span></span>
+                                <span className="text-red-600">&minus;{fmtUsd(entry.withdrawals_usd)} <span className="text-slate-400">({entry.withdrawal_count})</span></span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
                       </div>
-                      {account.account_number && (
-                        <p className="text-xs text-slate-500 mt-2 pt-2 border-t border-slate-200">
-                          Account: <span className="font-mono text-slate-800">{account.account_number}</span>
-                        </p>
-                      )}
-                      {account.description && (
-                        <p className="text-xs text-slate-500 mt-1">{account.description}</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                    </div>
+                  );
+                })
             )}
           </TabsContent>
         )}
       </Tabs>
-
-      {/* Add / Edit partner treasury account */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-slate-900">
-              {editingAccount ? 'Edit Account' : 'Add Partner Treasury Account'}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-slate-500 text-xs uppercase tracking-wider">Account Name</Label>
-              <Input
-                required
-                value={formData.account_name}
-                onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
-                className="bg-slate-50 border-slate-200 text-slate-800"
-                data-testid="ptreasury-account-name"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label className="text-slate-500 text-xs uppercase tracking-wider">Bank Name</Label>
-                <Input
-                  value={formData.bank_name}
-                  onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
-                  className="bg-slate-50 border-slate-200 text-slate-800"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-500 text-xs uppercase tracking-wider">Account Number</Label>
-                <Input
-                  value={formData.account_number}
-                  onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
-                  className="bg-slate-50 border-slate-200 text-slate-800"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label className="text-slate-500 text-xs uppercase tracking-wider">Currency</Label>
-                <Select value={formData.currency} onValueChange={(v) => setFormData({ ...formData, currency: v })}>
-                  <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-800">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-500 text-xs uppercase tracking-wider">Balance</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.balance}
-                  onChange={(e) => setFormData({ ...formData, balance: e.target.value })}
-                  className="bg-slate-50 border-slate-200 text-slate-800"
-                  data-testid="ptreasury-balance"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-slate-500 text-xs uppercase tracking-wider">Description</Label>
-              <Input
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-slate-50 border-slate-200 text-slate-800"
-              />
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="border-slate-200 text-slate-500">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={submitting} className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#45A29E] font-bold uppercase tracking-wider" data-testid="save-ptreasury-btn">
-                {submitting ? 'Saving...' : editingAccount ? 'Update' : 'Create'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
