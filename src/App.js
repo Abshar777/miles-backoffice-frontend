@@ -10,6 +10,7 @@ import LPAccounts from "./pages/LPAccounts";
 import PSPs from "./pages/PSPs";
 import Vendors from "./pages/Vendors";
 import VendorDashboard from "./pages/VendorDashboard";
+import Partners from "./pages/Partners";
 import Reports from "./pages/Reports";
 import DailyPnL from "./pages/DailyPnL";
 import Settings from "./pages/Settings";
@@ -124,6 +125,11 @@ function AppRouter() {
             </ProtectedRoute>
           } />
         <Route path="vendor-portal" element={<VendorDashboard />} />
+        <Route path="partners" element={
+            <ProtectedRoute requiredModule="partners">
+              <Partners />
+            </ProtectedRoute>
+          } />
         <Route path="reports" element={<Reports />} />
         <Route path="daily-pnl" element={<DailyPnL />} />
         <Route path="reconciliation" element={<Reconciliation />} />
