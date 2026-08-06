@@ -11,6 +11,7 @@ import PSPs from "./pages/PSPs";
 import Vendors from "./pages/Vendors";
 import VendorDashboard from "./pages/VendorDashboard";
 import Partners from "./pages/Partners";
+import PartnerDetail from "./pages/PartnerDetail";
 import Reports from "./pages/Reports";
 import DailyPnL from "./pages/DailyPnL";
 import Settings from "./pages/Settings";
@@ -128,6 +129,11 @@ function AppRouter() {
         <Route path="partners" element={
             <ProtectedRoute requiredModule="partners">
               <Partners />
+            </ProtectedRoute>
+          } />
+        <Route path="partners/:tagId" element={
+            <ProtectedRoute requiredModule="partners">
+              <PartnerDetail />
             </ProtectedRoute>
           } />
         <Route path="reports" element={<Reports />} />
