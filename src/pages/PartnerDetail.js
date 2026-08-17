@@ -123,6 +123,19 @@ const CurrencyLines = ({ byCurrency, field = 'net', className = '' }) => {
   );
 };
 
+// Settled comes straight off the transaction's own flag. Only the PSP settlement
+// flow stamps it, so exchanger rows read "Unsettled" even where a vendor settlement
+// exists - the badge reflects the flag, not a judgement about the counterparty.
+const SettlementBadge = ({ tx }) => (
+  <Badge
+    variant="outline"
+    className={`text-[10px] ${tx.settled ? 'text-green-600 border-green-200' : 'text-slate-500 border-slate-200'}`}
+    title={tx.settled && tx.settlement_id ? `Settlement ${tx.settlement_id}` : undefined}
+  >
+    {tx.settled ? 'Settled' : 'Unsettled'}
+  </Badge>
+);
+
 const fmtUsd = (n) => {
   const v = n || 0;
   return `${v < 0 ? '-' : ''}$${Math.abs(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -171,6 +184,7 @@ export default function PartnerDetail() {
   const [destinationFilter, setDestinationFilter] = useState('all');
   const [destinationIdFilter, setDestinationIdFilter] = useState('all');
   const [txnTagFilter, setTxnTagFilter] = useState('all');
+  const [settledFilter, setSettledFilter] = useState('all');   // all | yes | no
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [txDateType, setTxDateType] = useState('transaction');
@@ -326,6 +340,7 @@ export default function PartnerDetail() {
         );
       }
       if (txnTagFilter !== 'all') qs.set('transaction_tag', txnTagFilter);
+      if (settledFilter !== 'all') qs.set('settled', settledFilter);
 
       const r = await fetch(`${API_URL}/api/transactions?${qs.toString()}`, {
         headers: getAuthHeaders(), credentials: 'include',
@@ -345,7 +360,7 @@ export default function PartnerDetail() {
   }, [
     txPageSize, txType, statusFilter, baseCurrencyFilter, completedFilter, hasCrmFilter,
     destinationFilter, destinationIdFilter, search, emailFilter, dateFrom, dateTo,
-    txDateType, txnTagFilter,
+    txDateType, txnTagFilter, settledFilter,
   ]);
 
   // Any filter change sends us back to page 1 - staying on page 7 of a result set
@@ -355,7 +370,7 @@ export default function PartnerDetail() {
   }, [
     txType, statusFilter, baseCurrencyFilter, completedFilter, hasCrmFilter,
     destinationFilter, destinationIdFilter, search, emailFilter, dateFrom, dateTo,
-    txDateType, txnTagFilter, txPageSize,
+    txDateType, txnTagFilter, settledFilter, txPageSize,
   ]);
 
   useEffect(() => {
@@ -364,7 +379,7 @@ export default function PartnerDetail() {
 
   const filtersActive = txType !== 'all' || statusFilter !== 'all' || baseCurrencyFilter !== 'all'
     || completedFilter !== 'all' || hasCrmFilter !== 'all' || destinationFilter !== 'all'
-    || destinationIdFilter !== 'all' || txnTagFilter !== 'all' || dateFrom || dateTo
+    || destinationIdFilter !== 'all' || txnTagFilter !== 'all' || settledFilter !== 'all' || dateFrom || dateTo
     || searchInput || emailInput;
 
   const clearFilters = () => {
@@ -376,6 +391,7 @@ export default function PartnerDetail() {
     setDestinationFilter('all');
     setDestinationIdFilter('all');
     setTxnTagFilter('all');
+    setSettledFilter('all');
     setDateFrom('');
     setDateTo('');
     setTxDateType('transaction');
@@ -559,6 +575,7 @@ export default function PartnerDetail() {
     if (dateFrom) qs.set(txDateType === 'approved' ? 'approved_date_from' : txDateType === 'bank_receipt' ? 'bank_receipt_date_from' : txDateType === 'request_processed' ? 'request_processed_date_from' : 'date_from', dateFrom);
     if (dateTo) qs.set(txDateType === 'approved' ? 'approved_date_to' : txDateType === 'bank_receipt' ? 'bank_receipt_date_to' : txDateType === 'request_processed' ? 'request_processed_date_to' : 'date_to', dateTo);
     if (txnTagFilter !== 'all') qs.set('transaction_tag', txnTagFilter);
+    if (settledFilter !== 'all') qs.set('settled', settledFilter);
     return qs;
   };
 
@@ -916,6 +933,17 @@ export default function PartnerDetail() {
               </SelectContent>
             </Select>
 
+            <Select value={settledFilter} onValueChange={setSettledFilter}>
+              <SelectTrigger className="w-full sm:w-44 bg-white border-slate-200 text-slate-800" data-testid="pd-filter-settled">
+                <SelectValue placeholder="Settlement" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200">
+                <SelectItem value="all" className="text-slate-800 hover:bg-slate-100">All (settlement)</SelectItem>
+                <SelectItem value="yes" className="text-slate-800 hover:bg-slate-100">Settled</SelectItem>
+                <SelectItem value="no" className="text-slate-800 hover:bg-slate-100">Unsettled</SelectItem>
+              </SelectContent>
+            </Select>
+
             <div className="flex items-center gap-2">
               <select
                 value={txDateType}
@@ -967,6 +995,7 @@ export default function PartnerDetail() {
                   <TableHead>Payment Currency</TableHead>
                   <TableHead>Destination</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Settlement</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="w-10" />
                 </TableRow>
@@ -974,13 +1003,13 @@ export default function PartnerDetail() {
               <TableBody>
                 {txLoading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-slate-400">
+                    <TableCell colSpan={10} className="text-center py-8 text-slate-400">
                       <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
                 ) : txItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-slate-400">No transactions</TableCell>
+                    <TableCell colSpan={10} className="text-center py-8 text-slate-400">No transactions</TableCell>
                   </TableRow>
                 ) : (
                   txItems.map((tx) => (
@@ -1043,6 +1072,7 @@ export default function PartnerDetail() {
                         )}
                       </TableCell>
                       <TableCell><Badge variant="outline" className="text-xs capitalize">{tx.status}</Badge></TableCell>
+                      <TableCell><SettlementBadge tx={tx} /></TableCell>
                       <TableCell className="text-xs text-slate-500">{formatDate(tx.created_at)}</TableCell>
                       <TableCell>
                         <Button
@@ -1105,9 +1135,9 @@ export default function PartnerDetail() {
               </TableHeader>
               <TableBody>
                 {clientsLoading ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-slate-400"><Loader2 className="w-4 h-4 animate-spin mx-auto" /></TableCell></TableRow>
+                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-slate-400"><Loader2 className="w-4 h-4 animate-spin mx-auto" /></TableCell></TableRow>
                 ) : clientRows.length === 0 ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-slate-400">No clients</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-slate-400">No clients</TableCell></TableRow>
                 ) : clientRows.map((c) => (
                   <TableRow key={c.client_id}>
                     <TableCell>
@@ -1234,6 +1264,16 @@ export default function PartnerDetail() {
                                 <span className="text-red-600">&minus;{fmtUsd(entry.withdrawals_usd)} <span className="text-slate-400">({entry.withdrawal_count})</span></span>
                               </div>
                               <CurrencyBreakdown byCurrency={entry.by_currency} className="mt-2 pt-2 border-t border-slate-200" />
+                              {(entry.settled_count > 0 || entry.unsettled_count > 0) && (
+                                <div className="flex justify-between text-[10px] mt-2 pt-2 border-t border-slate-200 font-mono">
+                                  <span className="text-green-600">
+                                    Settled {fmtUsd(entry.settled_usd)} <span className="text-slate-400">({entry.settled_count})</span>
+                                  </span>
+                                  <span className="text-slate-500">
+                                    Unsettled {fmtUsd(entry.unsettled_usd)} <span className="text-slate-400">({entry.unsettled_count})</span>
+                                  </span>
+                                </div>
+                              )}
                               {/* Charges are a reporting overlay - they never touch the ledger */}
                               {entry.charges_usd > 0 && (
                                 <div className="mt-2 pt-2 border-t border-slate-200 space-y-1">
@@ -1306,15 +1346,16 @@ export default function PartnerDetail() {
                       <TableHead>Type</TableHead>
                       <TableHead className="text-right">Amount (USD)</TableHead>
                       <TableHead>Payment Currency</TableHead>
+                      <TableHead>Settlement</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead className="w-10" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {drillLoading ? (
-                      <TableRow><TableCell colSpan={7} className="text-center py-8 text-slate-400"><Loader2 className="w-4 h-4 animate-spin mx-auto" /></TableCell></TableRow>
+                      <TableRow><TableCell colSpan={8} className="text-center py-8 text-slate-400"><Loader2 className="w-4 h-4 animate-spin mx-auto" /></TableCell></TableRow>
                     ) : drillRows.length === 0 ? (
-                      <TableRow><TableCell colSpan={7} className="text-center py-8 text-slate-400">No transactions</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={8} className="text-center py-8 text-slate-400">No transactions</TableCell></TableRow>
                     ) : drillRows.map((tx) => (
                       <TableRow key={tx.transaction_id}>
                         <TableCell className="font-mono text-xs">{tx.reference || tx.transaction_id}</TableCell>
@@ -1335,6 +1376,7 @@ export default function PartnerDetail() {
                             </>
                           ) : <span className="text-slate-400">USD</span>}
                         </TableCell>
+                        <TableCell><SettlementBadge tx={tx} /></TableCell>
                         <TableCell className="text-xs text-slate-500">{formatDate(tx.created_at)}</TableCell>
                         <TableCell>
                           <Button variant="ghost" size="sm" onClick={() => viewFullDetails(tx)}
