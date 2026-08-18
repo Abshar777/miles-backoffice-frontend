@@ -726,6 +726,28 @@ export default function PartnerDetail() {
     setChargeOut(String(entry.out_rate ?? 0));
   };
 
+  // Live view of what the entered rates actually cost, so the outcome is visible
+  // while typing rather than only after saving.
+  const chargePreview = (() => {
+    const e = chargeEdit?.entry;
+    const depo = e?.deposits_usd || 0;
+    const wdr = e?.withdrawals_usd || 0;
+    const inR = parseFloat(chargeIn) || 0;
+    const outR = parseFloat(chargeOut) || 0;
+    const inAmt = depo * inR / 100;
+    const outAmt = wdr * outR / 100;
+    return {
+      depo, wdr, inR, outR, inAmt, outAmt,
+      total: inAmt + outAmt,
+      netBefore: e?.net_usd || 0,
+      netAfter: (e?.net_usd || 0) - (inAmt + outAmt),
+      dirty: inR !== (e?.in_rate ?? 0) || outR !== (e?.out_rate ?? 0),
+      invalid: inR < 0 || inR > 100 || outR < 0 || outR > 100,
+    };
+  })();
+
+  const CHARGE_PRESETS = [0, 0.5, 1, 1.5, 2, 2.5];
+
   const saveCharges = async () => {
     const inR = parseFloat(chargeIn) || 0;
     const outR = parseFloat(chargeOut) || 0;
@@ -1443,27 +1465,27 @@ export default function PartnerDetail() {
                             <CardContent className="p-4">
                               <div className="flex items-start justify-between gap-2">
                                 <p className="font-semibold text-slate-800 truncate" title={entry.name}>{entry.name}</p>
-                                <div className="flex items-center gap-1.5 shrink-0">
+                                <div className="flex items-center gap-2 shrink-0">
                                   {canEditCharges && (
                                     <button
                                       type="button"
                                       onClick={(e) => { e.stopPropagation(); openSettle(group, entry); }}
-                                      className="text-slate-400 hover:text-emerald-600"
+                                      className="h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-500 flex items-center justify-center transition-colors hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50"
                                       title="Settle transactions with this partner"
                                       data-testid={`ptreasury-settle-${entry.key}`}
                                     >
-                                      <HandCoins className="w-3.5 h-3.5" />
+                                      <HandCoins className="w-5 h-5" />
                                     </button>
                                   )}
                                   {canEditCharges && (
                                     <button
                                       type="button"
                                       onClick={(e) => { e.stopPropagation(); openChargeEditor(group, entry); }}
-                                      className="text-slate-400 hover:text-blue-600"
+                                      className="h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-500 flex items-center justify-center transition-colors hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50"
                                       title="Set in/out charges"
                                       data-testid={`ptreasury-edit-charge-${entry.key}`}
                                     >
-                                      <Percent className="w-3.5 h-3.5" />
+                                      <Percent className="w-5 h-5" />
                                     </button>
                                   )}
                                 </div>
@@ -1840,7 +1862,7 @@ export default function PartnerDetail() {
 
       {/* In/out charge percentages for one destination */}
       <Dialog open={!!chargeEdit} onOpenChange={(o) => { if (!o) setChargeEdit(null); }}>
-        <DialogContent className="bg-white border-slate-200 max-w-sm">
+        <DialogContent className="bg-white border-slate-200 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-slate-900">Charges &mdash; {chargeEdit?.entry?.name}</DialogTitle>
           </DialogHeader>
@@ -1848,35 +1870,102 @@ export default function PartnerDetail() {
             Applied to this partner only, for reporting. Nothing in the ledger changes,
             and this is separate from any exchanger/PSP commission on the transactions themselves.
           </p>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs text-slate-500 uppercase tracking-wider">In charge %</label>
-              <Input type="number" step="0.01" min="0" max="100" value={chargeIn}
-                onChange={(e) => setChargeIn(e.target.value)}
-                className="bg-slate-50 border-slate-200" data-testid="charge-in-rate" />
-              <p className="text-[10px] text-slate-400">on {fmtUsd(chargeEdit?.entry?.deposits_usd || 0)} in</p>
+
+          <div className="space-y-3">
+            {[
+              { key: 'in', label: 'In charge', value: chargeIn, set: setChargeIn,
+                base: chargePreview.depo, amount: chargePreview.inAmt,
+                baseLabel: 'in', testid: 'charge-in-rate' },
+              { key: 'out', label: 'Out charge', value: chargeOut, set: setChargeOut,
+                base: chargePreview.wdr, amount: chargePreview.outAmt,
+                baseLabel: 'out', testid: 'charge-out-rate' },
+            ].map((f) => (
+              <div key={f.key} className="rounded-lg border border-slate-200 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{f.label}</p>
+                    <p className="text-[11px] text-slate-400">on {fmtUsd(f.base)} {f.baseLabel}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Input
+                        type="number" step="0.01" min="0" max="100"
+                        value={f.value}
+                        onChange={(e) => f.set(e.target.value)}
+                        className="w-24 pr-7 text-right bg-slate-50 border-slate-200 text-slate-800"
+                        data-testid={f.testid}
+                      />
+                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">%</span>
+                    </div>
+                    <span className="font-mono text-sm text-amber-600 w-24 text-right" data-testid={`charge-${f.key}-amount`}>
+                      &minus;{fmtUsd(f.amount)}
+                    </span>
+                  </div>
+                </div>
+                {/* One tap for the rates people actually use. */}
+                <div className="flex items-center gap-1 mt-2">
+                  {CHARGE_PRESETS.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => f.set(String(r))}
+                      className={`px-2 py-0.5 rounded text-[11px] border transition-colors ${
+                        (parseFloat(f.value) || 0) === r
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600'
+                      }`}
+                      data-testid={`charge-${f.key}-preset-${r}`}
+                    >
+                      {r}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-500">Total charge</span>
+              <span className="font-mono font-semibold text-amber-600" data-testid="charge-total">
+                &minus;{fmtUsd(chargePreview.total)}
+              </span>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs text-slate-500 uppercase tracking-wider">Out charge %</label>
-              <Input type="number" step="0.01" min="0" max="100" value={chargeOut}
-                onChange={(e) => setChargeOut(e.target.value)}
-                className="bg-slate-50 border-slate-200" data-testid="charge-out-rate" />
-              <p className="text-[10px] text-slate-400">on {fmtUsd(chargeEdit?.entry?.withdrawals_usd || 0)} out</p>
+            <div className="flex justify-between text-sm pt-1.5 border-t border-slate-200">
+              <span className="text-slate-600 font-medium">Net after charges</span>
+              <span className="text-right">
+                <span className={`font-mono font-bold ${chargePreview.netAfter >= 0 ? 'text-green-600' : 'text-red-600'}`} data-testid="charge-net-after">
+                  {fmtUsd(chargePreview.netAfter)}
+                </span>
+                {chargePreview.total > 0 && (
+                  <span className="block text-[11px] text-slate-400 font-mono">was {fmtUsd(chargePreview.netBefore)}</span>
+                )}
+              </span>
             </div>
           </div>
-          <div className="text-xs text-slate-600 bg-slate-50 rounded p-2">
-            Estimated charge:{' '}
-            <span className="font-mono font-semibold text-amber-600">
-              {fmtUsd(((chargeEdit?.entry?.deposits_usd || 0) * (parseFloat(chargeIn) || 0) / 100)
-                + ((chargeEdit?.entry?.withdrawals_usd || 0) * (parseFloat(chargeOut) || 0) / 100))}
-            </span>
-          </div>
-          <div className="flex justify-end gap-2 pt-1">
-            <Button variant="outline" onClick={() => setChargeEdit(null)} className="border-slate-200 text-slate-500">Cancel</Button>
-            <Button onClick={saveCharges} disabled={chargeSaving}
-              className="bg-blue-600 hover:bg-blue-700 text-white" data-testid="save-charges">
-              {chargeSaving ? 'Saving…' : 'Save'}
+
+          {chargePreview.invalid && (
+            <p className="text-xs text-red-600" data-testid="charge-invalid">
+              Charges must be between 0 and 100 percent.
+            </p>
+          )}
+
+          <div className="flex justify-between items-center gap-2 pt-1">
+            <Button
+              variant="ghost"
+              onClick={() => { setChargeIn('0'); setChargeOut('0'); }}
+              className="text-slate-500 hover:text-red-500"
+              data-testid="charge-clear"
+            >
+              Clear both
             </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setChargeEdit(null)} className="border-slate-200 text-slate-500">Cancel</Button>
+              <Button onClick={saveCharges} disabled={chargeSaving || chargePreview.invalid || !chargePreview.dirty}
+                className="bg-blue-600 hover:bg-blue-700 text-white" data-testid="save-charges">
+                {chargeSaving ? 'Saving…' : 'Save'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
