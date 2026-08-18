@@ -85,6 +85,11 @@ const statusOptions = [
   { value: 'inactive', label: 'Inactive' },
 ];
 
+// Balances are floats and drift; anything under a cent is zero, not a tiny
+// negative that would otherwise render as "-0" and read as overdrawn.
+const settleBal = (n) => (Math.abs(n || 0) < 0.005 ? 0 : (n || 0));
+const isNegative = (n) => settleBal(n) < 0;
+
 export default function Treasury() {
   const { user } = useAuth();
   const { canCreate } = usePermissions();
@@ -1021,15 +1026,18 @@ export default function Treasury() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 text-sm">Balance ({account.currency})</span>
-                    <span className="text-xl font-mono font-bold text-slate-800">
-                      {account.currency === 'USD' ? '$' : ''}{(account.balance || 0).toLocaleString()} {account.currency !== 'USD' ? account.currency : ''}
+                    <span
+                      className={`text-xl font-mono font-bold ${isNegative(account.balance) ? 'text-red-600' : 'text-slate-800'}`}
+                      data-testid={`treasury-balance-${account.account_id}`}
+                    >
+                      {account.currency === 'USD' ? '$' : ''}{settleBal(account.balance).toLocaleString()} {account.currency !== 'USD' ? account.currency : ''}
                     </span>
                   </div>
                   {account.currency !== 'USD' && (
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500 text-sm">USD Equivalent</span>
-                      <span className="text-lg font-mono text-blue-600">
-                        {account.balance_usd != null ? `$${account.balance_usd.toLocaleString()}` : <span className="text-xs text-slate-400">Rate not set</span>}
+                      <span className={`text-lg font-mono ${isNegative(account.balance_usd) ? 'text-red-600' : 'text-blue-600'}`}>
+                        {account.balance_usd != null ? `$${settleBal(account.balance_usd).toLocaleString()}` : <span className="text-xs text-slate-400">Rate not set</span>}
                       </span>
                     </div>
                   )}
