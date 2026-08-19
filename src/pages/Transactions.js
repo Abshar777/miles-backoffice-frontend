@@ -571,12 +571,15 @@ export default function Transactions() {
         return (
           <TableCell key="completed_date" className="text-xs whitespace-nowrap">
             {tx.completed_at ? (
-              <span
-                className="text-slate-600"
-                title={tx.completed_by_name ? `Completed by ${tx.completed_by_name}` : undefined}
+              <button
+                type="button"
+                onClick={() => openCompletedDateEdit(tx)}
+                className="text-slate-600 underline decoration-dotted underline-offset-2 hover:text-blue-600"
+                title={`${tx.completed_by_name ? `Completed by ${tx.completed_by_name} \u2014 ` : ""}click to correct the date`}
+                data-testid={`tx-completed-date-${tx.transaction_id}`}
               >
                 {formatDate(tx.completed_at)}
-              </span>
+              </button>
             ) : (
               <span className="text-slate-400">-</span>
             )}
@@ -1664,6 +1667,48 @@ export default function Transactions() {
       toast.success(next ? "✅ Marked completed" : "⚪ Marked not completed");
     } catch (err) {
       toast.error(err?.message || "Something went wrong. Please try again.");
+    }
+  };
+
+  // Editing the completion date. Reachable at any status, unlike the Edit
+  // Transaction dialog which is limited to pending/approved rows.
+  const [completedDateEdit, setCompletedDateEdit] = useState(null); // the tx
+  const [completedDateValue, setCompletedDateValue] = useState("");
+  const [completedDateSaving, setCompletedDateSaving] = useState(false);
+
+  const openCompletedDateEdit = (tx) => {
+    setCompletedDateEdit(tx);
+    setCompletedDateValue((tx.completed_at || "").slice(0, 10));
+  };
+
+  const saveCompletedDate = async () => {
+    if (!completedDateValue) { toast.error("Pick a date"); return; }
+    setCompletedDateSaving(true);
+    try {
+      const res = await fetch(
+        `${API_URL}/api/transactions/${completedDateEdit.transaction_id}/completed`,
+        {
+          method: "PATCH",
+          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+          credentials: "include",
+          // No `completed` key - the endpoint reads it as a tri-state, so this
+          // moves the date without touching the flag.
+          body: JSON.stringify({ completed_at: completedDateValue }),
+        },
+      );
+      if (!res.ok) { toast.error(await getApiError(res)); return; }
+      const updated = await res.json();
+      setTransactions((prev) =>
+        prev.map((t) =>
+          t.transaction_id === completedDateEdit.transaction_id ? { ...t, ...updated } : t,
+        ),
+      );
+      toast.success("Completion date updated");
+      setCompletedDateEdit(null);
+    } catch (err) {
+      toast.error(err?.message || "Something went wrong. Please try again.");
+    } finally {
+      setCompletedDateSaving(false);
     }
   };
 
@@ -4494,6 +4539,47 @@ export default function Transactions() {
       </Dialog>
 
       {/* Edit Fields Dialog (CRM Reference, Amount, Reference, Payment Currency) */}
+      {/* Correct a completion date. Deliberately its own small dialog: the Edit
+          Transaction dialog is limited to pending/approved rows, and a completed
+          transaction is usually neither. */}
+      <Dialog open={!!completedDateEdit} onOpenChange={(o) => { if (!o) setCompletedDateEdit(null); }}>
+        <DialogContent className="bg-white border-slate-200 max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-slate-900">Completion date</DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-slate-500">
+            {completedDateEdit?.reference || completedDateEdit?.transaction_id}
+            {completedDateEdit?.completed_by_name ? ` \u2014 completed by ${completedDateEdit.completed_by_name}` : ""}
+          </p>
+          <div className="space-y-1">
+            <label className="text-xs text-slate-500 uppercase tracking-wider">Completed on</label>
+            <Input
+              type="date"
+              value={completedDateValue}
+              max={new Date().toISOString().slice(0, 10)}
+              onChange={(e) => setCompletedDateValue(e.target.value)}
+              className="bg-slate-50 border-slate-200"
+              data-testid="completed-date-input"
+            />
+            <p className="text-[10px] text-slate-400">
+              Changing this does not un-complete the transaction. Future dates are rejected.
+            </p>
+          </div>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button variant="outline" onClick={() => setCompletedDateEdit(null)} className="border-slate-200 text-slate-600">Cancel</Button>
+            <Button
+              onClick={saveCompletedDate}
+              disabled={completedDateSaving || !completedDateValue
+                || completedDateValue === (completedDateEdit?.completed_at || "").slice(0, 10)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              data-testid="completed-date-save"
+            >
+              {completedDateSaving ? "Saving…" : "Save"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!fieldEditTx} onOpenChange={() => setFieldEditTx(null)}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
