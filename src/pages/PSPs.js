@@ -726,7 +726,7 @@ export default function PSPs() {
       });
       if (response.ok) {
         const result = await response.json();
-        toast.success(`Compound settlement created: ${result.transaction_count} transactions, Net $${result.net_amount?.toLocaleString()}`);
+        toast.success(`Compound settlement created: ${result.transaction_count} transactions, Net $${result.net_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
         setBatchSettleDialogOpen(false);
         setSelectedSettleTxIds([]);
         setBatchSettleDestination('');
@@ -761,7 +761,7 @@ export default function PSPs() {
       });
       if (response.ok) {
         const result = await response.json();
-        toast.success(`Net settlement created: ${result.deposit_count} deposits + ${result.withdrawal_count} withdrawals, Net $${result.net_amount?.toLocaleString()}`);
+        toast.success(`Net settlement created: ${result.deposit_count} deposits + ${result.withdrawal_count} withdrawals, Net $${result.net_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
         setNetSettleDialogOpen(false);
         setNetSettleDestination('');
         setNetSettleDate('');
@@ -1095,7 +1095,7 @@ export default function PSPs() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Pending Settlement</p>
-                <p className="text-3xl font-bold font-mono text-slate-800">${totalPendingAmount.toLocaleString()}</p>
+                <p className="text-3xl font-bold font-mono text-slate-800">${totalPendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="p-3 bg-yellow-500/10 rounded-sm">
                 <Clock className="w-6 h-6 text-yellow-500" />
@@ -1109,9 +1109,9 @@ export default function PSPs() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Reserve Fund Held</p>
-                <p className="text-3xl font-bold font-mono text-orange-400">${(globalReserveSummary?.total_held || 0).toLocaleString()}</p>
+                <p className="text-3xl font-bold font-mono text-orange-400">${(globalReserveSummary?.total_held || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 {globalReserveSummary?.due_for_release > 0 && (
-                  <p className="text-xs text-yellow-400 mt-1">${globalReserveSummary.due_for_release.toLocaleString()} due for release</p>
+                  <p className="text-xs text-yellow-400 mt-1">${globalReserveSummary.due_for_release.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} due for release</p>
                 )}
               </div>
               <div className="p-3 bg-orange-500/10 rounded-sm">
@@ -1220,14 +1220,14 @@ export default function PSPs() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 text-sm">Pending</span>
-                    <span className="text-yellow-400 font-mono">${(psp.pending_amount || 0).toLocaleString()}</span>
+                    <span className="text-yellow-400 font-mono">${(psp.pending_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                   {psp.total_reserve_fund_held > 0 && (
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-slate-500 flex items-center gap-1">
                         <Shield className="w-3 h-3" /> Reserve Held
                       </span>
-                      <span className="text-orange-400 font-mono">${(psp.total_reserve_fund_held || 0).toLocaleString()}</span>
+                      <span className="text-orange-400 font-mono">${(psp.total_reserve_fund_held || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   )}
                   {psp.overdue_count > 0 && (
@@ -1309,8 +1309,8 @@ export default function PSPs() {
                     const hasItems = pendingTransactions.length > 0 || pspWithdrawals.filter(tx => tx.status === 'approved').length > 0;
                     return (
                       <div>
-                        <p className={`text-xl font-mono ${net === 0 ? 'text-slate-400' : 'text-yellow-400'}`}>${net.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
-                        {hasItems && <p className="text-[10px] text-slate-400">Dep: ${totalDeposits.toLocaleString()} - Wdr: ${totalWithdrawals.toLocaleString()} - Ded: ${totalAllDeductions.toLocaleString()}</p>}
+                        <p className={`text-xl font-mono ${net === 0 ? 'text-slate-400' : 'text-yellow-400'}`}>${net.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        {hasItems && <p className="text-[10px] text-slate-400">Dep: ${totalDeposits.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - Wdr: ${totalWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - Ded: ${totalAllDeductions.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>}
                         {net > 0 && hasItems && (
                           <Button
                             size="sm"
@@ -1318,7 +1318,7 @@ export default function PSPs() {
                             onClick={() => { setNetSettleDate(new Date().toISOString().split('T')[0]); setNetSettleDialogOpen(true); }}
                             data-testid="net-settle-btn"
                           >
-                            <ArrowRight className="w-3 h-3 mr-1" /> Settle Net ${net.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                            <ArrowRight className="w-3 h-3 mr-1" /> Settle Net ${net.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </Button>
                         )}
                       </div>
@@ -1336,15 +1336,15 @@ export default function PSPs() {
                 <div className="grid grid-cols-3 gap-4 p-3 bg-slate-50 rounded-sm border border-slate-200 mt-3">
                   <div>
                     <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Gateway Fee</p>
-                    <p className="text-lg font-mono text-slate-800">${(viewPsp.gateway_fee || 0).toLocaleString()}<span className="text-xs text-slate-500">/tx</span></p>
+                    <p className="text-lg font-mono text-slate-800">${(viewPsp.gateway_fee || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<span className="text-xs text-slate-500">/tx</span></p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Refund Fee</p>
-                    <p className="text-lg font-mono text-slate-800">${(viewPsp.refund_fee || 0).toLocaleString()}</p>
+                    <p className="text-lg font-mono text-slate-800">${(viewPsp.refund_fee || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Monthly Min Fee</p>
-                    <p className="text-lg font-mono text-slate-800">${(viewPsp.monthly_minimum_fee || 0).toLocaleString()}</p>
+                    <p className="text-lg font-mono text-slate-800">${(viewPsp.monthly_minimum_fee || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                 </div>
               )}
@@ -1457,32 +1457,32 @@ export default function PSPs() {
                                 </TableCell>
                                 <TableCell>
                                   <div className="font-mono text-slate-800 text-xs">
-                                    ${tx.amount?.toLocaleString()}
-                                    {hasDiffCurrency && <p className="text-[10px] text-blue-500">{baseGross?.toLocaleString(undefined, {maximumFractionDigits: 2})} {tx.base_currency}</p>}
+                                    ${tx.amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    {hasDiffCurrency && <p className="text-[10px] text-blue-500">{baseGross?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {tx.base_currency}</p>}
                                   </div>
                                 </TableCell>
                                 <TableCell>
                                   <div className="text-xs">
                                     <div className="flex justify-between">
                                       <span className="text-slate-500">Comm:</span>
-                                      <span className="font-mono text-yellow-400">-${(tx.psp_commission_amount || 0).toLocaleString()}</span>
+                                      <span className="font-mono text-yellow-400">-${(tx.psp_commission_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     {hasDiffCurrency && (
                                       <div className="flex justify-between">
                                         <span></span>
-                                        <span className="font-mono text-[10px] text-blue-500">-{baseComm?.toLocaleString(undefined, {maximumFractionDigits: 2})} {tx.base_currency}</span>
+                                        <span className="font-mono text-[10px] text-blue-500">-{baseComm?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {tx.base_currency}</span>
                                       </div>
                                     )}
                                     {(tx.psp_reserve_fund_amount || tx.psp_chargeback_amount) > 0 && (
                                       <>
                                         <div className="flex justify-between">
                                           <span className="text-slate-500">Reserve:</span>
-                                          <span className="font-mono text-red-400">-${(tx.psp_reserve_fund_amount || tx.psp_chargeback_amount).toLocaleString()}</span>
+                                          <span className="font-mono text-red-400">-${(tx.psp_reserve_fund_amount || tx.psp_chargeback_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
                                         {hasDiffCurrency && (
                                           <div className="flex justify-between">
                                             <span></span>
-                                            <span className="font-mono text-[10px] text-blue-500">-{baseReserve?.toLocaleString(undefined, {maximumFractionDigits: 2})} {tx.base_currency}</span>
+                                            <span className="font-mono text-[10px] text-blue-500">-{baseReserve?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {tx.base_currency}</span>
                                           </div>
                                         )}
                                       </>
@@ -1491,12 +1491,12 @@ export default function PSPs() {
                                       <>
                                         <div className="flex justify-between">
                                           <span className="text-slate-500">Extra:</span>
-                                          <span className="font-mono text-red-400">-${tx.psp_extra_charges.toLocaleString()}</span>
+                                          <span className="font-mono text-red-400">-${tx.psp_extra_charges.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
                                         {hasDiffCurrency && (
                                           <div className="flex justify-between">
                                             <span></span>
-                                            <span className="font-mono text-[10px] text-blue-500">-{baseExtra?.toLocaleString(undefined, {maximumFractionDigits: 2})} {tx.base_currency}</span>
+                                            <span className="font-mono text-[10px] text-blue-500">-{baseExtra?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {tx.base_currency}</span>
                                           </div>
                                         )}
                                       </>
@@ -1505,15 +1505,15 @@ export default function PSPs() {
                                 </TableCell>
                                 <TableCell>
                                   <div className="font-mono text-blue-600 font-bold">
-                                    ${netAmount.toLocaleString()}
-                                    {hasDiffCurrency && <p className="text-[10px] text-blue-500 font-normal">{baseNet?.toLocaleString(undefined, {maximumFractionDigits: 2})} {tx.base_currency}</p>}
+                                    ${netAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    {hasDiffCurrency && <p className="text-[10px] text-blue-500 font-normal">{baseNet?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {tx.base_currency}</p>}
                                   </div>
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="cursor-pointer" onClick={() => setExtraCommDialog({ open: true, tx, amount: (tx.psp_extra_commission || '').toString(), note: tx.psp_extra_commission_note || '', type: 'deposit' })}>
                                     {tx.psp_extra_commission > 0 ? (
                                       <div>
-                                        <span className="font-mono text-orange-400 text-xs hover:underline">${tx.psp_extra_commission.toLocaleString()}</span>
+                                        <span className="font-mono text-orange-400 text-xs hover:underline">${tx.psp_extra_commission.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         {tx.psp_extra_commission_note && <p className="text-[10px] text-slate-400 truncate max-w-[80px]" title={tx.psp_extra_commission_note}>{tx.psp_extra_commission_note}</p>}
                                       </div>
                                     ) : (
@@ -1589,9 +1589,9 @@ export default function PSPs() {
                       <div className="flex items-center gap-4">
                         <span className="text-[#66FCF1] text-sm font-medium">{batchSummary.count} selected</span>
                         <div className="flex gap-3 text-xs">
-                          <span className="text-slate-400">Gross: <span className="text-white font-mono">${batchSummary.gross.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>{batchSummary.payCurrency && <span className="text-blue-400 ml-1">({batchSummary.baseGross?.toLocaleString(undefined, {maximumFractionDigits: 2})} {batchSummary.payCurrency})</span>}</span>
-                          <span className="text-slate-400">Deductions: <span className="text-yellow-400 font-mono">-${batchSummary.deductions.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>{batchSummary.payCurrency && <span className="text-yellow-400/70 ml-1">(-{batchSummary.baseDeductions?.toLocaleString(undefined, {maximumFractionDigits: 2})} {batchSummary.payCurrency})</span>}</span>
-                          <span className="text-slate-400">Net: <span className="text-green-400 font-mono font-bold">${batchSummary.net.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>{batchSummary.payCurrency && <span className="text-green-400/70 ml-1">({batchSummary.baseNet?.toLocaleString(undefined, {maximumFractionDigits: 2})} {batchSummary.payCurrency})</span>}</span>
+                          <span className="text-slate-400">Gross: <span className="text-white font-mono">${batchSummary.gross.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>{batchSummary.payCurrency && <span className="text-blue-400 ml-1">({batchSummary.baseGross?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {batchSummary.payCurrency})</span>}</span>
+                          <span className="text-slate-400">Deductions: <span className="text-yellow-400 font-mono">-${batchSummary.deductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>{batchSummary.payCurrency && <span className="text-yellow-400/70 ml-1">(-{batchSummary.baseDeductions?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {batchSummary.payCurrency})</span>}</span>
+                          <span className="text-slate-400">Net: <span className="text-green-400 font-mono font-bold">${batchSummary.net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>{batchSummary.payCurrency && <span className="text-green-400/70 ml-1">({batchSummary.baseNet?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {batchSummary.payCurrency})</span>}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1631,15 +1631,15 @@ export default function PSPs() {
                   <div className="grid grid-cols-4 gap-3 mb-4">
                     <div className="p-3 bg-slate-50 rounded-sm border border-slate-200 text-center">
                       <p className="text-[10px] text-slate-500 uppercase tracking-wider">Total Withdrawals</p>
-                      <p className="text-lg font-mono text-red-500 font-bold">${pspWithdrawals.reduce((s, tx) => s + (tx.amount || 0), 0).toLocaleString()}</p>
+                      <p className="text-lg font-mono text-red-500 font-bold">${pspWithdrawals.reduce((s, tx) => s + (tx.amount || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-sm border border-slate-200 text-center">
                       <p className="text-[10px] text-slate-500 uppercase tracking-wider">Commission</p>
-                      <p className="text-lg font-mono text-yellow-500 font-bold">${pspWithdrawals.reduce((s, tx) => s + (tx.psp_commission_amount || 0), 0).toLocaleString()}</p>
+                      <p className="text-lg font-mono text-yellow-500 font-bold">${pspWithdrawals.reduce((s, tx) => s + (tx.psp_commission_amount || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-sm border border-slate-200 text-center">
                       <p className="text-[10px] text-slate-500 uppercase tracking-wider">Extra Commission</p>
-                      <p className="text-lg font-mono text-orange-400 font-bold">${pspWithdrawals.reduce((s, tx) => s + (tx.psp_withdrawal_extra_commission || 0), 0).toLocaleString()}</p>
+                      <p className="text-lg font-mono text-orange-400 font-bold">${pspWithdrawals.reduce((s, tx) => s + (tx.psp_withdrawal_extra_commission || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-sm border border-slate-200 text-center">
                       <p className="text-[10px] text-slate-500 uppercase tracking-wider">Count</p>
@@ -1680,10 +1680,10 @@ export default function PSPs() {
                                 {(tx.transaction_date || tx.created_at) ? new Date(tx.transaction_date || tx.created_at).toLocaleDateString() : '-'}
                               </TableCell>
                               <TableCell className="text-xs text-slate-600">{tx.client_name || '-'}</TableCell>
-                              <TableCell className="font-mono text-right text-red-500 text-sm">${tx.amount?.toLocaleString()}</TableCell>
-                              <TableCell className="font-mono text-right text-yellow-500 text-xs">${(tx.psp_commission_amount || 0).toLocaleString()}</TableCell>
+                              <TableCell className="font-mono text-right text-red-500 text-sm">${tx.amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                              <TableCell className="font-mono text-right text-yellow-500 text-xs">${(tx.psp_commission_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                               <TableCell className="font-mono text-right text-orange-400 text-xs">
-                                {tx.psp_withdrawal_extra_commission ? `$${tx.psp_withdrawal_extra_commission.toLocaleString()}` : '-'}
+                                {tx.psp_withdrawal_extra_commission ? `$${tx.psp_withdrawal_extra_commission.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
                                 {tx.psp_withdrawal_extra_commission_note && (
                                   <p className="text-[10px] text-slate-400 truncate max-w-[100px]" title={tx.psp_withdrawal_extra_commission_note}>{tx.psp_withdrawal_extra_commission_note}</p>
                                 )}
@@ -1729,15 +1729,15 @@ export default function PSPs() {
                       <div className="grid grid-cols-4 gap-3 mb-4">
                         <div className="p-3 bg-slate-50 rounded-sm border border-slate-200 text-center">
                           <p className="text-[10px] text-slate-500 uppercase tracking-wider">Total Held</p>
-                          <p className="text-lg font-mono text-orange-400 font-bold">${reserveFundLedger.summary.total_held.toLocaleString()}</p>
+                          <p className="text-lg font-mono text-orange-400 font-bold">${reserveFundLedger.summary.total_held.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
                         <div className="p-3 bg-slate-50 rounded-sm border border-slate-200 text-center">
                           <p className="text-[10px] text-slate-500 uppercase tracking-wider">Due This Week</p>
-                          <p className="text-lg font-mono text-yellow-400 font-bold">${reserveFundLedger.summary.due_this_week.toLocaleString()}</p>
+                          <p className="text-lg font-mono text-yellow-400 font-bold">${reserveFundLedger.summary.due_this_week.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
                         <div className="p-3 bg-slate-50 rounded-sm border border-slate-200 text-center">
                           <p className="text-[10px] text-slate-500 uppercase tracking-wider">Released</p>
-                          <p className="text-lg font-mono text-green-400 font-bold">${reserveFundLedger.summary.total_released.toLocaleString()}</p>
+                          <p className="text-lg font-mono text-green-400 font-bold">${reserveFundLedger.summary.total_released.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
                         <div className="p-3 bg-slate-50 rounded-sm border border-slate-200 text-center">
                           <p className="text-[10px] text-slate-500 uppercase tracking-wider">Holding Period</p>
@@ -1811,8 +1811,8 @@ export default function PSPs() {
                                   </TableCell>
                                   <TableCell className="font-mono text-slate-800 text-xs">{entry.reference}</TableCell>
                                   <TableCell className="text-slate-500 text-xs">{entry.client_name || '-'}</TableCell>
-                                  <TableCell className="font-mono text-slate-800 text-xs">${entry.amount?.toLocaleString()}</TableCell>
-                                  <TableCell className="font-mono text-orange-400 font-bold">${entry.reserve_fund_amount.toLocaleString()}</TableCell>
+                                  <TableCell className="font-mono text-slate-800 text-xs">${entry.amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                  <TableCell className="font-mono text-orange-400 font-bold">${entry.reserve_fund_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                   <TableCell className="text-slate-500 text-xs">{formatDate(entry.hold_date)}</TableCell>
                                   <TableCell className="text-slate-500 text-xs">{formatDate(entry.release_date)}</TableCell>
                                   <TableCell className="font-mono text-slate-800 text-xs">
@@ -1944,34 +1944,34 @@ export default function PSPs() {
                               </TableCell>
                               <TableCell>
                                 <div className="font-mono text-slate-800 text-xs">
-                                  ${settlement.gross_amount?.toLocaleString()}
-                                  {hasDiffCurrency && baseGross && <p className="text-[10px] text-blue-500">{baseGross.toLocaleString(undefined, {maximumFractionDigits: 2})} {settlement.payment_currency}</p>}
+                                  ${settlement.gross_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  {hasDiffCurrency && baseGross && <p className="text-[10px] text-blue-500">{baseGross.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {settlement.payment_currency}</p>}
                                 </div>
                               </TableCell>
                               <TableCell>
                                 <div className="font-mono text-yellow-400 text-xs">
-                                  -${(settlement.commission_amount || 0).toLocaleString()}
-                                  {hasDiffCurrency && baseComm != null && <p className="text-[10px] text-blue-500">-{baseComm.toLocaleString(undefined, {maximumFractionDigits: 2})} {settlement.payment_currency}</p>}
+                                  -${(settlement.commission_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  {hasDiffCurrency && baseComm != null && <p className="text-[10px] text-blue-500">-{baseComm.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {settlement.payment_currency}</p>}
                                 </div>
                               </TableCell>
                               <TableCell>
                                 <div className="font-mono text-red-400 text-xs">
-                                  {settlement.chargeback_amount || settlement.reserve_fund_amount ? `-$${(settlement.reserve_fund_amount || settlement.chargeback_amount).toLocaleString()}` : '-'}
-                                  {hasDiffCurrency && baseReserve != null && baseReserve > 0 && <p className="text-[10px] text-blue-500">-{baseReserve.toLocaleString(undefined, {maximumFractionDigits: 2})} {settlement.payment_currency}</p>}
+                                  {settlement.chargeback_amount || settlement.reserve_fund_amount ? `-$${(settlement.reserve_fund_amount || settlement.chargeback_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
+                                  {hasDiffCurrency && baseReserve != null && baseReserve > 0 && <p className="text-[10px] text-blue-500">-{baseReserve.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {settlement.payment_currency}</p>}
                                 </div>
                               </TableCell>
                               <TableCell>
                                 <div className="font-mono text-orange-400 text-xs">
-                                  {extraUsd > 0 ? `-$${extraUsd.toLocaleString()}` : '-'}
-                                  {hasDiffCurrency && baseExtra != null && baseExtra > 0 && <p className="text-[10px] text-blue-500">-{baseExtra.toLocaleString(undefined, {maximumFractionDigits: 2})} {settlement.payment_currency}</p>}
+                                  {extraUsd > 0 ? `-$${extraUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
+                                  {hasDiffCurrency && baseExtra != null && baseExtra > 0 && <p className="text-[10px] text-blue-500">-{baseExtra.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {settlement.payment_currency}</p>}
                                 </div>
                               </TableCell>
                               <TableCell>
                                 <div className="font-mono text-green-500 font-bold text-xs">
-                                  +${settlement.net_amount?.toLocaleString()}
+                                  +${settlement.net_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                   {hasDiffCurrency && (settlement.treasury_amount != null
-                                    ? <p className="text-[10px] text-blue-500 font-normal">{settlement.treasury_amount.toLocaleString(undefined, {maximumFractionDigits: 2})} {settlement.treasury_currency || settlement.payment_currency}</p>
-                                    : baseNet != null && <p className="text-[10px] text-blue-500 font-normal">{baseNet.toLocaleString(undefined, {maximumFractionDigits: 2})} {settlement.payment_currency}</p>
+                                    ? <p className="text-[10px] text-blue-500 font-normal">{settlement.treasury_amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {settlement.treasury_currency || settlement.payment_currency}</p>
+                                    : baseNet != null && <p className="text-[10px] text-blue-500 font-normal">{baseNet.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {settlement.payment_currency}</p>
                                   )}
                                 </div>
                               </TableCell>
@@ -2029,19 +2029,19 @@ export default function PSPs() {
                                               </td>
                                               <td className="py-1.5 text-slate-600">{tx.client_name || '-'}</td>
                                               <td className={`py-1.5 text-right font-mono ${isWithdrawal ? 'text-red-500' : 'text-slate-800'}`}>
-                                                {isWithdrawal ? '-' : ''}${tx.amount?.toLocaleString()}
+                                                {isWithdrawal ? '-' : ''}${tx.amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                               </td>
                                               <td className="py-1.5 text-right font-mono text-yellow-500">
-                                                {comm > 0 ? `-$${comm.toLocaleString()}` : '-'}
+                                                {comm > 0 ? `-$${comm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
                                               </td>
                                               <td className="py-1.5 text-right font-mono text-orange-400">
-                                                {extraCharges > 0 ? `-$${extraCharges.toLocaleString()}` : '-'}
+                                                {extraCharges > 0 ? `-$${extraCharges.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
                                               </td>
                                               <td className="py-1.5 text-right font-mono text-orange-400">
-                                                {extraComm > 0 ? `-$${extraComm.toLocaleString()}` : '-'}
+                                                {extraComm > 0 ? `-$${extraComm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
                                               </td>
                                               <td className={`py-1.5 text-right font-mono font-bold ${netAmt >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                                                {netAmt >= 0 ? '+' : ''}${netAmt.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                                                {netAmt >= 0 ? '+' : ''}${netAmt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                                               </td>
                                               <td className="py-1.5 text-slate-500">{(tx.transaction_date || tx.created_at) ? new Date(tx.transaction_date || tx.created_at).toLocaleDateString() : '-'}</td>
                                             </tr>
@@ -2097,15 +2097,15 @@ export default function PSPs() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Gross Amount</span>
-                  <span className="text-slate-800 font-mono">${selectedTransaction.amount?.toLocaleString()}</span>
+                  <span className="text-slate-800 font-mono">${selectedTransaction.amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Commission ({selectedTransaction.psp_commission_paid_by === 'client' ? 'Client pays' : 'Broker pays'})</span>
-                  <span className="text-red-400 font-mono">-${selectedTransaction.psp_commission_amount?.toLocaleString()}</span>
+                  <span className="text-red-400 font-mono">-${selectedTransaction.psp_commission_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-slate-200">
                   <span className="text-slate-500 font-medium">Net to Settle</span>
-                  <span className="text-green-400 font-mono text-lg">${selectedTransaction.psp_net_amount?.toLocaleString()}</span>
+                  <span className="text-green-400 font-mono text-lg">${selectedTransaction.psp_net_amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
               
@@ -2163,8 +2163,8 @@ export default function PSPs() {
             <form onSubmit={handleRecordCharges} className="space-y-4">
               <div className="p-3 bg-slate-50 rounded-lg">
                 <p className="text-sm text-slate-500">Transaction: <span className="text-slate-800 font-mono">{selectedTransaction.transaction_id}</span></p>
-                <p className="text-sm text-slate-500">Amount: <span className="text-slate-800 font-mono">${selectedTransaction.amount?.toLocaleString()}</span></p>
-                <p className="text-sm text-slate-500">Commission: <span className="text-yellow-400 font-mono">-${(selectedTransaction.psp_commission_amount || 0).toLocaleString()}</span></p>
+                <p className="text-sm text-slate-500">Amount: <span className="text-slate-800 font-mono">${selectedTransaction.amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>
+                <p className="text-sm text-slate-500">Commission: <span className="text-yellow-400 font-mono">-${(selectedTransaction.psp_commission_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>
               </div>
               
               <div className="space-y-2">
@@ -2192,7 +2192,7 @@ export default function PSPs() {
                   placeholder="0.00"
                 />
                 {selectedTransaction?.base_currency && selectedTransaction?.base_currency !== 'USD' && selectedTransaction?.exchange_rate && (
-                  <p className="text-[10px] text-blue-500">= ${(parseFloat(chargesForm.extra_charges || 0) * (selectedTransaction.exchange_rate || 1)).toLocaleString(undefined, {maximumFractionDigits: 2})} USD (rate: {selectedTransaction.exchange_rate})</p>
+                  <p className="text-[10px] text-blue-500">= ${(parseFloat(chargesForm.extra_charges || 0) * (selectedTransaction.exchange_rate || 1)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD (rate: {selectedTransaction.exchange_rate})</p>
                 )}
               </div>
               
@@ -2229,36 +2229,36 @@ export default function PSPs() {
                   <div className="flex justify-between">
                     <span className="text-slate-500">Gross Amount</span>
                     <div className="text-right">
-                      <span className="text-slate-800 font-mono">${grossUsd.toLocaleString()}</span>
-                      {payCurr && <p className="text-[10px] text-blue-500">{grossBase.toLocaleString()} {payCurr}</p>}
+                      <span className="text-slate-800 font-mono">${grossUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      {payCurr && <p className="text-[10px] text-blue-500">{grossBase.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {payCurr}</p>}
                     </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Commission</span>
                     <div className="text-right">
-                      <span className="text-red-400 font-mono">-${commUsd.toLocaleString()}</span>
-                      {payCurr && <p className="text-[10px] text-blue-500">-{commBase.toLocaleString(undefined, {maximumFractionDigits: 2})} {payCurr}</p>}
+                      <span className="text-red-400 font-mono">-${commUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      {payCurr && <p className="text-[10px] text-blue-500">-{commBase.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {payCurr}</p>}
                     </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Reserve Fund</span>
                     <div className="text-right">
-                      <span className="text-red-400 font-mono">-${reserveInUsd.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-                      {payCurr && <p className="text-[10px] text-blue-500">-{reserveInPayCurrency.toLocaleString()} {payCurr}</p>}
+                      <span className="text-red-400 font-mono">-${reserveInUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                      {payCurr && <p className="text-[10px] text-blue-500">-{reserveInPayCurrency.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {payCurr}</p>}
                     </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Extra Charges</span>
                     <div className="text-right">
-                      <span className="text-red-400 font-mono">-${extraInUsd.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-                      {payCurr && <p className="text-[10px] text-blue-500">-{extraInPayCurrency.toLocaleString()} {payCurr}</p>}
+                      <span className="text-red-400 font-mono">-${extraInUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                      {payCurr && <p className="text-[10px] text-blue-500">-{extraInPayCurrency.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {payCurr}</p>}
                     </div>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-slate-200">
                     <span className="text-slate-800 font-bold">Net Settlement</span>
                     <div className="text-right">
-                      <span className="text-blue-600 font-mono font-bold">${netUsd.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-                      {payCurr && netBase != null && <p className="text-[10px] text-green-500 font-bold">{netBase.toLocaleString(undefined, {maximumFractionDigits: 2})} {payCurr}</p>}
+                      <span className="text-blue-600 font-mono font-bold">${netUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                      {payCurr && netBase != null && <p className="text-[10px] text-green-500 font-bold">{netBase.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {payCurr}</p>}
                     </div>
                   </div>
                 </div>
@@ -2307,28 +2307,28 @@ export default function PSPs() {
                 <div className="border-t border-slate-200 pt-2 mt-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Gross Amount</span>
-                    <span className="text-slate-800 font-mono">${(selectedTransaction.amount || 0).toLocaleString()}</span>
+                    <span className="text-slate-800 font-mono">${(selectedTransaction.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Commission</span>
-                    <span className="text-yellow-400 font-mono">-${(selectedTransaction.psp_commission_amount || 0).toLocaleString()}</span>
+                    <span className="text-yellow-400 font-mono">-${(selectedTransaction.psp_commission_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                   {(selectedTransaction.psp_reserve_fund_amount || selectedTransaction.psp_chargeback_amount) > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-500">Reserve Fund</span>
-                      <span className="text-red-400 font-mono">-${(selectedTransaction.psp_reserve_fund_amount || selectedTransaction.psp_chargeback_amount).toLocaleString()}</span>
+                      <span className="text-red-400 font-mono">-${(selectedTransaction.psp_reserve_fund_amount || selectedTransaction.psp_chargeback_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   )}
                   {selectedTransaction.psp_extra_charges > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-500">Extra Charges</span>
-                      <span className="text-red-400 font-mono">-${selectedTransaction.psp_extra_charges.toLocaleString()}</span>
+                      <span className="text-red-400 font-mono">-${selectedTransaction.psp_extra_charges.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm pt-2 border-t border-slate-200 mt-2">
                     <span className="text-slate-800 font-bold">Expected Net</span>
                     <span className="text-blue-600 font-mono font-bold">
-                      ${((selectedTransaction.amount || 0) - (selectedTransaction.psp_commission_amount || 0) - (selectedTransaction.psp_reserve_fund_amount || selectedTransaction.psp_chargeback_amount || 0) - (selectedTransaction.psp_extra_charges || 0)).toLocaleString()}
+                      ${((selectedTransaction.amount || 0) - (selectedTransaction.psp_commission_amount || 0) - (selectedTransaction.psp_reserve_fund_amount || selectedTransaction.psp_chargeback_amount || 0) - (selectedTransaction.psp_extra_charges || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                 </div>
@@ -2440,38 +2440,38 @@ export default function PSPs() {
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Gross Amount ({batchSummary.count} txns)</span>
                 <div className="text-right">
-                  <span className="font-mono text-slate-800 font-bold">${batchSummary.gross.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-                  {batchSummary.payCurrency && <p className="text-[10px] text-blue-500 font-mono">{batchSummary.baseGross?.toLocaleString(undefined, {maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
+                  <span className="font-mono text-slate-800 font-bold">${batchSummary.gross.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                  {batchSummary.payCurrency && <p className="text-[10px] text-blue-500 font-mono">{batchSummary.baseGross?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
                 </div>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Commission</span>
                 <div className="text-right">
-                  <span className="font-mono text-yellow-600">-${batchSummary.commission.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-                  {batchSummary.payCurrency && batchSummary.avgRate && <p className="text-[10px] text-yellow-500 font-mono">-{(batchSummary.commission / batchSummary.avgRate).toLocaleString(undefined, {maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
+                  <span className="font-mono text-yellow-600">-${batchSummary.commission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                  {batchSummary.payCurrency && batchSummary.avgRate && <p className="text-[10px] text-yellow-500 font-mono">-{(batchSummary.commission / batchSummary.avgRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
                 </div>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Reserve Fund</span>
                 <div className="text-right">
-                  <span className="font-mono text-red-500">-${batchSummary.reserve.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-                  {batchSummary.payCurrency && batchSummary.avgRate && batchSummary.reserve > 0 && <p className="text-[10px] text-red-400 font-mono">-{(batchSummary.reserve / batchSummary.avgRate).toLocaleString(undefined, {maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
+                  <span className="font-mono text-red-500">-${batchSummary.reserve.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                  {batchSummary.payCurrency && batchSummary.avgRate && batchSummary.reserve > 0 && <p className="text-[10px] text-red-400 font-mono">-{(batchSummary.reserve / batchSummary.avgRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
                 </div>
               </div>
               {batchSummary.extra > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Extra Charges</span>
                   <div className="text-right">
-                    <span className="font-mono text-red-500">-${batchSummary.extra.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-                    {batchSummary.payCurrency && batchSummary.avgRate && <p className="text-[10px] text-red-400 font-mono">-{(batchSummary.extra / batchSummary.avgRate).toLocaleString(undefined, {maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
+                    <span className="font-mono text-red-500">-${batchSummary.extra.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    {batchSummary.payCurrency && batchSummary.avgRate && <p className="text-[10px] text-red-400 font-mono">-{(batchSummary.extra / batchSummary.avgRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
                   </div>
                 </div>
               )}
               <div className="border-t border-slate-300 pt-2 flex justify-between text-sm font-bold">
                 <span className="text-slate-700">Net to Treasury</span>
                 <div className="text-right">
-                  <span className="font-mono text-green-600">${batchSummary.net.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
-                  {batchSummary.payCurrency && <p className="text-[10px] text-green-500 font-mono font-bold">{batchSummary.baseNet?.toLocaleString(undefined, {maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
+                  <span className="font-mono text-green-600">${batchSummary.net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                  {batchSummary.payCurrency && <p className="text-[10px] text-green-500 font-mono font-bold">{batchSummary.baseNet?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {batchSummary.payCurrency}</p>}
                 </div>
               </div>
               {batchSummary.payCurrency && batchSummary.avgRate && (
@@ -2533,7 +2533,7 @@ export default function PSPs() {
                 className="bg-[#66FCF1] text-[#0B0C10] hover:bg-[#66FCF1]/80 font-bold"
                 data-testid="confirm-batch-settle-btn"
               >
-                {batchSettling ? 'Processing...' : `Settle $${batchSummary.net.toLocaleString(undefined, {maximumFractionDigits: 2})}`}
+                {batchSettling ? 'Processing...' : `Settle $${batchSummary.net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
               </Button>
             </div>
           </div>
@@ -2555,7 +2555,7 @@ export default function PSPs() {
                 </div>
                 <div className="flex justify-between text-sm mt-1">
                   <span className="text-slate-500">Amount:</span>
-                  <span className="font-mono text-red-500">${extraCommDialog.tx.amount?.toLocaleString()}</span>
+                  <span className="font-mono text-red-500">${extraCommDialog.tx.amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-1">
                   <span className="text-slate-500">Client:</span>
@@ -2626,17 +2626,17 @@ export default function PSPs() {
                   <p className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-2">Deposits ({deps.length})</p>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Gross Amount</span>
-                    <span className="font-mono text-slate-800">${depGross.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
+                    <span className="font-mono text-slate-800">${depGross.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                   </div>
                   {depDeductions > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-500">Deductions (Comm + Extra + Reserve)</span>
-                      <span className="font-mono text-yellow-600">-${depDeductions.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
+                      <span className="font-mono text-yellow-600">-${depDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm font-medium">
                     <span className="text-slate-600">Deposit Net</span>
-                    <span className="font-mono text-slate-800">${depNet.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
+                    <span className="font-mono text-slate-800">${depNet.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                   </div>
 
                   {wdrs.length > 0 && (
@@ -2645,12 +2645,12 @@ export default function PSPs() {
                       <p className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-2">Withdrawals ({wdrs.length})</p>
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-500">Withdrawal Amount</span>
-                        <span className="font-mono text-red-500">-${wdrGross.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
+                        <span className="font-mono text-red-500">-${wdrGross.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                       </div>
                       {wdrExtraComm > 0 && (
                         <div className="flex justify-between text-sm">
                           <span className="text-slate-500">Withdrawal Extra Commission</span>
-                          <span className="font-mono text-red-500">-${wdrExtraComm.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
+                          <span className="font-mono text-red-500">-${wdrExtraComm.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
                       )}
                     </>
@@ -2658,7 +2658,7 @@ export default function PSPs() {
 
                   <div className="border-t border-slate-300 pt-2 flex justify-between text-sm font-bold">
                     <span className="text-slate-700">Net to Treasury</span>
-                    <span className="font-mono text-green-600">${netAmount.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
+                    <span className="font-mono text-green-600">${netAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                   </div>
                 </div>
               );
